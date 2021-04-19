@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "widow"
+version = "0.1.0"
+description = ""
+authors = ["noah <noah@apartalk.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+flask = "*"
+flask-sqlalchemy = "*"
+flask-migrate = "*"
+flask-jwt-extended = "3.25.0"
+psycopg2-binary = "*"
+importlib-metadata = "*"
+inject = "*"
+pydantic = "*"
+pypubsub = "*"
+flasgger = "*"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+pytest-xdist = "*"
+pytest = "*"
+pytest-factoryboy = "*"
+faker = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

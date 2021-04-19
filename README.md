@@ -6,12 +6,19 @@
     * python : 3.8
     * flask : 1.1.2
 # Usage
-## [pipenv](https://github.com/pypa/pipenv)
-* install pipenv : `pip install pipenv`
-* create python virtual environment : `pipenv --python 3.8`
-* install packages in pipfile : `pipenv install`
-* install packages with dev in pipfile : `pipenv install --dev`
-* uninstall package : `pipenv uninstall {package name}`
+## [poetry](https://python-poetry.org/)
+* install poetry : `curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python`
+* set env
+```
+$ vi ~/.zshrc
+  export PATH="$HOME/.poetry/bin:$PATH"
+```
+* install packages in poetry.lock : `poetry install`
+* install package : `poetry add {package name}`
+* uninstall package : `pipenv remove {package name}`
+* dependencies update - newest version : `poetry update`
+* show pakage : `poery show`
+* env info : `poery env info`
 ## [flask-migrate](https://flask-migrate.readthedocs.io/en/latest/)
 * create empty migration file : `flask db revision -m "create {name} table"`
 * create auto-generate migrate file : `flask db migrate -m "create {name} table"`
