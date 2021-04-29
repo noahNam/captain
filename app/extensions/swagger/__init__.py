@@ -2,12 +2,12 @@ swagger_config = {
     "openapi": "3.0.2",
     "info": {
         "description": "powered by Flasgger",
-        "termsOfService": "/widow",
+        "termsOfService": "/captain",
         "title": "A swagger API",
         "version": "1.0.0",
     },
     "host": "localhost:5000",
-    "basePath": "/widow/",
+    "basePath": "/captain/",
     "components": {
         "schemas": ["http", "https"],
         "securitySchemes": {
@@ -39,7 +39,7 @@ swagger_config = {
             "model_filter": lambda tag: True,  # all in
         }
     ],
-    "static_url_path": "/widow/apidocs/flasgger_static",
+    "static_url_path": "/captain/apidocs/flasgger_static",
     "swagger_ui": True,
-    "specs_route": "/widow/apidocs/",
+    "specs_route": "/captain/apidocs/",
 }

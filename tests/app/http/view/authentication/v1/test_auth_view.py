@@ -18,7 +18,7 @@ def test_when_user_id_exists_then_check_auth_success(
 
     with test_request_context:
         response = client.get(
-            url_for("api/widow.auth_for_testing_view"), headers=headers
+            url_for("api/captain.auth_for_testing_view"), headers=headers
         )
 
     assert response.status_code == 200
@@ -35,7 +35,7 @@ def test_when_user_id_not_exists_then_check_auth_failure(
 
     with test_request_context:
         response = client.get(
-            url_for("api/widow.auth_for_testing_view"), headers=headers
+            url_for("api/captain.auth_for_testing_view"), headers=headers
         )
 
     assert response.status_code == 401
