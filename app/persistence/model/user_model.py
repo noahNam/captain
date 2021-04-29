@@ -13,7 +13,14 @@ class UserModel(db.Model):
         nullable=False,
         autoincrement=True,
     )
-    nickname = Column(String(45), nullable=False)
+    nickname = Column(String(50), nullable=False)
+    status = Column(String(10), nullable=True)
+    sex = Column(String(1), nullable=True)
 
     def to_entity(self) -> UserEntity:
-        return UserEntity(id=self.id, nickname=self.nickname)
+        return UserEntity(
+            id=self.id,
+            nickname=self.nickname,
+            status=self.status,
+            sex=self.sex
+        )
