@@ -15,7 +15,7 @@ class LocalConfig(Config):
     os.environ["FLASK_ENV"] = "local"
     SQLALCHEMY_ECHO = True
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:1234@localhost:5432/widow"
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:1234@localhost:5432/captain"
 
 
 class TestConfig(Config):
