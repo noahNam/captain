@@ -14,6 +14,6 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = UserModel
 
-    nickname = factory.Sequence(lambda n: "test_user_{}".format(n))
-    status = "default"
-    sex = "M"
+    provider = factory.Sequence(lambda value: "kakao" or "naver")
+
+
