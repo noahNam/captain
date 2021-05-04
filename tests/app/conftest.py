@@ -1,15 +1,15 @@
 import pytest
+from authlib.integrations.flask_client import OAuth
 from flask_jwt_extended import JWTManager
 
 
 @pytest.fixture()
 def make_header():
     def _make_header(
-        authorization: str = None,
-        content_type: str = "application/json",
-        accept: str = "application/json",
+            authorization: str = None,
+            content_type: str = "application/json",
+            accept: str = "application/json",
     ):
-
         return {
             "Authorization": authorization,
             "Content-Type": content_type,
@@ -33,3 +33,8 @@ def test_request_context(app):
 @pytest.fixture()
 def jwt_manager(app):
     return JWTManager(app)
+
+
+@pytest.fixture()
+def oauth(app):
+    return OAuth(app)

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class GetOAuthDto(BaseModel):
+class GetOAuthProviderDto(BaseModel):
     provider: str = None

@@ -1,7 +1,7 @@
 from pydantic import ValidationError
 
-from core.domains.oauth.dto.oauth_dto import GetOAuthDto
-from core.domains.oauth.schema.oauth_schema import GetOAuthSchema
+from core.domains.oauth.dto.oauth_dto import GetOAuthProviderDto
+from core.domains.oauth.schema.oauth_schema import GetProviderSchema
 
 
 class GetOAuthRequest:
@@ -10,11 +10,11 @@ class GetOAuthRequest:
 
     def validate_request_and_make_dto(self):
         try:
-            GetOAuthSchema(provider=self.provider)
+            GetProviderSchema(provider=self.provider)
             return self.to_dto()
         except ValidationError as e:
             print(e)
             return False
 
-    def to_dto(self) -> GetOAuthDto:
-        return GetOAuthDto(provider=self.provider)
+    def to_dto(self) -> GetOAuthProviderDto:
+        return GetOAuthProviderDto(provider=self.provider)

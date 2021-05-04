@@ -18,7 +18,7 @@ def test_when_get_user_with_valid_user_id_then_success(
 
     with test_request_context:
         response = client.get(
-            url_for("api/captain.get_user_view", user_id=user.id),
+            url_for("api.get_user_view", user_id=user.id),
             headers=headers,
         )
 
@@ -40,7 +40,7 @@ def test_when_get_not_existing_user_then_failure(
 
     with test_request_context:
         response = client.get(
-            url_for("api/captain.get_user_view", user_id=0),
+            url_for("api.get_user_view", user_id=0),
             headers=headers,
         )
 

@@ -1,5 +1,7 @@
 import os
 
+from dotenv import load_dotenv, find_dotenv
+
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") or "auckland"
@@ -21,7 +23,7 @@ class LocalConfig(Config):
 class TestConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = (
-        os.environ.get("TEST_DATABASE_URL") or "sqlite:///:memory:"
+            os.environ.get("TEST_DATABASE_URL") or "sqlite:///:memory:"
     )
 
     WTF_CSRF_ENABLED = False
@@ -31,6 +33,13 @@ class DevelopmentConfig(Config):
     os.environ["FLASK_ENV"] = "development"
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URL") or "sqlite:///:memory:"
+
+    # python-dotenv for OAuth secret_key
+    load_dotenv(find_dotenv())
+
+    # OAuth 2.0 Provider config
+    KAKAO_CLIENT_ID = os.getenv("KAKAO_CLIENT_ID")
+    KAKAO_CLIENT_SECRET = os.getenv("KAKAO_CLIENT_SECRET")
 
 
 class ProductionConfig(Config):

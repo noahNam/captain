@@ -17,6 +17,7 @@ pydantic = "*"
 pypubsub = "*"
 flasgger = "*"
 Authlib = "^0.15.3"
+requests = "^2.25.1"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
