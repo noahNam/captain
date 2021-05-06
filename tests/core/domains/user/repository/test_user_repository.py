@@ -22,7 +22,8 @@ def test_get_user(session):
     assert user_entity == user.to_entity()
 
 
-def test_create_user_when_use_create_users_fixture_then_make_two_users(session, create_users):
+def test_create_user_when_use_create_users_fixture_then_make_two_users(
+        session, create_users):
     """
     todo : Factory_boy를 활용한 테스트 케이스 추가
     """
@@ -33,7 +34,8 @@ def test_create_user_when_use_create_users_fixture_then_make_two_users(session, 
         assert users[i].provider in ("kakao", "naver")
 
 
-def test_compare_create_user_when_use_build_batch_and_create_users_fixture(session, create_users, normal_user_factory):
+def test_compare_create_user_when_use_build_batch_and_create_users_fixture(
+        session, create_users, normal_user_factory):
     fixture_users = session.query(UserModel).all()
     build_batch_users = normal_user_factory.build_batch(size=3, provider="kakao")
 

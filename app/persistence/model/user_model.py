@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from sqlalchemy import Column, BigInteger, Integer, String, DateTime
 
 from app import db
+from app.extensions.utils.time_helper import get_server_timestamp
 from core.domains.user.entity.user_entity import UserEntity
 
 
@@ -18,8 +17,8 @@ class UserModel(db.Model):
     provider = Column(String(10))
     provider_id = Column(BigInteger().with_variant(Integer, "sqlite"))
     group = Column(String(50), nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=get_server_timestamp())
+    updated_at = Column(DateTime, default=get_server_timestamp())
 
     def __repr__(self):
         return f"User('{self.id}', " \
@@ -35,6 +34,4 @@ class UserModel(db.Model):
             provider=self.provider,
             provider_id=self.provider_id,
             group=self.group,
-            created_at=self.created_at,
-            updated_at=self.updated_at
         )

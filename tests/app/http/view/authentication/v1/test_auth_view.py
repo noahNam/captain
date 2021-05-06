@@ -8,7 +8,7 @@ from core.use_case_output import FailureType
 def test_when_user_id_exists_then_check_auth_success(
     client, session, test_request_context, jwt_manager, make_header
 ):
-    user = UserModel(nickname="Tester")
+    user = UserModel(provider="kakao", provider_id=12345)
     session.add(user)
     session.commit()
 

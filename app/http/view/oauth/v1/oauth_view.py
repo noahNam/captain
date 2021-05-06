@@ -1,17 +1,18 @@
-import os
-import requests
-from flask import request, url_for
+from typing import Any
+from flask import request
 from app import oauth
-from app.extensions import KAKAO_API_BASE_URL, KAKAO_GET_ACCESS_TOKEN_END_POINT
-from app.extensions.utils.oauth_helper import request_default_header, KAKAO_REDIRECT_URL
-from app.http.requests.view.oauth.v1.oauth_request import GetOAuthRequest
+from app.extensions.utils.enum.oauth_enum import OAuthKakaoEnum
+from app.extensions.utils.oauth_helper import request_oauth_access_token_to_kakao, get_kakao_user_info
+from app.http.requests.view.oauth.v1.oauth_request import GetOAuthRequest, CreateUser
 from app.http.responses import failure_response
+from app.http.responses.presenters.oauth_presenter import OAuthPresenter
 from app.http.view import api
+from core.domains.oauth.use_case.oauth_use_case import GetOAuthUseCase
 from core.use_case_output import UseCaseFailureOutput, FailureType
 
 
 @api.route("/v1/oauth", methods=["GET"])
-def request_oauth_to_third_party():
+def request_oauth_to_third_party() -> Any:
     """
     Parameter : third_party("kakao" or "naver")
     Return : redirect -> fetch_{third_party}_access_token view
@@ -22,32 +23,36 @@ def request_oauth_to_third_party():
         return failure_response(
             UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR)
         )
-    redirect_url = "http://127.0.0.1:5000" + url_for("api.fetch_kakao_access_token")
 
-    return oauth.kakao.authorize_redirect(redirect_url)
+    return oauth.kakao.authorize_redirect(OAuthKakaoEnum.REDIRECT_URL.value)
 
 
 @api.route("/v1/oauth/kakao", methods=["GET"])
-def fetch_kakao_access_token():
+def fetch_kakao_access_token() -> Any:
+    provider = "kakao"
+    kakao_token_info = None
+    user_info = None
     code = request.args.get("code", None)
 
     if code is None:
         return failure_response(
-            UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR)
+            UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR,
+                                 message="Authorization_code not passed")
         )
 
-    return requests.post(
-        url=KAKAO_API_BASE_URL + KAKAO_GET_ACCESS_TOKEN_END_POINT,
-        headers=request_default_header,
-        data={
-            "grant_type": "authorization_code",
-            "client_id": os.getenv("KAKAO_CLIENT_ID"),
-            "client_secret": os.getenv("KAKAO_CLIENT_SECRET"),
-            "redirect_uri": KAKAO_REDIRECT_URL,
-            "code": code,
-        },
-    ).json()
-    # return OAuthPresenter().transform(GetOAuthUseCase().execute())
+    # 인가 서버 -> Access_Token 요청
+    token_result = request_oauth_access_token_to_kakao(code=code)
+    if not token_result.raise_for_status():
+        kakao_token_info = token_result
+
+    # 자원 서버 -> User_info 요청
+    user_info_result = get_kakao_user_info(kakao_token_info)
+    if not user_info_result.raise_for_status():
+        user_info = user_info_result.json()
+
+    # DTO 생성
+    dto = CreateUser(provider=provider, provider_id=user_info.get("id")).validate_request_and_make_dto()
+    return OAuthPresenter().transform(GetOAuthUseCase().execute(dto=dto))
 
 
 @api.route("/v1/oauth/naver", methods=["GET"])

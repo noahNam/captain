@@ -8,7 +8,7 @@ from core.use_case_output import FailureType
 def test_when_get_user_with_valid_user_id_then_success(
     client, session, test_request_context, jwt_manager, make_header
 ):
-    user = UserModel(nickname="Tester")
+    user = UserModel(provider="kakao", provider_id=12345)
     session.add(user)
     session.commit()
 
@@ -30,7 +30,7 @@ def test_when_get_user_with_valid_user_id_then_success(
 def test_when_get_not_existing_user_then_failure(
     client, session, test_request_context, jwt_manager, make_header
 ):
-    user = UserModel(nickname="Tester")
+    user = UserModel(provider="kakao", provider_id=12345)
     session.add(user)
     session.commit()
 
