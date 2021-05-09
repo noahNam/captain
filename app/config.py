@@ -32,7 +32,7 @@ class TestConfig(Config):
 class DevelopmentConfig(Config):
     os.environ["FLASK_ENV"] = "development"
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URL") or "sqlite:///:memory:"
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres@localhost:5432/captain"
 
     # python-dotenv for OAuth secret_key
     load_dotenv(find_dotenv())
