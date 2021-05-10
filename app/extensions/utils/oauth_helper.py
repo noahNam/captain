@@ -3,7 +3,7 @@ from typing import Optional, Any
 
 import requests
 
-from app.extensions.utils.enum.oauth_enum import OAuthKakaoEnum
+from core.domains.oauth.enum.oauth_enum import OAuthKakaoEnum
 
 
 def request_oauth_access_token_to_kakao(

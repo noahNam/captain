@@ -2,7 +2,7 @@ import os
 from authlib.integrations.flask_client import OAuth
 from flask_jwt_extended import JWTManager
 
-from app.extensions.utils.enum.oauth_enum import OAuthKakaoEnum
+from core.domains.oauth.enum.oauth_enum import OAuthKakaoEnum
 
 jwt = JWTManager()
 oauth = OAuth()

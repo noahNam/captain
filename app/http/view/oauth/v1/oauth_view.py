@@ -1,7 +1,7 @@
 from typing import Any
 from flask import request
 from app import oauth
-from app.extensions.utils.enum.oauth_enum import OAuthKakaoEnum
+from core.domains.oauth.enum.oauth_enum import OAuthKakaoEnum
 from app.extensions.utils.oauth_helper import request_oauth_access_token_to_kakao, get_kakao_user_info
 from app.http.requests.view.oauth.v1.oauth_request import GetOAuthRequest, CreateUserRequest
 from app.http.responses.presenters.oauth_presenter import OAuthPresenter
