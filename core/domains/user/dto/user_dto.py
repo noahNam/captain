@@ -6,5 +6,5 @@ class GetUserDto(BaseModel):
 
 
 class CreateUserDto(BaseModel):
-    provider: str = None
-    provider_id: int = None
+    provider: str
+    provider_id: int

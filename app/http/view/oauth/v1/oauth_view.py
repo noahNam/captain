@@ -53,7 +53,8 @@ def fetch_kakao_access_token() -> Any:
         user_info = user_info_result.json()
 
     # DTO 생성
-    dto = CreateUserRequest(provider=provider, provider_id=user_info.get("id")).validate_request_and_make_dto()
+    dto = CreateUserRequest(provider=provider, provider_id=user_info.get("id")) \
+        .validate_request_and_make_dto()
     return OAuthPresenter().transform(GetOAuthUseCase().execute(dto=dto))
 
 

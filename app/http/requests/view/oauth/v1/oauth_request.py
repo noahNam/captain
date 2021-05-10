@@ -1,6 +1,9 @@
 from pydantic import ValidationError, BaseModel, StrictStr, StrictInt, validator
+from sqlalchemy import and_
 
+from app.extensions.database import session
 from app.extensions.utils.log_helper import logger_
+from app.persistence.model.user_model import UserModel
 from core.domains.oauth.dto.oauth_dto import GetOAuthProviderDto
 from core.domains.user.dto.user_dto import CreateUserDto
 from core.exception import InvalidRequestException
@@ -47,6 +50,12 @@ class CreateUserRequest:
             schema = GetProviderSchema(provider=self.provider).dict()
             provider_id_schema = GetProviderIdSchema(provider_id=self.provider_id).dict()
             schema.update(provider_id_schema)
+
+            # 유저가 존재하면 바로 JWT Blacklist 검증
+            # if session.query(
+            #         exists().where(UserModel.provider == dto.provider) \
+            #                 .where(UserModel.provider_id == dto.provider_id)) \
+            #         .scalar():
 
             # CreateUserDto : in User domain
             return CreateUserDto(**schema)
