@@ -1,9 +1,23 @@
+import pytest
 from flask import url_for
 from flask.ctx import RequestContext
 from flask.testing import FlaskClient
 
 from app.extensions.utils.oauth_helper import request_oauth_access_token_to_kakao
 from core.domains.oauth.dto.oauth_dto import GetOAuthProviderDto
+from core.exception import InvalidRequestException
+
+
+def test_when_request_with_not_parameter_then_raise_validation_error(
+        client: FlaskClient, test_request_context: RequestContext):
+    """
+        given : Nothing
+        when : [GET] /api/captain/v1/oauth
+        then : raise InvalidRequestException
+    """
+    with pytest.raises(InvalidRequestException):
+        with test_request_context:
+            client.get(url_for("api.request_oauth_to_third_party"))
 
 
 def test_when_request_with_kakao_then_redirect_to_fetch_token_url(
@@ -23,21 +37,17 @@ def test_when_request_with_kakao_then_redirect_to_fetch_token_url(
     assert response.status_code == 302
 
 
-def test_when_request_with_wrong_provider_then_response_400(
+def test_when_request_with_wrong_provider_then_raise_validation_error(
         client: FlaskClient, test_request_context: RequestContext):
     """
         given : wrong provider value (not in ["naver" or "kakao"])
         when : [GET] /api/captain/v1/oauth?provider="mooyaho"
-        then : response 400
+        then : raise InvalidRequestException
     """
     dto = GetOAuthProviderDto(provider="mooyaho")
-
-    with test_request_context:
-        response = client.get(
-            url_for("api.request_oauth_to_third_party", provider=dto.provider)
-        )
-
-    assert response.status_code == 400
+    with pytest.raises(InvalidRequestException):
+        with test_request_context:
+            client.get(url_for("api.request_oauth_to_third_party", provider=dto.provider))
 
 
 def test_when_success_kakao_redirect_and_failed_token_request_then_response_400():

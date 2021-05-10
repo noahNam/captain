@@ -1,7 +1,25 @@
-from pydantic import ValidationError
+from pydantic import ValidationError, BaseModel, StrictStr, StrictInt, validator
 
-from core.domains.oauth.dto.oauth_dto import GetOAuthProviderDto, CreateUserDto
-from core.domains.oauth.schema.oauth_schema import GetProviderSchema, GetProviderIdSchema
+from app.extensions.utils.log_helper import logger_
+from core.domains.oauth.dto.oauth_dto import GetOAuthProviderDto
+from core.domains.user.dto.user_dto import CreateUserDto
+from core.exception import InvalidRequestException
+
+logger = logger_.getLogger(__name__)
+
+
+class GetProviderSchema(BaseModel):
+    provider: StrictStr = None
+
+    @validator("provider")
+    def provider_match(cls, provider):
+        if provider is None or provider.lower() not in ("kakao", "naver"):
+            raise ValidationError("value must be equal to provider name")
+        return provider
+
+
+class GetProviderIdSchema(BaseModel):
+    provider_id: StrictInt = None
 
 
 class GetOAuthRequest:
@@ -10,29 +28,31 @@ class GetOAuthRequest:
 
     def validate_request_and_make_dto(self):
         try:
-            GetProviderSchema(provider=self.provider)
-            return self.to_dto()
+            schema = GetProviderSchema(provider=self.provider).dict()
+            return GetOAuthProviderDto(**schema)
         except ValidationError as e:
-            print(e)
-            return False
+            logger.error(
+                f"[GetOAuthRequest][validate_request_and_make_dto] error : {e}"
+            )
+            raise InvalidRequestException(message="Invalid provider value")
 
-    def to_dto(self) -> GetOAuthProviderDto:
-        return GetOAuthProviderDto(provider=self.provider)
 
-
-class CreateUser:
+class CreateUserRequest:
     def __init__(self, provider: str, provider_id: int):
         self.provider = provider
         self.provider_id = provider_id
 
     def validate_request_and_make_dto(self):
         try:
-            GetProviderSchema(provider=self.provider)
-            GetProviderIdSchema(provider_id=self.provider_id)
-            return self.to_dto()
-        except ValidationError as e:
-            print(e)
-            return False
+            schema = GetProviderSchema(provider=self.provider).dict()
+            provider_id_schema = GetProviderIdSchema(provider_id=self.provider_id).dict()
+            schema.update(provider_id_schema)
 
-    def to_dto(self) -> CreateUserDto:
-        return CreateUserDto(provider=self.provider, provider_id=self.provider_id)
+            # CreateUserDto : in User domain
+            return CreateUserDto(**schema)
+        except ValidationError as e:
+            logger.error(
+                f"[CreateUserRequest][validate_request_and_make_dto] error : {e}"
+            )
+            raise InvalidRequestException(
+                message="provider_id must be int, or not receive id from Third_party server")

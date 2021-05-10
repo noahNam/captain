@@ -3,4 +3,5 @@ from pydantic import BaseModel, StrictInt, StrictStr
 
 class UserResponseSchema(BaseModel):
     id: StrictInt
-    nickname: StrictStr
+    provider: StrictStr
+    provider_id: StrictInt

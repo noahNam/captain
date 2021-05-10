@@ -7,7 +7,8 @@ class OAuthKakaoEnum(Enum):
     AUTHORIZE_END_POINT = "/oauth/authorize"
     ACCESS_TOKEN_END_POINT = "/oauth/token"
     USER_INFO_END_POINT = "/v2/user/me"
-    # REDIRECT_URL = request.host_url + url_for("api.fetch_kakao_access_token")
+    # with app.app_context():
+    #     REDIRECT_URL = request.host_url + url_for("api.fetch_kakao_access_token")
     REDIRECT_URL = "http://127.0.0.1:5000" + "/api/captain/v1/oauth/kakao"
 
     GRANT_TYPE = "authorization_code"
