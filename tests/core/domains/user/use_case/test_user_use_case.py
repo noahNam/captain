@@ -6,7 +6,7 @@ from core.domains.user.use_case.v1.user_use_case import (
 
 
 def test_when_get_user_then_success(session):
-    user = UserModel(nickname="Tester")
+    user = UserModel(provider="kakao", provider_id=12345)
 
     session.add(user)
     session.commit()

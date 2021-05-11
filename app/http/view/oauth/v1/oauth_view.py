@@ -6,7 +6,7 @@ from app.extensions.utils.oauth_helper import request_oauth_access_token_to_kaka
 from app.http.requests.view.oauth.v1.oauth_request import GetOAuthRequest, CreateUserRequest
 from app.http.responses.presenters.oauth_presenter import OAuthPresenter
 from app.http.view import api
-from core.domains.oauth.use_case.oauth_use_case import GetOAuthUseCase
+from core.domains.oauth.use_case.oauth_use_case import MakeTokenWithUserUseCase
 from core.exception import InvalidRequestException
 
 
@@ -55,7 +55,7 @@ def fetch_kakao_access_token() -> Any:
     # DTO 생성
     dto = CreateUserRequest(provider=provider, provider_id=user_info.get("id")) \
         .validate_request_and_make_dto()
-    return OAuthPresenter().transform(GetOAuthUseCase().execute(dto=dto))
+    return OAuthPresenter().transform(MakeTokenWithUserUseCase().execute(dto=dto))
 
 
 @api.route("/v1/oauth/naver", methods=["GET"])
