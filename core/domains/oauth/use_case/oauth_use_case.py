@@ -1,6 +1,8 @@
 from typing import Optional, Union
 
 import inject
+from flask import jsonify
+from flask_jwt_extended import create_access_token, create_refresh_token
 
 from app.extensions.utils.event_observer import send_message, get_event_object
 from core.domains.user.dto.user_dto import CreateUserDto
@@ -9,7 +11,13 @@ from core.domains.user.enum import UserTopicEnum
 from core.use_case_output import UseCaseSuccessOutput, UseCaseFailureOutput, FailureType
 
 
-class MakeTokenWithUserUseCase:
+class CreateTokenWithUserUseCase:
+    """
+        UserRepository->create_user
+        return JWT
+        todo : AuthenticationRepository->check_blacklist->store_token in auth branch
+    """
+
     # @inject.autoparams()
     # def __init__(self, auth_repo: AuthenticationRepository):
     #     self.__auth_repo = auth_repo
@@ -19,9 +27,14 @@ class MakeTokenWithUserUseCase:
 
         if not user:
             return UseCaseFailureOutput(type=FailureType.NOT_FOUND_ERROR)
-        # JWT 발급
 
-        return UseCaseSuccessOutput(value=user)
+        # JWT 발급
+        access_token = create_access_token(identity=user.id)
+        refresh_token = create_refresh_token(identity=user.id)
+
+        token_info = jsonify(access_token=access_token, refresh_token=refresh_token)
+
+        return UseCaseSuccessOutput(value=token_info)
 
     def __create_user(self, dto: CreateUserDto) -> Optional[UserEntity]:
         send_message(topic_name=UserTopicEnum.CREATE_USER, dto=dto)
