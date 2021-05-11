@@ -61,14 +61,13 @@ def test_when_success_kakao_redirect_and_failed_token_request_then_response_400(
 
     assert response.status_code == 400
 
-# mocking -> True 처리 예정
-# def test_when_success_kakao_redirect_and_success_token_request_then_response_200():
-#     """
-#         given : authorization_code = "correct_code"
-#         when : [POST] /api/captain/v1/oauth/kakao
-#         then : response
-#     """
-#     authorization_code = "yKxyFyqwgoWBR0VWj5fP0SRgcX-ysECUJ0zKfPrYseAWz-VK75KqHNiHw_h4o-YU2io9qQo9dJcAAAF5PWZeYg"
-#     response = request_oauth_access_token_to_kakao(authorization_code)
-#
-#     assert response.status_code == 200
+
+def test_when_success_kakao_redirect_and_success_token_request_then_success(
+        client: FlaskClient, test_request_context: RequestContext):
+    """
+        given : authorization_code = "correct_code" -> mocking
+                kakao provider_id = int -> mocking
+        when : [POST] /api/captain/v1/oauth/kakao, data=CreateUserDto()
+        then : response
+    """
+    pass

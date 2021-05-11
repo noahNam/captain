@@ -55,7 +55,7 @@ class CreateUserRequest:
             # if session.query(
             #         exists().where(UserModel.provider == dto.provider) \
             #                 .where(UserModel.provider_id == dto.provider_id)) \
-            #         .scalar():
+            #                 .scalar():
 
             # CreateUserDto : in User domain
             return CreateUserDto(**schema)

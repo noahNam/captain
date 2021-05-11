@@ -8,11 +8,10 @@ from core.use_case_output import UseCaseSuccessOutput
 
 def test_create_token_when_create_user_by_pypubsub_then_success(session: scoped_session):
     dto = CreateUserDto(provider="kakao", provider_id=12345)
-
     user = UserModel(provider=dto.provider, provider_id=dto.provider_id)
+
     session.add(user)
     session.commit()
-
     result = CreateTokenWithUserUseCase().execute(dto=dto)
 
     assert result.type == "success"
