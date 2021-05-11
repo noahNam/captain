@@ -13,8 +13,8 @@ from app.http.view.main import main as main_bp
 
 from app.http.view import api
 
-
 # event listener initialization
+from core.domains.user import event
 
 
 def init_config(
