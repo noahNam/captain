@@ -1,3 +1,4 @@
+import datetime
 import os
 
 from dotenv import load_dotenv, find_dotenv
@@ -11,6 +12,10 @@ class Config:
     SQLALCHEMY_RECORD_QUERIES = True
     SQLALCHEMY_ECHO = False
     DEBUG = False
+
+    # JWT Config
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=30)
+    JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(days=14)
 
 
 class LocalConfig(Config):
