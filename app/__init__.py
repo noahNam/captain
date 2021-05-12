@@ -16,6 +16,9 @@ from app.http.view import api
 # event listener initialization
 from core.domains.user import event
 
+# alembic auto-generate detected
+from app.persistence.model.user_model import UserModel
+
 
 def init_config(
         app: Flask, config_name: str, settings: Optional[Dict[str, Any]] = None

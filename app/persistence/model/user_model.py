@@ -15,7 +15,7 @@ class UserModel(db.Model):
         autoincrement=True,
     )
     provider = Column(String(10), nullable=False)
-    provider_id = Column(BigInteger().with_variant(Integer, "sqlite"), nullable=False)
+    provider_id = Column(BigInteger(), nullable=False)
     group = Column(String(50), nullable=True)
     created_at = Column(DateTime, default=get_server_timestamp())
     updated_at = Column(DateTime, default=get_server_timestamp())

@@ -9,6 +9,7 @@ from alembic import context
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 from app import db
+from app.persistence.model.user_model import UserModel
 
 config = context.config
 
@@ -18,7 +19,7 @@ fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-target_metadata = db.Model.metadata
+target_metadata = [UserModel, ]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
