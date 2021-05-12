@@ -62,7 +62,7 @@ def test_when_success_kakao_redirect_and_failed_token_request_then_response_400(
     assert response.status_code == 400
 
 
-def test_when_success_kakao_redirect_and_success_token_request_then_success(
+def test_when_redirect_kakao_and_success_token_request_then_success(
         client: FlaskClient, test_request_context: RequestContext):
     """
         given : authorization_code = "correct_code" -> mocking
