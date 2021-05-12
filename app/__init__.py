@@ -17,7 +17,7 @@ from app.http.view import api
 from core.domains.user import event
 
 # alembic auto-generate detected
-from app.persistence.model.user_model import UserModel
+from app.persistence.model import *
 
 
 def init_config(
