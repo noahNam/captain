@@ -14,9 +14,10 @@ class OAuthPresenter:
     def transform(self, output: Union[UseCaseSuccessOutput, UseCaseFailureOutput]):
         if isinstance(output, UseCaseSuccessOutput):
             value = output.value
+            value_to_json = value.get_json()
             try:
-                schema = ResponseOAuthSchema(access_token=value.get("access_token"),
-                                             refresh_token=value.get("refresh_token"), )
+                schema = ResponseOAuthSchema(access_token=value_to_json.get("access_token"),
+                                             refresh_token=value_to_json.get("refresh_token") )
             except ValidationError as e:
                 logger.error(
                     f"[OAuthPresenter][transform] value : {value} error : {e}")
@@ -28,7 +29,6 @@ class OAuthPresenter:
                 )
             result = {
                 "data": {"token_info": schema.dict()},
-                "meta": {"cursor": output.meta},
             }
             return success_response(result=result)
         elif isinstance(output, UseCaseFailureOutput):

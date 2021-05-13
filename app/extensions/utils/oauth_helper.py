@@ -27,6 +27,6 @@ def get_kakao_user_info(token_info) -> Any:
         headers={
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
             "Cache-Control": "no-cache",
-            "Authorization": "Bearer " + token_info.json().get("access_token")
+            "Authorization": "Bearer " + token_info.get("access_token")
         },
     )

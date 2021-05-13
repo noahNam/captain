@@ -27,7 +27,6 @@ def request_oauth_to_third_party() -> Any:
     redirect_to = OAuthKakaoEnum.REDIRECT_URL.value
     # if parameter == "naver":
     #     redirect_to = OAuthNaverEnum.REDIRECT_URL.value
-
     return oauth.kakao.authorize_redirect(redirect_to)
 
 
@@ -45,7 +44,7 @@ def fetch_kakao_access_token() -> Any:
     # 인가 서버 -> Access_Token 요청
     token_result = request_oauth_access_token_to_kakao(code=code)
     if not token_result.raise_for_status():
-        kakao_token_info = token_result
+        kakao_token_info = token_result.json()
 
     # 자원 서버 -> User_info 요청
     user_info_result = get_kakao_user_info(kakao_token_info)
