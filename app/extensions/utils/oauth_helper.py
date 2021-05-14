@@ -1,8 +1,8 @@
-import os
 from typing import Optional, Any
 
 import requests
 
+from app import config
 from core.domains.oauth.enum.oauth_enum import OAuthKakaoEnum
 
 
@@ -13,10 +13,10 @@ def request_oauth_access_token_to_kakao(
         headers=OAuthKakaoEnum.REQUEST_DEFAULT_HEADER.value,
         data={
             "grant_type": OAuthKakaoEnum.GRANT_TYPE.value,
-            "client_id": os.getenv("KAKAO_CLIENT_ID"),
+            "client_id": OAuthKakaoEnum.KAKAO_CLIENT_ID.value,
             "redirect_uri": OAuthKakaoEnum.REDIRECT_URL.value,
             "code": code,
-            "client_secret": os.getenv("KAKAO_CLIENT_SECRET"),
+            "client_secret": OAuthKakaoEnum.KAKAO_CLIENT_SECRET.value,
         },
     )
 

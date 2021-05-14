@@ -18,6 +18,7 @@ class UserRepository:
                         .where(UserModel.provider_id == dto.provider_id))\
                         .scalar():
             return
+
         try:
             user = UserModel(
                 provider=dto.provider,
@@ -36,12 +37,12 @@ class UserRepository:
         user = session.query(UserModel).filter_by(id=user_id).first()
 
         if not user:
-            return
+            return None
         return user.to_entity()
 
     def get_user_by_create_user_dto(self, dto: CreateUserDto) -> Optional[UserEntity]:
         user = session.query(UserModel).filter_by(provider=dto.provider, provider_id=dto.provider_id).first()
 
         if not user:
-            return
+            return None
         return user.to_entity()

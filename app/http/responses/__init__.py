@@ -12,4 +12,4 @@ def success_response(result):
 def failure_response(
     output: UseCaseFailureOutput, status_code: HTTPStatus = HTTPStatus.BAD_REQUEST
 ):
-    return jsonify(type=output.type, error_message=output.message), status_code
+    return jsonify(type=output.type, message=output.message), status_code

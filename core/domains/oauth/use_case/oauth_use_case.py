@@ -18,10 +18,6 @@ class CreateTokenWithUserUseCase:
         todo : AuthenticationRepository->check_blacklist->store_token in auth branch
     """
 
-    # @inject.autoparams()
-    # def __init__(self, auth_repo: AuthenticationRepository):
-    #     self.__auth_repo = auth_repo
-
     def execute(self, dto: CreateUserDto) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
         user = self.__create_user(dto=dto)
 

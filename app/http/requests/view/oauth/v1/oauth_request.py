@@ -1,12 +1,11 @@
 from pydantic import ValidationError, BaseModel, StrictStr, StrictInt, validator
-from sqlalchemy import and_
-
-from app.extensions.database import session
 from app.extensions.utils.log_helper import logger_
-from app.persistence.model.user_model import UserModel
+from app.http.responses import failure_response
 from core.domains.oauth.dto.oauth_dto import GetOAuthProviderDto
+from core.domains.oauth.enum.oauth_enum import ProviderEnum
 from core.domains.user.dto.user_dto import CreateUserDto
 from core.exception import InvalidRequestException
+from core.use_case_output import UseCaseFailureOutput, FailureType
 
 logger = logger_.getLogger(__name__)
 
@@ -16,7 +15,8 @@ class GetProviderSchema(BaseModel):
 
     @validator("provider")
     def provider_match(cls, provider):
-        if provider is None or provider.lower() not in ("kakao", "naver"):
+        provider_list = [provider.value for provider in list(ProviderEnum)]
+        if provider is None or provider.lower() not in provider_list:
             raise ValidationError("value must be equal to provider name")
         return provider
 
@@ -37,7 +37,7 @@ class GetOAuthRequest:
             logger.error(
                 f"[GetOAuthRequest][validate_request_and_make_dto] error : {e}"
             )
-            raise InvalidRequestException(message="Invalid provider value")
+            raise InvalidRequestException(message=e.errors())
 
 
 class CreateUserRequest:
@@ -50,12 +50,6 @@ class CreateUserRequest:
             schema = GetProviderSchema(provider=self.provider).dict()
             provider_id_schema = GetProviderIdSchema(provider_id=self.provider_id).dict()
             schema.update(provider_id_schema)
-
-            # 유저가 존재하면 바로 JWT Blacklist 검증
-            # if session.query(
-            #         exists().where(UserModel.provider == dto.provider) \
-            #                 .where(UserModel.provider_id == dto.provider_id)) \
-            #                 .scalar():
 
             # CreateUserDto : in User domain
             return CreateUserDto(**schema)

@@ -25,9 +25,7 @@ pytest-xdist = "*"
 pytest = "*"
 pytest-factoryboy = "*"
 faker = "*"
-python-dotenv = "^0.17.1"
 pytest-mock = "^3.6.1"
-requests-mock = "^1.9.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -16,7 +16,7 @@ class UserModel(db.Model):
     )
     provider = Column(String(10), nullable=False)
     provider_id = Column(BigInteger(), nullable=False)
-    group = Column(String(50), nullable=True)
+    group = Column(String(10), nullable=True)
     created_at = Column(DateTime, default=get_server_timestamp())
     updated_at = Column(DateTime, default=get_server_timestamp())
 

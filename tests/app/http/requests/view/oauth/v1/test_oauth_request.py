@@ -1,6 +1,7 @@
 import pytest
 
 from app.http.requests.view.oauth.v1.oauth_request import GetOAuthRequest, CreateUserRequest
+from core.domains.oauth.enum.oauth_enum import ProviderEnum
 from core.exception import InvalidRequestException
 
 
@@ -10,8 +11,8 @@ def test_when_valid_request_with_naver_then_success():
 
 
 def test_when_valid_request_with_kakao_then_success():
-    result = GetOAuthRequest(provider="kakao").validate_request_and_make_dto()
-    assert result.provider == "kakao"
+    result = GetOAuthRequest(provider=ProviderEnum.KAKAO.value).validate_request_and_make_dto()
+    assert result.provider == ProviderEnum.KAKAO.value
 
 
 def test_when_invalid_request_then_raise_validation_error():
@@ -20,11 +21,13 @@ def test_when_invalid_request_then_raise_validation_error():
 
 
 def test_when_valid_input_user_info_then_success():
-    result = CreateUserRequest(provider="kakao", provider_id=12345).validate_request_and_make_dto()
-    assert result.provider == "kakao"
+    result = CreateUserRequest(provider=ProviderEnum.KAKAO.value,
+                               provider_id=12345).validate_request_and_make_dto()
+    assert result.provider == ProviderEnum.KAKAO.value
     assert result.provider_id == 12345
 
 
 def test_when_invalid_input_user_info_then_fail():
     with pytest.raises(InvalidRequestException):
-        CreateUserRequest(provider="not_provider", provider_id="not_int").validate_request_and_make_dto()
+        CreateUserRequest(provider="not_provider",
+                          provider_id="not_int").validate_request_and_make_dto()

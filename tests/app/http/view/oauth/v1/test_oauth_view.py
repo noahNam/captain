@@ -1,6 +1,6 @@
+from http import HTTPStatus
 from unittest.mock import patch, MagicMock
 
-import pytest
 from flask import url_for, Response
 from flask.ctx import RequestContext
 from flask.testing import FlaskClient
@@ -8,7 +8,8 @@ from sqlalchemy.orm import scoped_session
 
 from app.extensions.utils.oauth_helper import request_oauth_access_token_to_kakao, get_kakao_user_info
 from core.domains.oauth.dto.oauth_dto import GetOAuthProviderDto
-from core.exception import InvalidRequestException
+from core.domains.oauth.enum.oauth_enum import ProviderEnum
+from core.use_case_output import FailureType
 
 
 class MockResponse:
@@ -32,9 +33,11 @@ def test_when_request_with_not_parameter_then_raise_validation_error(
         when : [GET] /api/captain/v1/oauth
         then : raise InvalidRequestException
     """
-    with pytest.raises(InvalidRequestException):
-        with test_request_context:
-            client.get(url_for("api.request_oauth_to_third_party"))
+    with test_request_context:
+        response = client.get(url_for("api.request_oauth_to_third_party"))
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.get_json()["type"] == FailureType.INVALID_REQUEST_ERROR
 
 
 def test_when_request_oauth_to_kakao_then_redirect_to_fetch_token_url(
@@ -46,7 +49,7 @@ def test_when_request_oauth_to_kakao_then_redirect_to_fetch_token_url(
     """
     with test_request_context:
         response = client.get(
-            url_for("api.request_oauth_to_third_party", provider="kakao")
+            url_for("api.request_oauth_to_third_party", provider=ProviderEnum.KAKAO.value)
         )
 
     assert response.status_code == 302
@@ -73,55 +76,7 @@ def test_mock_oauth_request_to_kakao_when_success(
 
     with test_request_context:
         response = client.get(
-            url_for("api.request_oauth_to_third_party", provider="kakao")
-        )
-
-    assert response.status_code == mock_request.return_value.status_code
-    assert response.data == mock_request.return_value.data
-    assert mock_request.called is True
-
-
-@patch("app.http.view.oauth.kakao.authorize_redirect")
-def test_mock_oauth_request_to_kakao_when_user_cancel(
-        mock_request: MagicMock,
-        client: FlaskClient,
-        test_request_context: RequestContext):
-    """
-    <mocking test>
-        when : [GET] /api/captain/v1/oauth?provider=kakao 진행 도중 사용자가 취소
-        then : get error
-    """
-    mock_request.return_value = Response()
-    mock_request.return_value.status_code = 302
-    mock_request.return_value.data = b"error=access_denied...something"
-
-    with test_request_context:
-        response = client.get(
-            url_for("api.request_oauth_to_third_party", provider="kakao")
-        )
-
-    assert response.status_code == mock_request.return_value.status_code
-    assert response.data == mock_request.return_value.data
-    assert mock_request.called is True
-
-
-@patch("app.http.view.oauth.kakao.authorize_redirect")
-def test_mock_oauth_request_to_kakao_when_user_disagree(
-        mock_request: MagicMock,
-        client: FlaskClient,
-        test_request_context: RequestContext):
-    """
-        <mocking test>
-            when : [GET] /api/captain/v1/oauth?provider=kakao 진행 도중 사용자가 동의안함
-            then : get error
-    """
-    mock_request.return_value = Response()
-    mock_request.return_value.status_code = 302
-    mock_request.return_value.data = b"error=consent_required...something"
-
-    with test_request_context:
-        response = client.get(
-            url_for("api.request_oauth_to_third_party", provider="kakao")
+            url_for("api.request_oauth_to_third_party", provider=ProviderEnum.KAKAO.value)
         )
 
     assert response.status_code == mock_request.return_value.status_code
@@ -137,9 +92,11 @@ def test_when_request_with_wrong_provider_then_raise_validation_error(
         then : raise InvalidRequestException
     """
     dto = GetOAuthProviderDto(provider="mooyaho")
-    with pytest.raises(InvalidRequestException):
-        with test_request_context:
-            client.get(url_for("api.request_oauth_to_third_party", provider=dto.provider))
+    with test_request_context:
+        response = client.get(url_for("api.request_oauth_to_third_party", provider=dto.provider))
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.get_json()["type"] == FailureType.INVALID_REQUEST_ERROR
 
 
 def test_when_success_kakao_redirect_and_failed_token_request_then_response_400():
@@ -222,7 +179,7 @@ def test_when_redirect_kakao_and_success_token_request_then_success(
         mock_redirect.return_value.data = b"https://kauth.kakao.com/oauth/authorize...something"
         with test_request_context:
             redirect_response = client.get(
-                url_for("api.request_oauth_to_third_party", provider="kakao")
+                url_for("api.request_oauth_to_third_party", provider=ProviderEnum.KAKAO.value)
             )
             with patch("requests.post") as mock_post:
                 mock_post.return_value = MockResponse(json_data=mock_token_info, status_code=201)
@@ -233,7 +190,7 @@ def test_when_redirect_kakao_and_success_token_request_then_success(
                             url_for("api.fetch_kakao_access_token", code="code")
                         )
 
-    data = response.get_json()["data"]
+    data = response.get_json().get("data")
 
     assert redirect_response.status_code == mock_redirect.return_value.status_code
     assert response.status_code == 200
