@@ -1,0 +1,14 @@
+get_kakao_id_and_create_jwt:
+  properties:
+    data:
+      type: object
+      properties:
+        token_info:
+          type: object
+          properties:
+            access_token:
+              type: string
+              example: jwt_access_token_value
+            refresh_token:
+              type: string
+              example: jwt_refresh_token_value

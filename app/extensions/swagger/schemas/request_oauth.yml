@@ -1,0 +1,5 @@
+request_oauth:
+  properties:
+    bytes-example:
+      type: bytes
+      example: https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=...&redirect_uri=http%3A%2F%2F127.0.0.1%3A5000%2Fapi%2Fcaptain%2Fv1%2Foauth%2Fkakao&state=...'

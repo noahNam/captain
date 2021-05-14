@@ -1,24 +1,24 @@
 import pytest
 from datetime import date, timedelta, datetime
 from faker import Faker
-from tests.seeder.factory.data_service_factory import (
-    NormalUserFactory,
-)
+
+from tests.seeder.factory import UserFactory
 
 MODEL_FACTORIES = [
-    NormalUserFactory,
+    UserFactory,
 ]
-
 
 faker = Faker()
 
 
 @pytest.fixture
-def create_users(session, normal_user_factory):
-    users = normal_user_factory.build_batch(2)
+def create_users(session, user_factory):
+    users = user_factory.build_batch(size=2)
 
     session.add_all(users)
     session.commit()
+
+    return users
 
 
 def make_random_today_date(between_days: int = 1, year_ago: int = 2):

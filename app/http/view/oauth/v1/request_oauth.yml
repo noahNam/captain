@@ -1,0 +1,20 @@
+openapi: "3.0.2"
+tags:
+  - OAuth
+security:
+  - userAuth: []
+parameters:
+  - name: provider
+    in: path
+    required: true
+    description: kakao or naver
+    schema:
+      type: string
+      example: kakao
+responses:
+  '302':
+    description: Redirect to end_point - /v1/oauth/kakao
+    content:
+      html/text:
+        schema:
+          $ref: '#/components/schemas/request_oauth'
