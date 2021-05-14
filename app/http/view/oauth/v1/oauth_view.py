@@ -1,4 +1,6 @@
 from typing import Any
+
+from flasgger import swag_from
 from flask import request
 from app import oauth
 from core.domains.oauth.enum.oauth_enum import OAuthKakaoEnum
@@ -11,6 +13,7 @@ from core.exception import InvalidRequestException
 
 
 @api.route("/v1/oauth", methods=["GET"])
+@swag_from("request_oauth.yml", methods=["GET"])
 def request_oauth_to_third_party() -> Any:
     """
     Parameter : third_party("kakao" or "naver")
@@ -31,6 +34,7 @@ def request_oauth_to_third_party() -> Any:
 
 
 @api.route("/v1/oauth/kakao", methods=["GET"])
+@swag_from("get_kakao_id_and_create_jwt.yml", methods=["GET"])
 def fetch_kakao_access_token() -> Any:
     provider = "kakao"
     kakao_token_info = None

@@ -2,7 +2,7 @@ openapi: "3.0.2"
 tags:
   - User
 security:
-  - userAuth: []
+  - userAuth: [ ]
 parameters:
   - name: user_id
     in: path
@@ -23,9 +23,15 @@ responses:
             id:
               type: integer
               example: 1
-            nickname:
+            provider:
               type: string
-              example: Simon
+              example: kakao
+            provider_id:
+              type: integer
+              example: 12345678
+            group:
+              type: string
+              example: None
   '400':
     description: unauthorized_error, invalid_request_error, not_found_error
     content:

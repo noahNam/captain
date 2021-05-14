@@ -69,7 +69,7 @@ def test_mock_oauth_request_to_kakao_when_success(
     """
     mock_request.return_value = Response()
     mock_request.return_value.status_code = 302
-    mock_request.return_value.data = b"https://kauth.kakao.com/oauth/authorize...someting"
+    mock_request.return_value.data = b"https://kauth.kakao.com/oauth/authorize...something"
 
     with test_request_context:
         response = client.get(
@@ -219,7 +219,7 @@ def test_when_redirect_kakao_and_success_token_request_then_success(
     with patch("app.http.view.oauth.kakao.authorize_redirect") as mock_redirect:
         mock_redirect.return_value = Response()
         mock_redirect.return_value.status_code = 302
-        mock_redirect.return_value.data = b"https://kauth.kakao.com/oauth/authorize...someting"
+        mock_redirect.return_value.data = b"https://kauth.kakao.com/oauth/authorize...something"
         with test_request_context:
             redirect_response = client.get(
                 url_for("api.request_oauth_to_third_party", provider="kakao")
