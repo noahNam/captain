@@ -5,7 +5,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from app.config import config
-from app.extensions import jwt, oauth
+from app.extensions import jwt, oauth, redis
 from app.extensions.database import db, migrate
 from app.extensions.ioc_container import init_provider
 from app.extensions.swagger import swagger_config
@@ -43,6 +43,7 @@ def init_extensions(app: Flask):
     Swagger(app, **swagger_config())
     jwt.init_app(app)
     oauth.init_app(app)
+    redis.init_app(app)
 
 
 def create_app(
