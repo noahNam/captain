@@ -6,8 +6,8 @@ from core.exception import InvalidRequestException
 
 
 def test_when_valid_request_with_naver_then_success():
-    result = GetOAuthRequest(provider="naver").validate_request_and_make_dto()
-    assert result.provider == "naver"
+    result = GetOAuthRequest(provider=ProviderEnum.NAVER.value).validate_request_and_make_dto()
+    assert result.provider == ProviderEnum.NAVER.value
 
 
 def test_when_valid_request_with_kakao_then_success():

@@ -13,7 +13,7 @@ kakao_user_dto = CreateUserDto(
     provider=ProviderEnum.KAKAO.value,
     provider_id=12345
 )
-provider_list = [provider.value for provider in list(ProviderEnum)]
+provider_list = tuple([provider.value for provider in list(ProviderEnum)])
 
 
 def test_create_user_when_get_provider_id(session: scoped_session):

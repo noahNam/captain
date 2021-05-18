@@ -1,11 +1,9 @@
 from pydantic import ValidationError, BaseModel, StrictStr, StrictInt, validator
 from app.extensions.utils.log_helper import logger_
-from app.http.responses import failure_response
 from core.domains.oauth.dto.oauth_dto import GetOAuthProviderDto
 from core.domains.oauth.enum.oauth_enum import ProviderEnum
 from core.domains.user.dto.user_dto import CreateUserDto
 from core.exception import InvalidRequestException
-from core.use_case_output import UseCaseFailureOutput, FailureType
 
 logger = logger_.getLogger(__name__)
 
@@ -15,7 +13,7 @@ class GetProviderSchema(BaseModel):
 
     @validator("provider")
     def provider_match(cls, provider):
-        provider_list = [provider.value for provider in list(ProviderEnum)]
+        provider_list = tuple([provider.value for provider in list(ProviderEnum)])
         if provider is None or provider.lower() not in provider_list:
             raise ValidationError("value must be equal to provider name")
         return provider

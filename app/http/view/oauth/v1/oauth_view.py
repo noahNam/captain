@@ -2,7 +2,6 @@ from typing import Any
 
 from flasgger import swag_from
 from flask import request
-from requests import HTTPError
 
 from app import oauth
 from app.http.responses import failure_response
@@ -23,7 +22,7 @@ def request_oauth_to_third_party() -> Any:
     Parameter : third_party("kakao" or "naver")
     Return : redirect -> redirect_url
     """
-    provider_list = [provider.value for provider in list(ProviderEnum)]
+    provider_list = tuple([provider.value for provider in list(ProviderEnum)])
     parameter = request.args.get("provider")
 
     if not parameter:
