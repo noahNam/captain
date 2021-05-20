@@ -26,8 +26,8 @@ class JwtModel(db.Model):
     user_id = Column(BigInteger, ForeignKey(UserModel.id), nullable=False)
     access_token = Column(String(270), nullable=False)
     refresh_token = Column(String(270), nullable=False)
-    access_expired_at = Column(DateTime, default=get_jwt_access_expired_timestamp())
-    refresh_expired_at = Column(DateTime, default=get_jwt_refresh_expired_timestamp())
+    access_expired_at = Column(DateTime, nullable=False, default=get_jwt_access_expired_timestamp())
+    refresh_expired_at = Column(DateTime, nullable=False, default=get_jwt_refresh_expired_timestamp())
 
     def __repr__(self):
         return f"Jwts('{self.id}', " \

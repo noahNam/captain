@@ -1,8 +1,8 @@
 """create jwts table
 
-Revision ID: 982b2601630b
+Revision ID: 04385755e02e
 Revises: 3abd50eeaea9
-Create Date: 2021-05-18 15:44:29.314180
+Create Date: 2021-05-20 15:32:35.163234
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '982b2601630b'
+revision = '04385755e02e'
 down_revision = '3abd50eeaea9'
 branch_labels = None
 depends_on = None
@@ -23,8 +23,8 @@ def upgrade():
     sa.Column('user_id', sa.BigInteger(), nullable=False),
     sa.Column('access_token', sa.String(length=270), nullable=False),
     sa.Column('refresh_token', sa.String(length=270), nullable=False),
-    sa.Column('access_expired_at', sa.DateTime(), nullable=True),
-    sa.Column('refresh_expired_at', sa.DateTime(), nullable=True),
+    sa.Column('access_expired_at', sa.DateTime(), nullable=False),
+    sa.Column('refresh_expired_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
