@@ -3,15 +3,15 @@ from pydantic import ValidationError
 from sqlalchemy.orm import scoped_session
 
 from app.extensions import RedisClient
+from app.persistence.model.jwt_model import JwtModel
 from core.domains.authentication.repository.authentication_repository import AuthenticationRepository
 from core.domains.user.dto.user_dto import GetUserDto
-from tests.conftest import app
 
 get_user_dto = GetUserDto(user_id=1)
 
 
 def test_create_token_when_get_user_id(session: scoped_session):
-    token_info = AuthenticationRepository().create_token(dto=get_user_dto)
+    token_info = AuthenticationRepository().create_or_update_token(dto=get_user_dto)
 
     assert token_info.user_id == get_user_dto.user_id
     assert token_info.access_token is not None
@@ -22,10 +22,25 @@ def test_create_token_without_user_id_then_validation_error(
         session: scoped_session):
     with pytest.raises(ValidationError):
         dummy_dto = GetUserDto(user_id=None)
-        AuthenticationRepository().create_token(dto=dummy_dto)
+        AuthenticationRepository().create_or_update_token(dto=dummy_dto)
 
 
-def test_redis_example():
+def test_update_token_when_get_user_id(session: scoped_session):
+    token_before = AuthenticationRepository().create_or_update_token(dto=get_user_dto)
+    AuthenticationRepository().create_or_update_token(dto=get_user_dto)
+
+    token_after = session.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
+
+    assert token_before.user_id == get_user_dto.user_id
+    assert token_before.user_id == token_after.user_id
+    assert token_before.id == token_after.id
+    assert token_before.access_token != token_after.access_token
+    assert token_before.refresh_token != token_after.refresh_token
+    assert token_before.access_expired_at != token_after.access_expired_at
+    assert token_before.refresh_expired_at != token_after.refresh_expired_at
+
+
+def test_redis_example(app):
     redis_url = "redis://localhost:6379"
     test_redis = RedisClient()
     test_redis.init_app(app=app, url=redis_url)

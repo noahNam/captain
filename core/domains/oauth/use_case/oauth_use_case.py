@@ -43,6 +43,6 @@ class CreateTokenWithUserUseCase:
         return get_event_object(topic_name=UserTopicEnum.CREATE_USER)
 
     def __create_token(self, dto: GetUserDto) -> Optional[JwtEntity]:
-        send_message(topic_name=AuthenticationTopicEnum.CREATE_TOKEN, dto=dto)
+        send_message(topic_name=AuthenticationTopicEnum.CREATE_OR_UPDATE_TOKEN, dto=dto)
 
-        return get_event_object(topic_name=AuthenticationTopicEnum.CREATE_TOKEN)
+        return get_event_object(topic_name=AuthenticationTopicEnum.CREATE_OR_UPDATE_TOKEN)
