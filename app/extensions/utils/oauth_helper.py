@@ -2,7 +2,6 @@ from typing import Optional, Any
 
 import requests
 
-from app import config
 from core.domains.oauth.enum.oauth_enum import OAuthKakaoEnum
 
 

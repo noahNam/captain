@@ -13,7 +13,7 @@ class RedisClient:
         self.keys = None
         self.copied_keys = []
 
-    def init_app(self, app: Flask, url):
+    def init_app(self, app: Flask, url=None):
         redis_url = url if url else app.config.get(RedisClient.CONFIG_NAME)
         self._redis_client = self._redis_client.from_url(redis_url)
 
