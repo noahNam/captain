@@ -2,10 +2,11 @@ import pytest
 from datetime import date, timedelta, datetime
 from faker import Faker
 
-from tests.seeder.factory import UserFactory
+from tests.seeder.factory import UserFactory, JwtFactory
 
 MODEL_FACTORIES = [
     UserFactory,
+    JwtFactory,
 ]
 
 faker = Faker()
@@ -19,6 +20,16 @@ def create_users(session, user_factory):
     session.commit()
 
     return users
+
+
+@pytest.fixture
+def create_jwts(session, jwt_factory):
+    jwts = jwt_factory.build_batch(size=2)
+
+    session.add_all(jwts)
+    session.commit()
+
+    return jwts
 
 
 def make_random_today_date(between_days: int = 1, year_ago: int = 2):
