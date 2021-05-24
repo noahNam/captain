@@ -29,7 +29,7 @@ class RedisClient:
         except StopIteration as e:
             return None
 
-    def set(self, key: Any, value: Any, ex: Union[int, timedelta] = None,) -> None:
+    def set(self, key: Any, value: Any, ex: Union[int, timedelta] = None, ) -> None:
         self._redis_client.set(name=key, value=value, ex=ex)
 
     def clear_cache(self) -> None:
@@ -38,8 +38,11 @@ class RedisClient:
         self.keys = None
         self.copied_keys = []
 
-    def get_by_key(self, key: str) -> str:
+    def get_by_key(self, key: any) -> str:
         return self._redis_client.get(name=key)
 
     def flushall(self) -> None:
         self._redis_client.flushall()
+
+    def disconnect(self) -> None:
+        self._redis_client.connection_pool.disconnect()

@@ -1,4 +1,5 @@
 from sqlalchemy import Column, BigInteger, Integer, String, DateTime
+from sqlalchemy.orm import relationship, backref
 
 from app import db
 from app.extensions.utils.time_helper import get_server_timestamp
@@ -19,6 +20,8 @@ class UserModel(db.Model):
     group = Column(String(10), nullable=True)
     created_at = Column(DateTime, default=get_server_timestamp())
     updated_at = Column(DateTime, default=get_server_timestamp())
+
+    jwt_models = relationship("JwtModel", backref=backref("jwts"))
 
     def __repr__(self):
         return f"User('{self.id}', " \

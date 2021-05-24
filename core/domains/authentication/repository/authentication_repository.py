@@ -1,7 +1,10 @@
 from typing import Optional
+
+from app import redis
 from app.extensions.database import session
 from app.extensions.utils.log_helper import logger_
-from app.extensions.utils.time_helper import get_jwt_access_expired_timestamp, get_jwt_refresh_expired_timestamp
+from app.extensions.utils.time_helper import get_jwt_access_expired_timestamp, get_jwt_refresh_expired_timestamp, \
+    get_jwt_access_expire_timedelta_to_seconds, get_jwt_refresh_expire_timedelta_to_seconds
 from app.persistence.model.jwt_model import JwtModel
 from core.domains.authentication.entity.jwt_entity import JwtEntity
 from core.domains.user.dto.user_dto import GetUserDto
@@ -67,5 +70,36 @@ class AuthenticationRepository:
 
         return token_info.to_entity()
 
-    def set_token_to_cache(self, dto):
-        pass
+    def _set_access_token_to_cache(self, token_info: Optional[JwtEntity]):
+        try:
+            redis.set(
+                key=token_info.access_token,
+                value=token_info.user_id,
+                ex=get_jwt_access_expire_timedelta_to_seconds()
+            )
+        except Exception as e:
+            logger.error(
+                f"[AuthenticationRepository][set_access_token_to_cache] key : {token_info.access_token}, "
+                f"value : {token_info.user_id} error : {e}"
+            )
+
+    def _set_refresh_token_to_cache(self, token_info: Optional[JwtEntity]):
+        try:
+            redis.set(
+                key=token_info.user_id,
+                value=token_info.refresh_token,
+                ex=get_jwt_refresh_expire_timedelta_to_seconds()
+            )
+        except Exception as e:
+            logger.error(
+                f"[AuthenticationRepository][set_refresh_token_to_cache] key : {token_info.user_id}, "
+                f"value : {token_info.refresh_token} error : {e}"
+            )
+
+    def set_token_to_cache(self, token_info: Optional[JwtEntity]) -> bool:
+        if token_info:
+            self._set_access_token_to_cache(token_info)
+            self._set_refresh_token_to_cache(token_info)
+
+            return True
+        return False

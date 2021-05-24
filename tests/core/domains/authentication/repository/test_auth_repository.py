@@ -32,8 +32,11 @@ def test_update_token_when_get_user_id(session: scoped_session):
     token_after = session.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
 
     assert token_before.user_id == get_user_dto.user_id
+
     assert token_before.user_id == token_after.user_id
     assert token_before.id == token_after.id
+
+    # 업데이트된 토큰 == 새로운 토큰 + 만료시간 갱신(기존 토큰과 값이 달라야 함)
     assert token_before.access_token != token_after.access_token
     assert token_before.refresh_token != token_after.refresh_token
     assert token_before.access_expired_at != token_after.access_expired_at
@@ -80,3 +83,21 @@ def test_redis_example(app):
     assert value.decode('ascii') == message
     assert key.split(":")[1] == "1"
     assert result[key.split(":")[1]].decode('ascii') == message
+
+
+def test_set_token_to_redis_when_get_token_info(
+        session: scoped_session, redis: RedisClient):
+    """
+    <key> : <value>
+        jwt_access_token : user_id
+        user_id : jwt_refresh_token
+    """
+    token_info = AuthenticationRepository().create_or_update_token(dto=get_user_dto)
+    result = AuthenticationRepository().set_token_to_cache(token_info)
+
+    value_user_id = redis.get_by_key(key=token_info.access_token)
+    value_refresh_token = redis.get_by_key(key=token_info.user_id)
+
+    assert result is True
+    assert value_user_id == b'1'
+    assert value_refresh_token.decode("utf-8") == token_info.refresh_token
