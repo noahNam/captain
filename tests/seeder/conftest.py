@@ -2,11 +2,12 @@ import pytest
 from datetime import date, timedelta, datetime
 from faker import Faker
 
-from tests.seeder.factory import UserFactory, JwtFactory
+from tests.seeder.factory import UserFactory, JwtFactory, InvalidJwtFactory
 
 MODEL_FACTORIES = [
     UserFactory,
     JwtFactory,
+    InvalidJwtFactory
 ]
 
 faker = Faker()
@@ -30,6 +31,26 @@ def create_jwts(session, jwt_factory):
     session.commit()
 
     return jwts
+
+
+@pytest.fixture
+def create_invalid_jwts(session, invalid_jwt_factory):
+    jwts = invalid_jwt_factory.build_batch(size=2)
+
+    session.add_all(jwts)
+    session.commit()
+
+    return jwts
+
+
+@pytest.fixture
+def create_blacklists(session, blacklist_factory):
+    blacklists = blacklist_factory.build_batch(size=2)
+
+    session.add_all(blacklists)
+    session.commit()
+
+    return blacklists
 
 
 def make_random_today_date(between_days: int = 1, year_ago: int = 2):

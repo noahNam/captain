@@ -13,7 +13,6 @@ class CreateTokenWithUserUseCase:
     """
         UserRepository->create_user
         return JWT
-        todo : AuthenticationRepository->check_blacklist->store_token in auth branch
     """
 
     def execute(self, dto: CreateUserDto) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
