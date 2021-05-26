@@ -1,6 +1,7 @@
 import random
 import uuid
 from datetime import datetime, timedelta
+from typing import Optional
 
 import factory
 import jwt
@@ -20,10 +21,10 @@ faker = FakerFactory.create(locale="ko_KR")
 provider_list = tuple([provider.value for provider in list(ProviderEnum)])
 
 
-def make_custom_jwt(obj: any, token_type: str, now: datetime, delta: timedelta) -> bytes:
+def make_custom_jwt(obj: any, token_type: str, now: Optional[datetime], delta: timedelta) -> bytes:
     uid = str(uuid.uuid4())
     if not now:
-        now = get_server_timestamp()
+        now = datetime.utcnow()
     payload = {
         # additional info
         "identity": str(obj),
