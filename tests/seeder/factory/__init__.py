@@ -21,10 +21,15 @@ faker = FakerFactory.create(locale="ko_KR")
 provider_list = tuple([provider.value for provider in list(ProviderEnum)])
 
 
-def make_custom_jwt(obj: any, token_type: str, now: Optional[datetime], delta: timedelta) -> bytes:
+def make_custom_jwt(obj: any,
+                    token_type: Optional[str] = None,
+                    now: Optional[datetime] = None,
+                    delta: Optional[timedelta] = None) -> bytes:
     uid = str(uuid.uuid4())
     if not now:
         now = datetime.utcnow()
+    if not delta:
+        delta = get_jwt_access_expired_time_delta()
     payload = {
         # additional info
         "identity": str(obj),
@@ -88,9 +93,9 @@ class BlacklistFactory(BaseFactory):
                                    delta=get_jwt_access_expired_time_delta())
 
 
-class UserFactory(BaseFactory):
+class UserBaseFactory(BaseFactory):
     """
-    Define user factory
+        Define user base factory
     """
 
     class Meta:
@@ -99,6 +104,11 @@ class UserFactory(BaseFactory):
     provider = random.choice(provider_list)
     provider_id = factory.Sequence(lambda n: n + 1)
 
+
+class UserFactory(UserBaseFactory):
+    """
+        Define user factory with jwt_models
+    """
     jwt_models = factory.List([factory.SubFactory(JwtFactory)])
 
 

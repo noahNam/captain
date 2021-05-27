@@ -1,13 +1,12 @@
-from flask import request, jsonify
-
+from flask import request
 from app.http.requests.view.authentication.authentication_request import UpdateTokenRequest
 from app.http.responses import failure_response
 from app.http.responses.presenters.authentication_presenter import UpdateJwtPresenter
 from app.http.view import api
 from app.http.view.authentication import auth_required
-# from core.domains.authentication.use_case.v1.authentication_use_case import (
-#     AuthenticationUseCase,
-# )
+from core.domains.authentication.use_case.v1.authentication_use_case import (
+    UpdateJwtUseCase,
+)
 from core.exception import InvalidRequestException
 from core.use_case_output import UseCaseFailureOutput, FailureType
 
@@ -42,7 +41,7 @@ def token_update_view():
 
     # 토큰 자체에 대한 유효성 검증
     try:
-        UpdateTokenRequest(token=token_to_bytes).validate_request_and_make_dto()
+        dto = UpdateTokenRequest(token=token_to_bytes).validate_request_and_make_dto()
     except InvalidRequestException:
         return failure_response(
             UseCaseFailureOutput(
@@ -50,6 +49,4 @@ def token_update_view():
                 message=f"Invalid token input from header")
         )
 
-    return jsonify(f"token : {token_to_bytes}")
-
-    # return UpdateJwtPresenter().transform(UpdateJwtUseCase().execute())
+    return UpdateJwtPresenter().transform(UpdateJwtUseCase().execute(dto=dto))

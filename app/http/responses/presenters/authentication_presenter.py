@@ -16,8 +16,7 @@ class UpdateJwtPresenter:
             value = output.value
             value_to_json = value.get_json()
             try:
-                schema = UpdateJwtResponseSchema(access_token=value_to_json.get("access_token"),
-                                                 refresh_token=value_to_json.get("refresh_token"))
+                schema = UpdateJwtResponseSchema(access_token=value_to_json.get("access_token"))
             except ValidationError as e:
                 logger.error(
                     f"[UpdateJwtPresenter][transform] value : {value} error : {e}")

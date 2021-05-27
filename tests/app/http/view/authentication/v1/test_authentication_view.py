@@ -1,14 +1,89 @@
+from http import HTTPStatus
+from typing import List
+
 from flask import url_for
+from flask.ctx import RequestContext
+from flask.testing import FlaskClient
+from flask_jwt_extended import create_access_token
+
+from core.use_case_output import FailureType
+from tests.seeder.factory import UserBaseFactory
 
 
-def test_update_view(client, test_request_context, make_header, make_authorization):
-    user_id = 1
-    authorization = make_authorization(user_id=user_id)
+def test_update_view_when_request_with_not_jwt_then_raise_validation_error(
+        client: FlaskClient, test_request_context: RequestContext):
+    """
+        given : Nothing
+        when : [GET] /api/captain/v1/refresh
+        then : raise InvalidRequestException
+    """
+    with test_request_context:
+        response = client.get(url_for("api.token_update_view"))
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.get_json()["type"] == FailureType.INVALID_REQUEST_ERROR
+
+
+def test_update_view_when_request_with_token_with_wrong_prefix_then_raise_validation_error(
+        client: FlaskClient,
+        test_request_context: RequestContext,
+        make_header,
+        create_base_users: List[UserBaseFactory]):
+    """
+        given : JWT (Header with wrong prefix)
+        when : [GET] /api/captain/v1/refresh
+        then : raise InvalidRequestException
+    """
+    authorization = "Wrong " + create_access_token(identity=create_base_users[0].id)
+    headers = make_header(authorization=authorization)
+
+    with test_request_context:
+        response = client.get(url_for("api.token_update_view"), headers=headers)
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.get_json()["type"] == FailureType.INVALID_REQUEST_ERROR
+
+
+def test_update_view_when_request_with_token_with_wrong_token_then_raise_validation_error(
+        client: FlaskClient,
+        test_request_context: RequestContext,
+        make_header,
+        create_base_users: List[UserBaseFactory]):
+    """
+        given : wrong JWT
+        when : [GET] /api/captain/v1/refresh
+        then : raise InvalidRequestException
+    """
+    authorization = "Bearer " + "something wrong token"
+    headers = make_header(authorization=authorization)
+
+    with test_request_context:
+        response = client.get(url_for("api.token_update_view"), headers=headers)
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.get_json()["type"] == FailureType.INVALID_REQUEST_ERROR
+
+
+def test_update_view(client: FlaskClient,
+                     test_request_context: RequestContext,
+                     make_header,
+                     make_expired_authorization,
+                     create_base_users: List[UserBaseFactory]):
+    """
+        given : wrong JWT
+        when : [GET] /api/captain/v1/refresh
+        then : return updated access_token
+    """
+    user_id = create_base_users[0].id
+
+    authorization = make_expired_authorization(user_id=user_id)
     headers = make_header(authorization=authorization)
 
     with test_request_context:
         response = client.get(
             url_for("api.token_update_view"), headers=headers
         )
+    data = response.get_json().get("data")
 
-    d = response.get_json()
+    assert response.status_code == 200
+    assert isinstance(data["token_info"]["access_token"], str)

@@ -1,11 +1,11 @@
-from datetime import datetime
 from typing import Optional
-
 from app import redis
 from app.extensions.database import session
 from app.extensions.utils.log_helper import logger_
-from app.extensions.utils.time_helper import get_jwt_access_expired_timestamp, get_jwt_refresh_expired_timestamp, \
-    get_jwt_access_expire_timedelta_to_seconds, get_jwt_refresh_expire_timedelta_to_seconds
+from app.extensions.utils.time_helper import (get_jwt_access_expired_timestamp,
+                                              get_jwt_refresh_expire_timedelta_to_seconds,
+                                              get_jwt_access_expire_timedelta_to_seconds,
+                                              get_jwt_refresh_expired_timestamp)
 from app.persistence.model import BlacklistModel
 from app.persistence.model.jwt_model import JwtModel
 from core.domains.authentication.dto.authentication_dto import GetBlacklistDto
@@ -20,7 +20,7 @@ logger = logger_.getLogger(__name__)
 class AuthenticationRepository:
     def _is_exists(self, dto: GetUserDto) -> bool:
         """
-            기존 유저 존재 여부
+            기존 유저 토큰 존재 여부
         """
         if session.query(JwtModel).filter_by(user_id=dto.user_id).first():
             return True
@@ -41,6 +41,7 @@ class AuthenticationRepository:
                     "refresh_expired_at": get_jwt_refresh_expired_timestamp()
                 }
             )
+
             session.commit()
         except Exception as e:
             session.rollback()
@@ -50,7 +51,6 @@ class AuthenticationRepository:
             )
 
     def _create_token(self, dto: GetUserDto) -> None:
-
         token_info = JwtModel(
             user_id=dto.user_id,
             access_token=create_access_token(identity=dto.user_id),
@@ -134,7 +134,6 @@ class AuthenticationRepository:
     def create_blacklist(self, dto: GetBlacklistDto):
         blacklist = BlacklistModel(user_id=dto.user_id,
                                    access_token=dto.access_token)
-
         try:
             session.add(blacklist)
             session.commit()
@@ -162,7 +161,6 @@ class AuthenticationRepository:
     def delete_blacklist(self, dto: GetBlacklistDto):
         blacklist = BlacklistModel(user_id=dto.user_id,
                                    access_token=dto.access_token)
-
         try:
             session.delete(blacklist)
             session.commit()

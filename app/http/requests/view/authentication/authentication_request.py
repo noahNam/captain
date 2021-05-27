@@ -1,4 +1,5 @@
 from flask_jwt_extended import decode_token
+from flask_jwt_extended.exceptions import JWTDecodeError
 from jwt import PyJWTError
 from pydantic import BaseModel, ValidationError, validator, StrictBytes
 
@@ -15,17 +16,23 @@ class GetJwtSchema(BaseModel):
     @validator("token")
     def check_token(cls, token):
         """
-            decode_token() : 정상적인 JWT라면 decode 가능
+            decode_token() : 정상적인 JWT 라면 decode 가능
             -> allow_expired=True : 만료된 토큰도 decode 허용
+            -> 토큰이 올바른 구조인지 체크
         """
         try:
             decode_token(token, allow_expired=True)
 
         except PyJWTError as e:
             logger.error(
-                f"[UpdateTokenRequest][validate_request_and_make_dto][check_token] decode_token error : {e}"
+                f"[UpdateTokenRequest][validate_request_and_make_dto][check_token] PyJWTError : {e}"
             )
-            raise ValidationError(f"[UpdateTokenRequest][check_token] decode_token error")
+            raise ValidationError(f"[UpdateTokenRequest][check_token] PyJWTError")
+        except JWTDecodeError as e:
+            logger.error(
+                f"[UpdateTokenRequest][validate_request_and_make_dto][check_token] JWTDecodeError : {e}"
+            )
+            raise ValidationError(f"[UpdateTokenRequest][check_token] JWTDecodeError")
         return token
 
 

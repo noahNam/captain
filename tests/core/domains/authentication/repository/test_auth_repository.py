@@ -45,17 +45,20 @@ def test_create_token_without_user_id_then_validation_error(
         AuthenticationRepository().create_or_update_token(dto=dummy_dto)
 
 
-def test_update_token_when_get_user_id(session: scoped_session, create_invalid_jwts):
-    dto = GetUserDto(user_id=create_invalid_jwts[0].user_id)
-    token_before = session.query(JwtModel).filter_by(user_id=dto.user_id).first()
+def test_update_token_when_get_user_id(session: scoped_session):
+    """
+        given : user, JWT
+        when : 로그인 로직 -> 기존 유저 재로그인
+        then : update token
+    """
+    AuthenticationRepository().create_or_update_token(dto=get_user_dto)
+    token_before = session.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
+    AuthenticationRepository().create_or_update_token(dto=get_user_dto)
 
-    AuthenticationRepository().create_or_update_token(dto=dto)
-    token_after = session.query(JwtModel).filter_by(user_id=dto.user_id).first()
+    token_after = session.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
+    session.refresh(token_after)
 
-    t = decode_token(token_after.access_token)
-    print(t)
-
-    assert token_before.user_id == dto.user_id
+    assert token_before.user_id == get_user_dto.user_id
 
     assert token_before.user_id == token_after.user_id
     assert token_before.id == token_after.id
@@ -127,7 +130,7 @@ def test_set_token_to_redis_when_get_token_info(
     value_refresh_token = redis.get_by_key(key=token_info.user_id)
 
     assert result is True
-    assert value_user_id == b'1'
+    assert int(value_user_id.decode("utf-8")) == token_info.user_id
     assert value_refresh_token == token_info.refresh_token
 
 

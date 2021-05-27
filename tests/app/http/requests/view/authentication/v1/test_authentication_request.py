@@ -8,7 +8,7 @@ from tests.seeder.factory import make_custom_jwt
 
 
 def create_valid_access_token(user_id):
-    return make_custom_jwt(user_id,
+    return make_custom_jwt(obj=user_id,
                            token_type="access",
                            now=None,
                            delta=get_jwt_access_expired_time_delta())
@@ -19,14 +19,14 @@ def create_invalid_access_token(user_id):
         어제 날짜로 만료된 토큰 (access)
     """
     yesterday = make_random_today_date(1, 0)
-    return make_custom_jwt(user_id,
+    return make_custom_jwt(obj=user_id,
                            token_type="access",
                            now=yesterday,
                            delta=get_jwt_access_expired_time_delta())
 
 
 def create_valid_refresh_token(user_id):
-    return make_custom_jwt(user_id,
+    return make_custom_jwt(obj=user_id,
                            token_type="refresh",
                            now=None,
                            delta=get_jwt_refresh_expired_time_delta())
@@ -37,7 +37,7 @@ def create_invalid_refresh_token(user_id):
         2주 지나서 만료된 토큰 (refresh)
     """
     more_then_two_weeks_ago = make_random_today_date(15, 0)
-    return make_custom_jwt(user_id,
+    return make_custom_jwt(obj=user_id,
                            token_type="refresh",
                            now=more_then_two_weeks_ago,
                            delta=get_jwt_refresh_expired_time_delta())

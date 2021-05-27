@@ -11,10 +11,11 @@ from core.use_case_output import UseCaseSuccessOutput, UseCaseFailureOutput, Fai
 
 class CreateTokenWithUserUseCase:
     """
-        UserRepository->create_user
+        UserRepository
+        -> 1. create (신규 로그인)
+        -> 2. update if user exists (로그아웃 후 재로그인)
         return JWT
     """
-
     def execute(self, dto: CreateUserDto) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
         user = self.__create_user(dto=dto)
 
@@ -24,7 +25,7 @@ class CreateTokenWithUserUseCase:
         # JWT 발급 + DB 저장
         user_dto = GetUserDto(user_id=user.id)
 
-        token_info = self.__create_token(dto=user_dto)
+        token_info = self.__create_or_update_token(dto=user_dto)
 
         if not token_info:
             return UseCaseFailureOutput(type=FailureType.NOT_FOUND_ERROR)
@@ -41,7 +42,7 @@ class CreateTokenWithUserUseCase:
 
         return get_event_object(topic_name=UserTopicEnum.CREATE_USER)
 
-    def __create_token(self, dto: GetUserDto) -> Optional[JwtEntity]:
+    def __create_or_update_token(self, dto: GetUserDto) -> Optional[JwtEntity]:
         send_message(topic_name=AuthenticationTopicEnum.CREATE_OR_UPDATE_TOKEN, dto=dto)
 
         return get_event_object(topic_name=AuthenticationTopicEnum.CREATE_OR_UPDATE_TOKEN)

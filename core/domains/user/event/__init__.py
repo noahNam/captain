@@ -12,4 +12,10 @@ def create_user(dto: CreateUserDto):
     setattr(g, UserTopicEnum.CREATE_USER, user)
 
 
+def is_exists(user_id: int):
+    user = UserRepository().get_user_by_user_id(user_id=user_id)
+    setattr(g, UserTopicEnum.IS_EXISTS, user)
+
+
 pub.subscribe(create_user, UserTopicEnum.CREATE_USER)
+pub.subscribe(is_exists, UserTopicEnum.IS_EXISTS)

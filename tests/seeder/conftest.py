@@ -2,15 +2,26 @@ import pytest
 from datetime import date, timedelta, datetime
 from faker import Faker
 
-from tests.seeder.factory import UserFactory, JwtFactory, InvalidJwtFactory
+from tests.seeder.factory import UserFactory, JwtFactory, InvalidJwtFactory, UserBaseFactory
 
 MODEL_FACTORIES = [
+    UserBaseFactory,
     UserFactory,
     JwtFactory,
     InvalidJwtFactory
 ]
 
 faker = Faker()
+
+
+@pytest.fixture
+def create_base_users(session, user_base_factory):
+    users = user_base_factory.build_batch(size=2)
+
+    session.add_all(users)
+    session.commit()
+
+    return users
 
 
 @pytest.fixture
