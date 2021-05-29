@@ -124,14 +124,14 @@ class AuthenticationRepository:
             - jwt_access_token : user_id
             - user_id : jwt_refresh_token
         """
-        if token_info:
+        if redis.is_available() and token_info:
             self._set_access_token_to_cache(token_info)
             self._set_refresh_token_to_cache(token_info)
 
             return True
         return False
 
-    def create_blacklist(self, dto: GetBlacklistDto):
+    def create_blacklist(self, dto: GetBlacklistDto) -> None:
         blacklist = BlacklistModel(user_id=dto.user_id,
                                    access_token=dto.access_token)
         try:
@@ -158,7 +158,7 @@ class AuthenticationRepository:
             return None
         return blacklist.to_entity()
 
-    def delete_blacklist(self, dto: GetBlacklistDto):
+    def delete_blacklist(self, dto: GetBlacklistDto) -> None:
         blacklist = BlacklistModel(user_id=dto.user_id,
                                    access_token=dto.access_token)
         try:
@@ -169,4 +169,18 @@ class AuthenticationRepository:
             logger.error(
                 f"[AuthenticationRepository][delete_blacklist] user_id : {dto.user_id}, "
                 f"access_token : {dto.access_token} error : {e}"
+            )
+
+    def set_blacklist_to_cache(self, blacklist_info: Optional[BlacklistEntity]) -> None:
+        try:
+            set_name = "jwt_blacklist"
+            value = blacklist_info.access_token
+            # 집합 set 에 blacklist_token 추가
+            redis.sadd(set_name=set_name, values=value)
+            # 집합에 만료시간 지정 (30분)
+            redis.expire(key=set_name, time=get_jwt_access_expire_timedelta_to_seconds())
+        except Exception as e:
+            logger.error(
+                f"[AuthenticationRepository][set_access_token_to_cache] key : {blacklist_info.access_token}, "
+                f"value : {blacklist_info.user_id} error : {e}"
             )

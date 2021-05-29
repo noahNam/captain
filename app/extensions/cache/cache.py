@@ -3,6 +3,7 @@ from typing import Union, Optional, Any
 
 import redis
 from flask import Flask
+from redis import RedisError
 
 
 class RedisClient:
@@ -29,8 +30,8 @@ class RedisClient:
         except StopIteration as e:
             return None
 
-    def set(self, key: Any, value: Any, ex: Union[int, timedelta] = None, ) -> None:
-        self._redis_client.set(name=key, value=value, ex=ex)
+    def set(self, key: Any, value: Any, ex: Union[int, timedelta] = None, ) -> Any:
+        return self._redis_client.set(name=key, value=value, ex=ex)
 
     def clear_cache(self) -> None:
         for key in self.copied_keys:
@@ -46,3 +47,22 @@ class RedisClient:
 
     def disconnect(self) -> None:
         self._redis_client.connection_pool.disconnect()
+
+    def sadd(self, set_name: Any, values: Any) -> Any:
+        return self._redis_client.sadd(set_name, values)
+
+    def expire(self, key: Any, time: Union[int, timedelta]) -> Any:
+        return self._redis_client.expire(name=key, time=time)
+
+    def is_available(self):
+        try:
+            self._redis_client.ping()
+        except RedisError:
+            return False
+        return True
+
+    def sismember(self, set_name: Any, value: Any) -> bool:
+        return self._redis_client.sismember(name=set_name, value=value)
+
+    def smembers(self, set_name: Any) -> Any:
+        return self._redis_client.smembers(name=set_name)

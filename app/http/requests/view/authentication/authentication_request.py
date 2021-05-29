@@ -1,16 +1,14 @@
-from flask_jwt_extended import decode_token
-from flask_jwt_extended.exceptions import JWTDecodeError
-from jwt import PyJWTError
-from pydantic import BaseModel, ValidationError, validator, StrictBytes
+from flask_jwt_extended import decode_token, get_jwt_identity
+from pydantic import BaseModel, ValidationError, validator, StrictBytes, StrictInt
 
-from core.domains.authentication.dto.authentication_dto import UpdateJwtDto
+from core.domains.authentication.dto.authentication_dto import UpdateJwtDto, GetBlacklistDto
 from app.extensions.utils.log_helper import logger_
 from core.exception import InvalidRequestException
 
 logger = logger_.getLogger(__name__)
 
 
-class GetJwtSchema(BaseModel):
+class GetJwtAllowedExpiredSchema(BaseModel):
     token: StrictBytes
 
     @validator("token")
@@ -23,16 +21,12 @@ class GetJwtSchema(BaseModel):
         try:
             decode_token(token, allow_expired=True)
 
-        except PyJWTError as e:
+        except Exception as e:
             logger.error(
-                f"[UpdateTokenRequest][validate_request_and_make_dto][check_token] PyJWTError : {e}"
+                f"[UpdateTokenRequest][validate_request_and_make_dto][check_token] Error : {e}"
             )
-            raise ValidationError(f"[UpdateTokenRequest][check_token] PyJWTError")
-        except JWTDecodeError as e:
-            logger.error(
-                f"[UpdateTokenRequest][validate_request_and_make_dto][check_token] JWTDecodeError : {e}"
-            )
-            raise ValidationError(f"[UpdateTokenRequest][check_token] JWTDecodeError")
+            raise ValidationError(f"[UpdateTokenRequest][check_token] Error")
+
         return token
 
 
@@ -42,11 +36,49 @@ class UpdateTokenRequest:
 
     def validate_request_and_make_dto(self):
         try:
-            schema = GetJwtSchema(token=self.token).dict()
+            schema = GetJwtAllowedExpiredSchema(token=self.token).dict()
             return UpdateJwtDto(**schema)
         except ValidationError as e:
             logger.error(
-                f"[UpdateTokenRequest][validate_request_and_make_dto] error : {e.errors()}"
+                f"[UpdateTokenRequest][validate_request_and_make_dto] error : {e}"
             )
             raise InvalidRequestException(
-                message=f"Invalid token")
+                message=e.errors())
+
+
+class GetBlacklistSchema(BaseModel):
+    access_token: StrictBytes
+    user_id: StrictInt
+
+    @validator("access_token")
+    def check_access_token(cls, access_token):
+        """
+            allow_expired=False : 만료된 토큰 허용 안함
+        """
+        try:
+            decode_token(access_token)
+
+        except Exception as e:
+            logger.error(
+                f"[LogoutRequest][validate_request_and_make_dto][check_access_token] Error : {e}"
+            )
+            raise ValidationError(f"[LogoutRequest][check_access_token] error")
+
+        return access_token
+
+
+class LogoutRequest:
+    def __init__(self, access_token, user_id):
+        self.access_token = access_token
+        self.user_id = user_id
+
+    def validate_request_and_make_dto(self):
+        try:
+            schema = GetBlacklistSchema(access_token=self.access_token, user_id=self.user_id).dict()
+            return GetBlacklistDto(**schema)
+        except ValidationError as e:
+            logger.error(
+                f"[LogoutRequest][validate_request_and_make_dto] error : {e}"
+            )
+            raise InvalidRequestException(
+                message=e.errors())

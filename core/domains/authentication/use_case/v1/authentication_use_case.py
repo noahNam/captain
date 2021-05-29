@@ -4,7 +4,8 @@ from flask_jwt_extended import decode_token
 from flask_jwt_extended.exceptions import JWTDecodeError
 
 from app.extensions.utils.event_observer import send_message, get_event_object
-from core.domains.authentication.dto.authentication_dto import UpdateJwtDto
+from core.domains.authentication.dto.authentication_dto import UpdateJwtDto, GetBlacklistDto
+from core.domains.authentication.entity.blacklist_entity import BlacklistEntity
 from core.domains.authentication.entity.jwt_entity import JwtEntity
 from core.domains.authentication.enum import AuthenticationTopicEnum
 from core.domains.user.dto.user_dto import GetUserDto
@@ -68,3 +69,22 @@ class UpdateJwtUseCase:
         send_message(topic_name=AuthenticationTopicEnum.CREATE_OR_UPDATE_TOKEN, dto=dto)
 
         return get_event_object(topic_name=AuthenticationTopicEnum.CREATE_OR_UPDATE_TOKEN)
+
+
+class LogoutUseCase:
+    def execute(self, dto: GetBlacklistDto) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
+        blacklist = self.__create_blacklist(dto=dto)
+
+        if not blacklist:
+            return UseCaseFailureOutput(type=FailureType.NOT_FOUND_ERROR)
+
+        result = jsonify(logout_user=blacklist.user_id,
+                         blacklist_token=blacklist.access_token.decode("utf-8"),
+                         expired_at=blacklist.expired_at)
+
+        return UseCaseSuccessOutput(value=result)
+
+    def __create_blacklist(self, dto: GetBlacklistDto) -> Optional[BlacklistEntity]:
+        send_message(topic_name=AuthenticationTopicEnum.CREATE_BLACKLIST, dto=dto)
+
+        return get_event_object(topic_name=AuthenticationTopicEnum.CREATE_BLACKLIST)

@@ -1,18 +1,17 @@
 import jwt
 import pytest
 from flask_jwt_extended import decode_token
+from flask_sqlalchemy import SQLAlchemy
 from pydantic import ValidationError
 from sqlalchemy.orm import scoped_session
 
 from app.extensions import RedisClient
 from app.extensions.utils.time_helper import get_jwt_access_expired_time_delta, get_jwt_refresh_expired_time_delta
-from app.persistence.model import UserModel, BlacklistModel
+from app.persistence.model import BlacklistModel
 from app.persistence.model.jwt_model import JwtModel
 from core.domains.authentication.dto.authentication_dto import GetBlacklistDto
 from core.domains.authentication.repository.authentication_repository import AuthenticationRepository
-from core.domains.oauth.enum.oauth_enum import ProviderEnum
-from core.domains.user.dto.user_dto import GetUserDto, CreateUserDto
-from core.domains.user.repository.user_repository import UserRepository
+from core.domains.user.dto.user_dto import GetUserDto
 from tests.seeder.conftest import make_random_today_date
 from tests.seeder.factory import make_custom_jwt
 
@@ -45,7 +44,7 @@ def test_create_token_without_user_id_then_validation_error(
         AuthenticationRepository().create_or_update_token(dto=dummy_dto)
 
 
-def test_update_token_when_get_user_id(session: scoped_session):
+def test_update_token_when_get_user_id(db: SQLAlchemy, session: scoped_session):
     """
         given : user, JWT
         when : 로그인 로직 -> 기존 유저 재로그인
@@ -53,21 +52,31 @@ def test_update_token_when_get_user_id(session: scoped_session):
     """
     AuthenticationRepository().create_or_update_token(dto=get_user_dto)
     token_before = session.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
-    AuthenticationRepository().create_or_update_token(dto=get_user_dto)
 
-    token_after = session.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
-    session.refresh(token_after)
+    # create new session
+    connection = db.engine.connect()
+    options = dict(bind=connection, binds={})
+
+    session_2 = db.create_scoped_session(options=options)
+
+    # update token
+    AuthenticationRepository().create_or_update_token(dto=get_user_dto)
+    # query from new session
+    token_after = session_2.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
 
     assert token_before.user_id == get_user_dto.user_id
 
     assert token_before.user_id == token_after.user_id
     assert token_before.id == token_after.id
 
-    # 업데이트된 토큰 == 새로운 토큰 + 만료시간 갱신(기존 토큰과 값이 달라야 함)
+    # 업데이트된 전, 후 토큰 비교
     assert token_before.access_token != token_after.access_token
     assert token_before.refresh_token != token_after.refresh_token
     assert token_before.access_expired_at != token_after.access_expired_at
     assert token_before.refresh_expired_at != token_after.refresh_expired_at
+
+    # session 2 remove
+    session_2.remove()
 
 
 def test_redis_example(app):
@@ -228,3 +237,27 @@ def test_delete_blacklist_when_blacklist_id(session: scoped_session,
 
     assert blacklist.user_id == create_users[0].id
     assert blacklist.access_token is not None
+
+
+def test_set_blacklist_to_redis_when_get_blacklist_info(
+        session: scoped_session, redis: RedisClient, create_users: list):
+    """
+        given : Blacklist access_token, user_id
+        when : logout
+        then : Redis -> jwt_blacklist 집합 set 저장, expire: 30분 지정
+
+        <key> : <value>
+            jwt_blacklist : Set(blacklist_token)
+    """
+    token_info = session.query(JwtModel).filter_by(user_id=create_users[0].id).first()
+
+    dto = GetBlacklistDto(user_id=token_info.user_id, access_token=token_info.access_token)
+    AuthenticationRepository().create_blacklist(dto=dto)
+
+    blacklist = AuthenticationRepository().get_blacklist_by_dto(dto=dto)
+    # to redis
+    AuthenticationRepository().set_blacklist_to_cache(blacklist)
+    blacklists_in_redis = redis.smembers("jwt_blacklist")
+
+    assert redis.sismember(set_name="jwt_blacklist", value=blacklist.access_token) is True
+    assert blacklist.access_token in blacklists_in_redis

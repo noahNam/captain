@@ -122,11 +122,11 @@ class InvalidJwtFactory(BaseFactory):
         model = JwtModel
 
     user_id = factory.Sequence(lambda n: n + 1)
-    access_token = make_custom_jwt(user_id,
+    access_token = make_custom_jwt(obj=user_id,
                                    token_type="access",
                                    now=datetime.now() - timedelta(days=1),
                                    delta=get_jwt_access_expired_time_delta())
-    refresh_token = make_custom_jwt(user_id,
+    refresh_token = make_custom_jwt(obj=user_id,
                                     token_type="refresh",
                                     now=datetime.now() - timedelta(days=1),
                                     delta=get_jwt_refresh_expired_time_delta())
