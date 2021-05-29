@@ -1,4 +1,3 @@
-import ast
 from typing import List
 
 from flask_jwt_extended import create_access_token
@@ -24,12 +23,10 @@ def test_update_token_when_get_expired_token(
     user_id = create_base_users[0].id
 
     token = create_invalid_access_token(user_id=user_id)
-    print(token)
     dto = UpdateJwtDto(token=token)
 
     result = UpdateJwtUseCase().execute(dto=dto)
     updated_token_info = AuthenticationRepository().get_token_info_by_user_id(user_id=user_id)
-    print(updated_token_info.access_token)
     value_user_id = redis.get_by_key(key=updated_token_info.access_token)
     value_refresh_token = redis.get_by_key(key=user_id)
 

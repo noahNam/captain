@@ -31,9 +31,8 @@ class CreateTokenWithUserUseCase:
             return UseCaseFailureOutput(type=FailureType.NOT_FOUND_ERROR)
 
         access_token = token_info.access_token
-        refresh_token = token_info.refresh_token
 
-        result = jsonify(access_token=access_token, refresh_token=refresh_token)
+        result = jsonify(access_token=access_token)
 
         return UseCaseSuccessOutput(value=result)
 

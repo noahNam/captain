@@ -16,8 +16,7 @@ class OAuthPresenter:
             value = output.value
             value_to_json = value.get_json()
             try:
-                schema = ResponseOAuthSchema(access_token=value_to_json.get("access_token"),
-                                             refresh_token=value_to_json.get("refresh_token"))
+                schema = ResponseOAuthSchema(access_token=value_to_json.get("access_token"))
             except ValidationError as e:
                 logger.error(
                     f"[OAuthPresenter][transform] value : {value} error : {e}")

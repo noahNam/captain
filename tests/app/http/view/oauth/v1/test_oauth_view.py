@@ -195,7 +195,6 @@ def test_when_redirect_kakao_and_success_token_request_then_success(
     assert redirect_response.status_code == mock_redirect.return_value.status_code
     assert response.status_code == 200
     assert isinstance(data["token_info"]["access_token"], str)
-    assert isinstance(data["token_info"]["refresh_token"], str)
     assert mock_redirect.called is True
     assert mock_get.called is True
     assert mock_post.called is True

@@ -1,4 +1,4 @@
-from flask_jwt_extended import decode_token, get_jwt_identity
+from flask_jwt_extended import decode_token
 from pydantic import BaseModel, ValidationError, validator, StrictBytes, StrictInt
 
 from core.domains.authentication.dto.authentication_dto import UpdateJwtDto, GetBlacklistDto

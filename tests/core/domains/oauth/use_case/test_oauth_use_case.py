@@ -15,4 +15,3 @@ def test_create_token_when_create_user_by_pypubsub_then_success(session: scoped_
     assert result.type == "success"
     assert isinstance(result, UseCaseSuccessOutput)
     assert b"access_token" in result.value.data
-    assert b"refresh_token" in result.value.data
