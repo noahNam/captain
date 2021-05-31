@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class UpdateJwtResponseSchema(BaseModel):
+class JwtResponseSchema(BaseModel):
     access_token: str
 
 

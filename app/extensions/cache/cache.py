@@ -5,9 +5,14 @@ import redis
 from flask import Flask
 from redis import RedisError
 
+from app.extensions.utils.log_helper import logger_
+
+logger = logger_.getLogger(__name__)
+
 
 class RedisClient:
     CONFIG_NAME = "REDIS_URL"
+    BLACKLIST_SET_NAME = "jwt_blacklist"
 
     def __init__(self):
         self._redis_client: redis.Redis = redis.Redis
@@ -58,6 +63,9 @@ class RedisClient:
         try:
             self._redis_client.ping()
         except RedisError:
+            logger.error(
+                f"[RedisClient][is_available] ping error"
+            )
             return False
         return True
 

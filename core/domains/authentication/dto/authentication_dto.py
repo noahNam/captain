@@ -1,7 +1,7 @@
 from pydantic import BaseModel, StrictInt, StrictBytes
 
 
-class UpdateJwtDto(BaseModel):
+class JwtDto(BaseModel):
     token: StrictBytes = None
 
 

@@ -2,13 +2,14 @@ import pytest
 from datetime import date, timedelta, datetime
 from faker import Faker
 
-from tests.seeder.factory import UserFactory, JwtFactory, InvalidJwtFactory, UserBaseFactory
+from tests.seeder.factory import UserFactory, JwtFactory, InvalidJwtFactory, UserBaseFactory, BlacklistFactory
 
 MODEL_FACTORIES = [
     UserBaseFactory,
     UserFactory,
     JwtFactory,
-    InvalidJwtFactory
+    InvalidJwtFactory,
+    BlacklistFactory,
 ]
 
 faker = Faker()

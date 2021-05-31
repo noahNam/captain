@@ -1,25 +1,21 @@
-from flask import request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_current_user
+from flask import request
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from app.http.requests.view.authentication.authentication_request import UpdateTokenRequest, LogoutRequest
+from app.http.requests.view.authentication.authentication_request import AllowedExpiredJwtTokenRequest, LogoutRequest
 from app.http.responses import failure_response
-from app.http.responses.presenters.authentication_presenter import UpdateJwtPresenter, LogoutPresenter
+from app.http.responses.presenters.authentication_presenter import UpdateJwtPresenter, LogoutPresenter, \
+    VerificationJwtPresenter
 from app.http.view import api
 from app.http.view.authentication import auth_required
 from core.domains.authentication.use_case.v1.authentication_use_case import (
-    UpdateJwtUseCase, LogoutUseCase,
+    UpdateJwtUseCase, LogoutUseCase, VerificationJwtUseCase,
 )
 from core.exception import InvalidRequestException
 from core.use_case_output import UseCaseFailureOutput, FailureType
 
 
-@api.route("/v1/refresh", methods=["GET"])
-def token_update_view():
-    """
-        Update request from tanos
-    """
+def check_jwt_allow_expired(auth_header: str) -> bytes:
     prefix = "Bearer"
-    auth_header = request.headers.get("Authorization")
 
     # 헤더에 토큰 없을 경우
     if not auth_header:
@@ -39,18 +35,27 @@ def token_update_view():
                 message=f"Invalid Authorization header prefix")
         )
 
-    token_to_bytes = token.encode("UTF-8")
+    return token.encode("utf-8")
+
+
+@api.route("/v1/refresh", methods=["GET"])
+def token_update_view():
+    """
+        Update request from tanos
+    """
+    auth_header = request.headers.get("Authorization")
+
+    token_to_bytes = check_jwt_allow_expired(auth_header=auth_header)
 
     # 토큰 자체에 대한 유효성 검증
     try:
-        dto = UpdateTokenRequest(token=token_to_bytes).validate_request_and_make_dto()
+        dto = AllowedExpiredJwtTokenRequest(token=token_to_bytes).validate_request_and_make_dto()
     except InvalidRequestException:
         return failure_response(
             UseCaseFailureOutput(
                 type=FailureType.INVALID_REQUEST_ERROR,
                 message=f"Invalid token input from header")
         )
-
     return UpdateJwtPresenter().transform(UpdateJwtUseCase().execute(dto=dto))
 
 
@@ -78,3 +83,22 @@ def logout_view():
         )
 
     return LogoutPresenter().transform(LogoutUseCase().execute(dto=dto))
+
+
+@api.route("/v1/verification", methods=["GET"])
+def verification_view():
+    auth_header = request.headers.get("Authorization")
+
+    token_to_bytes = check_jwt_allow_expired(auth_header=auth_header)
+
+    # 토큰 자체에 대한 유효성 검증
+    try:
+        dto = AllowedExpiredJwtTokenRequest(token=token_to_bytes).validate_request_and_make_dto()
+    except InvalidRequestException:
+        return failure_response(
+            UseCaseFailureOutput(
+                type=FailureType.INVALID_REQUEST_ERROR,
+                message=f"Invalid token input from header")
+        )
+
+    return VerificationJwtPresenter().transform(VerificationJwtUseCase().execute(dto=dto))

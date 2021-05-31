@@ -1,3 +1,5 @@
+from typing import List
+
 import jwt
 import pytest
 from flask_jwt_extended import decode_token
@@ -9,11 +11,11 @@ from app.extensions import RedisClient
 from app.extensions.utils.time_helper import get_jwt_access_expired_time_delta, get_jwt_refresh_expired_time_delta
 from app.persistence.model import BlacklistModel
 from app.persistence.model.jwt_model import JwtModel
-from core.domains.authentication.dto.authentication_dto import GetBlacklistDto
+from core.domains.authentication.dto.authentication_dto import GetBlacklistDto, JwtDto
 from core.domains.authentication.repository.authentication_repository import AuthenticationRepository
 from core.domains.user.dto.user_dto import GetUserDto
 from tests.seeder.conftest import make_random_today_date
-from tests.seeder.factory import make_custom_jwt
+from tests.seeder.factory import make_custom_jwt, UserBaseFactory
 
 get_user_dto = GetUserDto(user_id=10)
 
@@ -133,7 +135,7 @@ def test_set_token_to_redis_when_get_token_info(
             user_id : jwt_refresh_token
     """
     token_info = session.query(JwtModel).filter_by(user_id=create_users[0].id).first()
-    result = AuthenticationRepository().set_token_to_cache(token_info)
+    result = AuthenticationRepository().set_token_to_cache(token_info=token_info)
 
     value_user_id = redis.get_by_key(key=token_info.access_token)
     value_refresh_token = redis.get_by_key(key=token_info.user_id)
@@ -197,8 +199,8 @@ def test_verify_refresh_token_when_get_invalid_token_then_decode_fail(
         decode_token(invalid_refresh_token)
 
 
-def test_create_blacklist_when_blacklist_id(session: scoped_session,
-                                            create_users: list):
+def test_create_blacklist_when_get_blacklist_dto(session: scoped_session,
+                                                 create_users: list):
     """
         given : Blacklist DTO (user_id, access_token)
         when : 유저 로그 아웃
@@ -217,8 +219,8 @@ def test_create_blacklist_when_blacklist_id(session: scoped_session,
     assert blacklist.access_token is not None
 
 
-def test_delete_blacklist_when_blacklist_id(session: scoped_session,
-                                            create_users: list):
+def test_delete_blacklist_when_get_blacklist_dto(session: scoped_session,
+                                                 create_users: list):
     """
         given : Blacklist DTO (user_id, access_token)
         when : 별도 배치 정리 작업(주기적으로 삭제)
@@ -239,10 +241,10 @@ def test_delete_blacklist_when_blacklist_id(session: scoped_session,
     assert blacklist.access_token is not None
 
 
-def test_set_blacklist_to_redis_when_get_blacklist_info(
+def test_set_blacklist_to_redis_when_get_blacklist_dto(
         session: scoped_session, redis: RedisClient, create_users: list):
     """
-        given : Blacklist access_token, user_id
+        given : Blacklist DTO (user_id, access_token)
         when : logout
         then : Redis -> jwt_blacklist 집합 set 저장, expire: 30분 지정
 
@@ -257,7 +259,49 @@ def test_set_blacklist_to_redis_when_get_blacklist_info(
     blacklist = AuthenticationRepository().get_blacklist_by_dto(dto=dto)
     # to redis
     AuthenticationRepository().set_blacklist_to_cache(blacklist)
-    blacklists_in_redis = redis.smembers("jwt_blacklist")
+    blacklists_in_redis = redis.smembers(redis.BLACKLIST_SET_NAME)
 
-    assert redis.sismember(set_name="jwt_blacklist", value=blacklist.access_token) is True
+    assert redis.sismember(set_name=redis.BLACKLIST_SET_NAME, value=blacklist.access_token) is True
     assert blacklist.access_token in blacklists_in_redis
+
+
+def test_get_blacklist_from_redis_when_get_blacklist_dto(
+        session: scoped_session,
+        redis: RedisClient,
+        create_users: list,
+        create_blacklists: list):
+    """
+        given : Blacklist DTO (user_id, access_token)
+        when : verification JWT
+        then : Redis -> jwt_blacklist 집합 set 확인, 존재여부 return
+
+        <key> : <value>
+            jwt_blacklist : Set(blacklist_token)
+    """
+    blacklist = create_blacklists[0]
+    dto = GetBlacklistDto(user_id=blacklist.user_id, access_token=blacklist.access_token)
+    # to redis
+    AuthenticationRepository().set_blacklist_to_cache(blacklist)
+    result = AuthenticationRepository().is_blacklist_from_redis(dto=dto)
+
+    assert result is True
+
+
+def test_is_valid_refresh_token_from_redis_when_get_user_id(
+        session: scoped_session,
+        redis: RedisClient,
+        create_base_users: List[UserBaseFactory]):
+    """
+        given : user_id, valid refersh_token
+        when : valid refersh_token in redis
+        then : return True (valid)
+    """
+    user_id = create_base_users[0].id
+    AuthenticationRepository().create_or_update_token(dto=GetUserDto(user_id=user_id))
+    token_info = session.query(JwtModel).filter_by(user_id=user_id).first()
+    # to redis
+    AuthenticationRepository().set_token_to_cache(token_info=token_info)
+
+    result = AuthenticationRepository().is_valid_refresh_token_from_redis(user_id=token_info.user_id)
+
+    assert result is True

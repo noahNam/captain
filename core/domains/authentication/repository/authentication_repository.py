@@ -1,4 +1,7 @@
 from typing import Optional
+
+from flask_jwt_extended.exceptions import JWTDecodeError
+
 from app import redis
 from app.extensions.database import session
 from app.extensions.utils.log_helper import logger_
@@ -8,11 +11,11 @@ from app.extensions.utils.time_helper import (get_jwt_access_expired_timestamp,
                                               get_jwt_refresh_expired_timestamp)
 from app.persistence.model import BlacklistModel
 from app.persistence.model.jwt_model import JwtModel
-from core.domains.authentication.dto.authentication_dto import GetBlacklistDto
+from core.domains.authentication.dto.authentication_dto import GetBlacklistDto, JwtDto
 from core.domains.authentication.entity.blacklist_entity import BlacklistEntity
 from core.domains.authentication.entity.jwt_entity import JwtEntity
 from core.domains.user.dto.user_dto import GetUserDto
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import create_access_token, create_refresh_token, decode_token
 
 logger = logger_.getLogger(__name__)
 
@@ -118,17 +121,23 @@ class AuthenticationRepository:
                 f"value : {token_info.refresh_token} error : {e}"
             )
 
+    def is_redis_ready(self) -> bool:
+        return redis.is_available()
+
     def set_token_to_cache(self, token_info: Optional[JwtEntity]) -> bool:
         """
             Save Token_info to Redis (key : value)
             - jwt_access_token : user_id
             - user_id : jwt_refresh_token
         """
-        if redis.is_available() and token_info:
+        if self.is_redis_ready() and token_info:
             self._set_access_token_to_cache(token_info)
             self._set_refresh_token_to_cache(token_info)
 
             return True
+        logger.error(
+            f"[AuthenticationRepository][set_token_to_cache] token_info: {token_info}, Failed"
+        )
         return False
 
     def create_blacklist(self, dto: GetBlacklistDto) -> None:
@@ -145,14 +154,7 @@ class AuthenticationRepository:
             )
 
     def get_blacklist_by_dto(self, dto: GetBlacklistDto) -> Optional[BlacklistEntity]:
-        blacklist = session.query(BlacklistModel).filter_by(user_id=dto.user_id).first()
-
-        if not blacklist:
-            return None
-        return blacklist.to_entity()
-
-    def get_blacklist_by_user_id(self, user_id: int) -> Optional[BlacklistEntity]:
-        blacklist = session.query(JwtModel).filter_by(user_id=user_id).first()
+        blacklist = session.query(BlacklistModel).filter_by(access_token=dto.access_token).first()
 
         if not blacklist:
             return None
@@ -173,7 +175,7 @@ class AuthenticationRepository:
 
     def set_blacklist_to_cache(self, blacklist_info: Optional[BlacklistEntity]) -> None:
         try:
-            set_name = "jwt_blacklist"
+            set_name = redis.BLACKLIST_SET_NAME
             value = blacklist_info.access_token
             # 집합 set 에 blacklist_token 추가
             redis.sadd(set_name=set_name, values=value)
@@ -185,3 +187,22 @@ class AuthenticationRepository:
                 f"value : {blacklist_info.user_id} error : {e}"
             )
 
+    def is_blacklist_from_redis(self, dto: GetBlacklistDto) -> bool:
+        return redis.sismember(set_name=redis.BLACKLIST_SET_NAME, value=dto.access_token)
+
+    def is_valid_access_token(self, dto: JwtDto) -> bool:
+        try:
+            decode_token(encoded_token=dto.token)
+        except Exception:
+            return False
+        return True
+
+    def is_valid_refresh_token_from_redis(self, user_id: int) -> bool:
+        refresh_token = redis.get_by_key(key=user_id)
+        if not refresh_token:
+            return False
+        try:
+            decode_token(encoded_token=refresh_token)
+        except Exception:
+            return False
+        return True

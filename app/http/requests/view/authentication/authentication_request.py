@@ -1,7 +1,7 @@
 from flask_jwt_extended import decode_token
 from pydantic import BaseModel, ValidationError, validator, StrictBytes, StrictInt
 
-from core.domains.authentication.dto.authentication_dto import UpdateJwtDto, GetBlacklistDto
+from core.domains.authentication.dto.authentication_dto import JwtDto, GetBlacklistDto
 from app.extensions.utils.log_helper import logger_
 from core.exception import InvalidRequestException
 
@@ -23,24 +23,24 @@ class GetJwtAllowedExpiredSchema(BaseModel):
 
         except Exception as e:
             logger.error(
-                f"[UpdateTokenRequest][validate_request_and_make_dto][check_token] Error : {e}"
+                f"[GetJwtAllowedExpiredSchema][check_token] Error : {e}"
             )
-            raise ValidationError(f"[UpdateTokenRequest][check_token] Error")
+            raise ValidationError(f"[GetJwtAllowedExpiredSchema][check_token] Error")
 
         return token
 
 
-class UpdateTokenRequest:
+class AllowedExpiredJwtTokenRequest:
     def __init__(self, token):
         self.token = token
 
     def validate_request_and_make_dto(self):
         try:
             schema = GetJwtAllowedExpiredSchema(token=self.token).dict()
-            return UpdateJwtDto(**schema)
+            return JwtDto(**schema)
         except ValidationError as e:
             logger.error(
-                f"[UpdateTokenRequest][validate_request_and_make_dto] error : {e}"
+                f"[AllowedExpiredJwtTokenRequest][validate_request_and_make_dto] error : {e}"
             )
             raise InvalidRequestException(
                 message=e.errors())
@@ -60,9 +60,9 @@ class GetBlacklistSchema(BaseModel):
 
         except Exception as e:
             logger.error(
-                f"[LogoutRequest][validate_request_and_make_dto][check_access_token] Error : {e}"
+                f"[GetBlacklistSchema][check_access_token] Error : {e}"
             )
-            raise ValidationError(f"[LogoutRequest][check_access_token] error")
+            raise ValidationError(f"[GetBlacklistSchema][check_access_token] error")
 
         return access_token
 
