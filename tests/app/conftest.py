@@ -51,6 +51,12 @@ def test_request_context(app):
 
 
 @pytest.fixture()
+def application_context(app):
+    app.testing = True
+    return app.app_context()
+
+
+@pytest.fixture()
 def jwt_manager(app):
     return JWTManager(app)
 

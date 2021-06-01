@@ -6,7 +6,7 @@ from flask_jwt_extended import decode_token
 from flask_jwt_extended.exceptions import JWTDecodeError
 
 from app.extensions.utils.event_observer import send_message, get_event_object
-from app.extensions.utils.time_helper import get_server_timestamp, get_jwt_now_timestamp_to_seconds
+from app.extensions.utils.time_helper import get_server_timestamp
 from core.domains.authentication.dto.authentication_dto import JwtDto, GetBlacklistDto
 
 from core.domains.authentication.entity.blacklist_entity import BlacklistEntity

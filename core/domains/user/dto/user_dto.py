@@ -7,4 +7,4 @@ class GetUserDto(BaseModel):
 
 class CreateUserDto(BaseModel):
     provider: str
-    provider_id: int
+    provider_id: str
