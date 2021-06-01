@@ -1,9 +1,9 @@
 from typing import Optional, Any
 
 import requests
+from flask import request
 
-from app import config
-from core.domains.oauth.enum.oauth_enum import OAuthKakaoEnum
+from core.domains.oauth.enum.oauth_enum import OAuthKakaoEnum, OAuthNaverEnum
 
 
 def request_oauth_access_token_to_kakao(
@@ -14,7 +14,7 @@ def request_oauth_access_token_to_kakao(
         data={
             "grant_type": OAuthKakaoEnum.GRANT_TYPE.value,
             "client_id": OAuthKakaoEnum.KAKAO_CLIENT_ID.value,
-            "redirect_uri": OAuthKakaoEnum.REDIRECT_URL.value,
+            "redirect_uri": request.host_url + OAuthKakaoEnum.REDIRECT_PATH.value,
             "code": code,
             "client_secret": OAuthKakaoEnum.KAKAO_CLIENT_SECRET.value,
         },
@@ -24,6 +24,32 @@ def request_oauth_access_token_to_kakao(
 def get_kakao_user_info(token_info) -> Any:
     return requests.get(
         url=OAuthKakaoEnum.API_BASE_URL.value + OAuthKakaoEnum.USER_INFO_END_POINT.value,
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+            "Cache-Control": "no-cache",
+            "Authorization": "Bearer " + token_info.get("access_token")
+        },
+    )
+
+
+def request_oauth_access_token_to_naver(
+        code: Optional[any]) -> Any:
+    return requests.post(
+        url=OAuthNaverEnum.AUTH_BASE_URL.value + OAuthNaverEnum.ACCESS_TOKEN_END_POINT.value,
+        headers=OAuthNaverEnum.REQUEST_DEFAULT_HEADER.value,
+        data={
+            "grant_type": OAuthNaverEnum.GRANT_TYPE.value,
+            "client_id": OAuthNaverEnum.NAVER_CLIENT_ID.value,
+            "redirect_uri": request.host_url + OAuthNaverEnum.REDIRECT_PATH.value,
+            "code": code,
+            "client_secret": OAuthNaverEnum.NAVER_CLIENT_SECRET.value,
+        },
+    )
+
+
+def get_naver_user_info(token_info) -> Any:
+    return requests.get(
+        url=OAuthNaverEnum.API_BASE_URL.value + OAuthNaverEnum.USER_INFO_END_POINT.value,
         headers={
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
             "Cache-Control": "no-cache",

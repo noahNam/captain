@@ -6,7 +6,7 @@ from datetime import datetime
 class UserEntity:
     id: int
     provider: str
-    provider_id: int
+    provider_id: str
     group: str
     created_at: datetime
     updated_at: datetime

@@ -11,9 +11,9 @@ from core.domains.user.repository.user_repository import UserRepository
 
 kakao_user_dto = CreateUserDto(
     provider=ProviderEnum.KAKAO.value,
-    provider_id=12345
+    provider_id="12345"
 )
-provider_list = [provider.value for provider in list(ProviderEnum)]
+provider_list = tuple([provider.value for provider in list(ProviderEnum)])
 
 
 def test_create_user_when_get_provider_id(session: scoped_session):
@@ -49,7 +49,7 @@ def test_create_user_when_use_create_users_fixture_then_make_two_users(
     assert len(users) == 2
     for i in range(2):
         assert users[i].provider in provider_list
-        assert type(users[i].provider_id) == int
+        assert type(users[i].provider_id) == str
 
 
 def test_get_user_with_factory_boy(session: scoped_session, create_users: Any):
