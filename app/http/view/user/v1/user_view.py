@@ -12,7 +12,6 @@ from core.use_case_output import FailureType, UseCaseFailureOutput
 @api.route("/v1/users/<int:user_id>", methods=["GET"])
 @jwt_required
 @auth_required
-@swag_from("get_user.yml", methods=["GET"])
 def get_user_view(user_id):
     dto = GetUserRequest(user_id=user_id).validate_request_and_make_dto()
     if not dto:
