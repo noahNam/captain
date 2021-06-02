@@ -36,7 +36,7 @@ def swagger_config():
                 "servers": [
                     {"url": "http://localhost:5000/", "description": "local server"},
                     {
-                        "url": "https://dev.apartalk.com/captain/",
+                        "url": "https://www.apartalk.com/captain/",
                         "description": "development server",
                     },
                     {
@@ -56,7 +56,7 @@ def swagger_config():
             ],
             "static_url_path": "/captain/apidocs/flasgger_static",
             "swagger_ui": True,
-            "specs_route": "/captain/apidocs/",
+            "specs_route": "/docs/captain/apidocs/",
         },
         "template": {
             "info": {
