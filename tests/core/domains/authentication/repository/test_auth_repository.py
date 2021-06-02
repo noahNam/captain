@@ -219,26 +219,27 @@ def test_create_blacklist_when_get_blacklist_dto(session: scoped_session,
     assert blacklist.access_token is not None
 
 
-def test_delete_blacklist_when_get_blacklist_dto(session: scoped_session,
-                                                 create_users: list):
-    """
-        given : Blacklist DTO (user_id, access_token)
-        when : 별도 배치 정리 작업(주기적으로 삭제)
-        then : Blacklist DB 제거
-    """
-    token_info = session.query(JwtModel).filter_by(user_id=create_users[0].id).first()
-
-    blacklist_dto = GetBlacklistDto(user_id=create_users[0].id,
-                                    access_token=token_info.access_token)
-
-    AuthenticationRepository().create_blacklist(dto=blacklist_dto)
-
-    AuthenticationRepository().delete_blacklist(dto=blacklist_dto)
-
-    blacklist = session.query(BlacklistModel).filter_by(user_id=create_users[0].id).first()
-
-    assert blacklist.user_id == create_users[0].id
-    assert blacklist.access_token is not None
+# 추후 사용 예정
+# def test_delete_blacklist_when_get_blacklist_dto(session: scoped_session,
+#                                                  create_users: list):
+#     """
+#         given : Blacklist DTO (user_id, access_token)
+#         when : 별도 배치 정리 작업(주기적으로 삭제)
+#         then : Blacklist DB 제거
+#     """
+#     token_info = session.query(JwtModel).filter_by(user_id=create_users[0].id).first()
+#
+#     blacklist_dto = GetBlacklistDto(user_id=create_users[0].id,
+#                                     access_token=token_info.access_token)
+#
+#     AuthenticationRepository().create_blacklist(dto=blacklist_dto)
+#
+#     AuthenticationRepository().delete_blacklist(dto=blacklist_dto)
+#
+#     blacklist = session.query(BlacklistModel).filter_by(user_id=create_users[0].id).first()
+#
+#     assert blacklist.user_id == create_users[0].id
+#     assert blacklist.access_token is not None
 
 
 def test_set_blacklist_to_redis_when_get_blacklist_dto(
@@ -303,5 +304,23 @@ def test_is_valid_refresh_token_from_redis_when_get_user_id(
     AuthenticationRepository().set_token_to_cache(token_info=token_info)
 
     result = AuthenticationRepository().is_valid_refresh_token_from_redis(user_id=token_info.user_id)
+
+    assert result is True
+
+
+def test_is_valid_refresh_token_from_db_when_get_user_id(
+        session: scoped_session,
+        redis: RedisClient,
+        create_base_users: List[UserBaseFactory]):
+    """
+        given : user_id, valid refersh_token
+        when : valid refersh_token in db
+        then : return True (valid)
+    """
+    user_id = create_base_users[0].id
+    AuthenticationRepository().create_or_update_token(dto=GetUserDto(user_id=user_id))
+    token_info = session.query(JwtModel).filter_by(user_id=user_id).first()
+
+    result = AuthenticationRepository().is_valid_refresh_token(user_id=token_info.user_id)
 
     assert result is True

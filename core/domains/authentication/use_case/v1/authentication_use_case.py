@@ -151,13 +151,13 @@ class VerificationJwtUseCase:
             )
         else:
             # redis 연결이 안될 경우 DB 에서 토큰 가져옴
-            token_info = self._auth_repo.get_token_info_by_user_id(user_id=user_id)
-            if token_info.refresh_expired_at < get_server_timestamp():
+            if not self._auth_repo.is_valid_refresh_token(user_id=user_id):
                 return UseCaseFailureOutput(
                     message=f"Refresh Token expired, please retry login", type=FailureType.UNAUTHORIZED_ERROR
                 )
             # DB 만 토큰 업데이트
             self._auth_repo.create_or_update_token(dto=GetUserDto(user_id=user_id))
             new_token_info = self._auth_repo.get_token_info_by_user_id(user_id=user_id)
+
             result = jsonify(access_token=new_token_info.access_token)
             return UseCaseSuccessOutput(value=result)
