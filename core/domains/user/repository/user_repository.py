@@ -1,6 +1,5 @@
 from typing import Optional
 
-from sqlalchemy import exc
 from sqlalchemy.sql import exists
 from app.extensions.database import session
 from app.extensions.utils.log_helper import logger_
@@ -26,7 +25,7 @@ class UserRepository:
             )
             session.add(user)
             session.commit()
-        except exc.IntegrityError as e:
+        except Exception as e:
             session.rollback()
             logger.error(
                 f"[UserRepository][create_user] provider : {dto.provider} "

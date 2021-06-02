@@ -1,4 +1,5 @@
 from typing import List
+from unittest.mock import patch
 
 from flask_jwt_extended import create_access_token, create_refresh_token
 from sqlalchemy.orm import scoped_session
@@ -9,13 +10,14 @@ from core.domains.authentication.dto.authentication_dto import JwtDto, GetBlackl
 from core.domains.authentication.repository.authentication_repository import AuthenticationRepository
 from core.domains.authentication.use_case.v1.authentication_use_case import UpdateJwtUseCase, LogoutUseCase, \
     VerificationJwtUseCase
+from core.domains.user.dto.user_dto import GetUserDto
 from core.use_case_output import FailureType, UseCaseSuccessOutput
 from tests.app.http.requests.view.authentication.v1.test_authentication_request import create_invalid_access_token, \
     create_invalid_refresh_token
 from tests.seeder.factory import InvalidJwtFactory, make_custom_jwt, UserBaseFactory, UserFactory
 
 
-def test_update_token_when_get_expired_token(
+def test_update_token_when_get_expired_token_then_success(
         session: scoped_session, redis: RedisClient,
         create_base_users: List[UserBaseFactory]):
     """
@@ -72,6 +74,78 @@ def test_update_token_when_get_token_with_wrong_type_then_response_error(
 
     result = UpdateJwtUseCase().execute(dto=dto)
     assert result.type == FailureType.INVALID_REQUEST_ERROR
+
+
+def test_verification_token_when_detected_blacklist_then_response_401(
+        session: scoped_session, redis: RedisClient, create_base_users: List[UserBaseFactory]):
+    """
+        given : invalid access_token, blacklist in redis
+        when : verification requset
+        then : unauthorized_error
+    """
+    user_id = create_base_users[0].id
+
+    token = create_invalid_access_token(user_id=user_id)
+
+    jwt_dto = JwtDto(token=token)
+    blacklist_dto = GetBlacklistDto(user_id=user_id, access_token=token)
+
+    AuthenticationRepository().create_blacklist(dto=blacklist_dto)
+    blacklist = AuthenticationRepository().get_blacklist_by_dto(dto=blacklist_dto)
+    # to redis
+    AuthenticationRepository().set_blacklist_to_cache(blacklist_info=blacklist)
+
+    result = VerificationJwtUseCase().execute(dto=jwt_dto)
+
+    assert result.type == FailureType.UNAUTHORIZED_ERROR
+
+
+def test_verification_token_with_no_redis_when_detected_blacklist_then_response_401(
+        session: scoped_session, create_base_users: List[UserBaseFactory]):
+    """
+        given : invalid access_token, blacklist in DB
+        when : verification requset
+        then : unauthorized_error
+    """
+    user_id = create_base_users[0].id
+
+    token = create_invalid_access_token(user_id=user_id)
+
+    jwt_dto = JwtDto(token=token)
+    blacklist_dto = GetBlacklistDto(user_id=user_id, access_token=token)
+
+    AuthenticationRepository().create_blacklist(dto=blacklist_dto)
+
+    with patch("core.domains.authentication.repository.authentication_repository.AuthenticationRepository"
+               ".is_redis_ready") as mock_ready:
+        mock_ready.return_value = False
+        result = VerificationJwtUseCase().execute(dto=jwt_dto)
+
+    assert result.type == FailureType.UNAUTHORIZED_ERROR
+
+
+def test_verification_without_redis_when_get_invalid_access_token_then_success(
+        session: scoped_session, create_base_users: List[UserBaseFactory]):
+    """
+        given : invalid access_token, valid refresh_token in DB
+        when : Redis 장애시 DB만 토큰 업데이트
+        then : success
+    """
+    user_id = create_base_users[0].id
+
+    access_token = create_invalid_access_token(user_id=user_id)
+    AuthenticationRepository().create_or_update_token(dto=GetUserDto(user_id=user_id))
+
+    jwt_dto = JwtDto(token=access_token)
+
+    with patch("core.domains.authentication.repository.authentication_repository.AuthenticationRepository"
+               ".is_redis_ready") as mock_ready:
+        mock_ready.return_value = False
+        result = VerificationJwtUseCase().execute(dto=jwt_dto)
+
+    assert result.type == "success"
+    assert isinstance(result, UseCaseSuccessOutput)
+    assert b"access_token" in result.value.data
 
 
 def test_logout_when_get_token_with_user_id_then_success(

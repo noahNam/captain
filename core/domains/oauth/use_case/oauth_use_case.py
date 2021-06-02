@@ -16,6 +16,7 @@ class CreateTokenWithUserUseCase:
         -> 2. update if user exists (로그아웃 후 재로그인)
         return JWT
     """
+
     def execute(self, dto: CreateUserDto) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
         user = self.__create_user(dto=dto)
 

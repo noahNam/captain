@@ -1,7 +1,4 @@
 from typing import Optional
-
-from flask_jwt_extended.exceptions import JWTDecodeError
-
 from app import redis
 from app.extensions.database import session
 from app.extensions.utils.log_helper import logger_
@@ -160,18 +157,19 @@ class AuthenticationRepository:
             return None
         return blacklist.to_entity()
 
-    def delete_blacklist(self, dto: GetBlacklistDto) -> None:
-        blacklist = BlacklistModel(user_id=dto.user_id,
-                                   access_token=dto.access_token)
-        try:
-            session.delete(blacklist)
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            logger.error(
-                f"[AuthenticationRepository][delete_blacklist] user_id : {dto.user_id}, "
-                f"access_token : {dto.access_token} error : {e}"
-            )
+    # DB -> Blacklist 삭제: 추후 사용 예정
+    # def delete_blacklist(self, dto: GetBlacklistDto) -> None:
+    #     blacklist = BlacklistModel(user_id=dto.user_id,
+    #                                access_token=dto.access_token)
+    #     try:
+    #         session.delete(blacklist)
+    #         session.commit()
+    #     except Exception as e:
+    #         session.rollback()
+    #         logger.error(
+    #             f"[AuthenticationRepository][delete_blacklist] user_id : {dto.user_id}, "
+    #             f"access_token : {dto.access_token} error : {e}"
+    #         )
 
     def set_blacklist_to_cache(self, blacklist_info: Optional[BlacklistEntity]) -> None:
         try:
@@ -193,7 +191,10 @@ class AuthenticationRepository:
     def is_valid_access_token(self, dto: JwtDto) -> bool:
         try:
             decode_token(encoded_token=dto.token)
-        except Exception:
+        except Exception as e:
+            logger.error(
+                f"[AuthenticationRepository][is_valid_access_token] Error : {e}, "
+            )
             return False
         return True
 
@@ -203,6 +204,23 @@ class AuthenticationRepository:
             return False
         try:
             decode_token(encoded_token=refresh_token)
-        except Exception:
+        except Exception as e:
+            logger.error(
+                f"[AuthenticationRepository][is_valid_refresh_token_from_redis] Error : {e}, "
+            )
+            return False
+        return True
+
+    def is_valid_refresh_token(self, user_id: int) -> bool:
+        token_info = session.query(JwtModel).filter_by(user_id=user_id).first()
+        refresh_token = token_info.refresh_token
+        if not refresh_token:
+            return False
+        try:
+            decode_token(encoded_token=refresh_token)
+        except Exception as e:
+            logger.error(
+                f"[AuthenticationRepository][is_valid_refresh_token] Error : {e}, "
+            )
             return False
         return True
