@@ -48,6 +48,6 @@ config = dict(
     default=LocalConfig,
     local=LocalConfig,
     testing=TestConfig,
-    dev=DevelopmentConfig,
+    development=DevelopmentConfig,
     prod=ProductionConfig,
 )
