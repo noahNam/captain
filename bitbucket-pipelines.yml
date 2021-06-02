@@ -146,3 +146,7 @@ definitions:
         POSTGRES_DB: 'captain'
         POSTGRES_USER: 'postgres'
         POSTGRES_PASSWORD: '1234'
+    redis:
+      image: redis:latest
+      ports:
+        - 6379:6379
