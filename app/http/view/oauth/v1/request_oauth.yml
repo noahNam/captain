@@ -2,7 +2,7 @@ openapi: "3.0.2"
 tags:
   - OAuth
 security:
-  - userAuth: []
+  - userAuth: [ ]
 parameters:
   - name: provider
     in: path
@@ -13,8 +13,34 @@ parameters:
       example: kakao
 responses:
   '302':
-    description: Redirect to end_point - /v1/oauth/kakao
+    description: Redirect to end_point - /v1/oauth/kakao or /v1/oauth/naver (Success)
     content:
       html/text:
         schema:
           $ref: '#/components/schemas/request_oauth'
+  '400 - (1)':
+    description: When not given parameter
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Parameter 'provider' is not found, Available parameters are ('kakao', 'naver')"
+            type:
+              type: string
+              example: "invalid_request_error"
+  '400 - (2)':
+    description: When parameter is not naver or kakao
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Invalid provider input, Available parameters are ('kakao', 'naver')"
+            type:
+              type: string
+              example: "invalid_request_error"

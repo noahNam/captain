@@ -1,0 +1,42 @@
+authentication:
+  yml:
+user_not_found_error:
+  properties:
+    detail:
+      type: string
+      example: "user id"
+    message:
+      type: string
+      example: "not_found_error"
+token_not_found_error:
+  properties:
+    detail:
+      type: string
+      example: "Authorization header is not provided"
+    message:
+      type: string
+      example: "not_found_error"
+user_object_not_found_error:
+  properties:
+    detail:
+      type: string
+      example: "user object"
+    message:
+      type: string
+      example: "not_found_error"
+token_info_not_found_error:
+  properties:
+    detail:
+      type: string
+      example: "token_info"
+    message:
+      type: string
+      example: "not_found_error"
+blacklist_not_found_error:
+  properties:
+    detail:
+      type: string
+      example: "blacklist"
+    message:
+      type: string
+      example: "not_found_error"

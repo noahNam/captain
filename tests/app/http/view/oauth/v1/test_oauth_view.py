@@ -37,8 +37,8 @@ def test_when_request_with_not_parameter_then_raise_validation_error(
     with test_request_context:
         response = client.get(url_for("api.request_oauth_to_third_party"))
 
-    assert response.status_code == HTTPStatus.BAD_REQUEST
-    assert response.get_json()["type"] == FailureType.INVALID_REQUEST_ERROR
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.get_json()["detail"] == FailureType.NOT_FOUND_ERROR
 
 
 def test_when_request_oauth_to_kakao_then_redirect_to_fetch_token_url(
@@ -141,11 +141,11 @@ def test_when_request_with_wrong_provider_then_raise_validation_error(
         response = client.get(url_for("api.request_oauth_to_third_party", provider=dto.provider))
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
-    assert response.get_json()["type"] == FailureType.INVALID_REQUEST_ERROR
+    assert response.get_json()["detail"] == FailureType.INVALID_REQUEST_ERROR
 
 
 @patch("requests.post")
-def test_mock_request_access_token_to_kakao(mock_post):
+def test_mock_request_access_token_to_kakao(mock_post, test_request_context):
     """
         <mocking test>
             인가 서버 -> Access_Token 요청
@@ -160,13 +160,14 @@ def test_mock_request_access_token_to_kakao(mock_post):
     mock_post.return_value.status_code = 201
     mock_post.return_value.data = mock_contents
 
-    assert request_oauth_access_token_to_kakao(code="code").status_code == mock_post.return_value.status_code
+    with test_request_context:
+        assert request_oauth_access_token_to_kakao(code="code").status_code == mock_post.return_value.status_code
     assert "access_token" in mock_post.return_value.data
     assert mock_post.called is True
 
 
 @patch("requests.post")
-def test_mock_request_access_token_to_naver(mock_post):
+def test_mock_request_access_token_to_naver(mock_post, test_request_context):
     """
         <mocking test>
             인가 서버 -> Access_Token 요청
@@ -181,7 +182,8 @@ def test_mock_request_access_token_to_naver(mock_post):
     mock_post.return_value.status_code = 201
     mock_post.return_value.data = mock_contents
 
-    assert request_oauth_access_token_to_naver(code="code").status_code == mock_post.return_value.status_code
+    with test_request_context:
+        assert request_oauth_access_token_to_naver(code="code").status_code == mock_post.return_value.status_code
     assert "access_token" in mock_post.return_value.data
     assert mock_post.called is True
 

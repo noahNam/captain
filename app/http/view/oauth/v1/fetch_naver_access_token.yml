@@ -1,0 +1,59 @@
+openapi: "3.0.2"
+tags:
+  - OAuth
+security:
+  - userAuth: [ ]
+parameters:
+  - name: code
+    in: path
+    required: true
+    description: authorization_code
+    schema:
+      type: string
+      example: code from redirect at /api/captain/v1/oauth
+responses:
+  '200':
+    description: Return jwt - access_token (Success)
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/fetch_jwt_access_token'
+  '404':
+    description: When not given Authorization code from Naver Auth Server
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Failed get Authorization code from Naver"
+            type:
+              type: string
+              example: "not_found_error"
+  '400 #1':
+    description: When not given OAuth token from Naver Auth Server
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Failed get OAuth token info from Naver"
+            type:
+              type: string
+              example: "invalid_request_error"
+  '400 #2':
+    description: When not given User info from Naver Resource Server
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Failed get user info from Naver"
+            type:
+              type: string
+              example: "invalid_request_error"

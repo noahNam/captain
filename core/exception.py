@@ -22,6 +22,11 @@ class TokenNotFoundError(Exception):
     msg = "token_not_found"
 
 
+class InvalidTokenError(Exception):
+    code = HTTPStatus.FORBIDDEN
+    msg = "invalid_token"
+
+
 class NotFoundException(Exception):
     code = HTTPStatus.NOT_FOUND
     msg = "not_found"

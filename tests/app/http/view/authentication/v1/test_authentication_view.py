@@ -14,7 +14,7 @@ from core.use_case_output import FailureType
 from tests.seeder.factory import UserBaseFactory, UserFactory
 
 
-def test_update_view_when_request_with_not_jwt_then_raise_validation_error(
+def test_update_view_when_request_without_jwt_then_raise_validation_error(
         client: FlaskClient, test_request_context: RequestContext):
     """
         given : Nothing
@@ -24,8 +24,8 @@ def test_update_view_when_request_with_not_jwt_then_raise_validation_error(
     with test_request_context:
         response = client.get(url_for("api.token_update_view"))
 
-    assert response.status_code == HTTPStatus.BAD_REQUEST
-    assert response.get_json()["type"] == FailureType.INVALID_REQUEST_ERROR
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.get_json()["detail"] == FailureType.NOT_FOUND_ERROR
 
 
 def test_update_view_when_request_with_token_with_wrong_prefix_then_raise_validation_error(
@@ -45,7 +45,7 @@ def test_update_view_when_request_with_token_with_wrong_prefix_then_raise_valida
         response = client.get(url_for("api.token_update_view"), headers=headers)
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
-    assert response.get_json()["type"] == FailureType.INVALID_REQUEST_ERROR
+    assert response.get_json()["detail"] == FailureType.INVALID_REQUEST_ERROR
 
 
 def test_update_view_when_request_with_token_with_wrong_token_then_raise_validation_error(
@@ -65,7 +65,7 @@ def test_update_view_when_request_with_token_with_wrong_token_then_raise_validat
         response = client.get(url_for("api.token_update_view"), headers=headers)
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
-    assert response.get_json()["type"] == FailureType.INVALID_REQUEST_ERROR
+    assert response.get_json()["detail"] == FailureType.INVALID_REQUEST_ERROR
 
 
 def test_update_view(client: FlaskClient,

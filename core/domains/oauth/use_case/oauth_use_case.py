@@ -21,7 +21,7 @@ class CreateTokenWithUserUseCase:
         user = self.__create_user(dto=dto)
 
         if not user:
-            return UseCaseFailureOutput(type=FailureType.NOT_FOUND_ERROR)
+            return UseCaseFailureOutput(message="user id", detail=FailureType.NOT_FOUND_ERROR)
 
         # JWT 발급 + DB 저장
         user_dto = GetUserDto(user_id=user.id)
@@ -29,7 +29,7 @@ class CreateTokenWithUserUseCase:
         token_info = self.__create_or_update_token(dto=user_dto)
 
         if not token_info:
-            return UseCaseFailureOutput(type=FailureType.NOT_FOUND_ERROR)
+            return UseCaseFailureOutput(message="token_info", detail=FailureType.NOT_FOUND_ERROR)
 
         access_token = token_info.access_token
 

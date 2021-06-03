@@ -57,8 +57,8 @@ def test_update_token_when_get_expired_access_token_with_no_user_then_response_e
     dto = JwtDto(token=create_invalid_jwts[0].access_token)
 
     result = UpdateJwtUseCase().execute(dto=dto)
-    assert result.type == FailureType.NOT_FOUND_ERROR
-    assert result.message == "user not exists"
+    assert result.detail == FailureType.NOT_FOUND_ERROR
+    assert result.message == "user object"
 
 
 def test_update_token_when_get_token_with_wrong_type_then_response_error(
@@ -73,7 +73,7 @@ def test_update_token_when_get_token_with_wrong_type_then_response_error(
     dto = JwtDto(token=token)
 
     result = UpdateJwtUseCase().execute(dto=dto)
-    assert result.type == FailureType.INVALID_REQUEST_ERROR
+    assert result.detail == FailureType.INVALID_REQUEST_ERROR
 
 
 def test_verification_token_when_detected_blacklist_then_response_401(
@@ -97,7 +97,7 @@ def test_verification_token_when_detected_blacklist_then_response_401(
 
     result = VerificationJwtUseCase().execute(dto=jwt_dto)
 
-    assert result.type == FailureType.UNAUTHORIZED_ERROR
+    assert result.detail == FailureType.UNAUTHORIZED_ERROR
 
 
 def test_verification_token_with_no_redis_when_detected_blacklist_then_response_401(
@@ -121,7 +121,7 @@ def test_verification_token_with_no_redis_when_detected_blacklist_then_response_
         mock_ready.return_value = False
         result = VerificationJwtUseCase().execute(dto=jwt_dto)
 
-    assert result.type == FailureType.UNAUTHORIZED_ERROR
+    assert result.detail == FailureType.UNAUTHORIZED_ERROR
 
 
 def test_verification_without_redis_when_get_invalid_access_token_then_success(
@@ -222,7 +222,7 @@ def test_verification_when_get_expired_access_token_with_expired_refresh_token_t
 
     result = VerificationJwtUseCase().execute(dto=dto)
 
-    assert result.type == FailureType.UNAUTHORIZED_ERROR
+    assert result.detail == FailureType.UNAUTHORIZED_ERROR
 
 
 def test_verification_when_get_valid_access_token_then_return_same_token(

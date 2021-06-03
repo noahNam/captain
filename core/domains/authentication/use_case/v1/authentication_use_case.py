@@ -25,7 +25,7 @@ class UpdateJwtUseCase:
             decoded = decode_token(dto.token, allow_expired=True)
         except JWTDecodeError as e:
             return UseCaseFailureOutput(
-                message=f"Invalid Token, error: {e}", type=FailureType.INVALID_REQUEST_ERROR
+                message=f"Invalid Token, error: {e}", detail=FailureType.INVALID_REQUEST_ERROR
             )
 
         user_id = decoded.get("identity")
@@ -33,25 +33,25 @@ class UpdateJwtUseCase:
 
         if not user_id:
             return UseCaseFailureOutput(
-                message="user id is empty", type=FailureType.NOT_FOUND_ERROR
+                message="user id", detail=FailureType.NOT_FOUND_ERROR
             )
 
         if token_type != ("access" or "refresh"):
             return UseCaseFailureOutput(
-                message="wrong token type, need access or refresh", type=FailureType.INVALID_REQUEST_ERROR
+                message="wrong token type, need access or refresh", detail=FailureType.INVALID_REQUEST_ERROR
             )
         user = self.__is_exists_user(user_id=user_id)
 
         if not user:
             return UseCaseFailureOutput(
-                message="user not exists", type=FailureType.NOT_FOUND_ERROR
+                message="user object", detail=FailureType.NOT_FOUND_ERROR
             )
         # JWT 토큰 업데이트
         # 위에서 사용자 존재 여부를 확인했기 때문에, 항상 토큰 업데이트
         token_info = self.__create_or_update_token(dto=GetUserDto(user_id=user_id))
 
         if not token_info:
-            return UseCaseFailureOutput(type=FailureType.NOT_FOUND_ERROR)
+            return UseCaseFailureOutput(message="token_info", detail=FailureType.NOT_FOUND_ERROR)
 
         access_token = token_info.access_token
 
@@ -75,7 +75,7 @@ class LogoutUseCase:
         blacklist = self.__create_blacklist(dto=dto)
 
         if not blacklist:
-            return UseCaseFailureOutput(type=FailureType.NOT_FOUND_ERROR)
+            return UseCaseFailureOutput(message="blacklist", detail=FailureType.INTERNAL_SERVER_ERROR)
 
         result = jsonify(logout_user=blacklist.user_id,
                          blacklist_token=blacklist.access_token.decode("utf-8"),
@@ -99,7 +99,7 @@ class VerificationJwtUseCase:
             decoded = decode_token(dto.token, allow_expired=True)
         except JWTDecodeError as e:
             return UseCaseFailureOutput(
-                message=f"Invalid Token, error: {e}", type=FailureType.INVALID_REQUEST_ERROR
+                message=f"Invalid Token, error: {e}", detail=FailureType.INVALID_REQUEST_ERROR
             )
 
         user_id = int(decoded.get("identity"))
@@ -107,12 +107,12 @@ class VerificationJwtUseCase:
 
         if not user_id:
             return UseCaseFailureOutput(
-                message="user id is empty", type=FailureType.NOT_FOUND_ERROR
+                message="user id", detail=FailureType.NOT_FOUND_ERROR
             )
 
         if token_type != "access":
             return UseCaseFailureOutput(
-                message="wrong token type, need access token", type=FailureType.INVALID_REQUEST_ERROR
+                message="wrong token type, need access token", detail=FailureType.INVALID_REQUEST_ERROR
             )
 
         # Blacklist check
@@ -126,7 +126,7 @@ class VerificationJwtUseCase:
 
         if is_blacklist:
             return UseCaseFailureOutput(
-                message=f"Blacklist Token detected, please retry login", type=FailureType.UNAUTHORIZED_ERROR
+                message=f"Blacklist Token detected, please retry login", detail=FailureType.UNAUTHORIZED_ERROR
             )
 
         # Valid access_token check
@@ -147,13 +147,13 @@ class VerificationJwtUseCase:
                 result = jsonify(access_token=new_token_info.access_token)
                 return UseCaseSuccessOutput(value=result)
             return UseCaseFailureOutput(
-                message=f"Refresh Token expired, please retry login", type=FailureType.UNAUTHORIZED_ERROR
+                message=f"Refresh Token expired, please retry login", detail=FailureType.UNAUTHORIZED_ERROR
             )
         else:
             # redis 연결이 안될 경우 DB 에서 토큰 가져옴
             if not self._auth_repo.is_valid_refresh_token(user_id=user_id):
                 return UseCaseFailureOutput(
-                    message=f"Refresh Token expired, please retry login", type=FailureType.UNAUTHORIZED_ERROR
+                    message=f"Refresh Token expired, please retry login", detail=FailureType.UNAUTHORIZED_ERROR
                 )
             # DB 만 토큰 업데이트
             self._auth_repo.create_or_update_token(dto=GetUserDto(user_id=user_id))
