@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Any
 
 from flasgger import swag_from
@@ -29,8 +30,9 @@ def request_oauth_to_third_party() -> Any:
     if not parameter:
         return failure_response(
             UseCaseFailureOutput(
-                type=FailureType.INVALID_REQUEST_ERROR,
-                message=f"Parameter 'provider' is not found, Available parameters are {provider_list}")
+                detail=FailureType.NOT_FOUND_ERROR,
+                message=f"Parameter 'provider' is not found, Available parameters are {provider_list}"),
+            status_code=HTTPStatus.NOT_FOUND
         )
 
     try:
@@ -38,7 +40,7 @@ def request_oauth_to_third_party() -> Any:
     except InvalidRequestException:
         return failure_response(
             UseCaseFailureOutput(
-                type=FailureType.INVALID_REQUEST_ERROR,
+                detail=FailureType.INVALID_REQUEST_ERROR,
                 message=f"Invalid provider input, Available parameters are {provider_list}")
         )
 
@@ -50,14 +52,14 @@ def request_oauth_to_third_party() -> Any:
 
 
 @api.route("/v1/oauth/kakao", methods=["GET"])
-@swag_from("get_kakao_id_and_create_jwt.yml", methods=["GET"])
+@swag_from("fetch_kakao_access_token.yml", methods=["GET"])
 def fetch_kakao_access_token() -> Any:
     provider = ProviderEnum.KAKAO.value
     code = request.args.get("code")
 
     if not code:
         return failure_response(
-            UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR,
+            UseCaseFailureOutput(detail=FailureType.INVALID_REQUEST_ERROR,
                                  message="Failed get Authorization code from Kakao")
         )
 
@@ -66,7 +68,7 @@ def fetch_kakao_access_token() -> Any:
 
     if token_result.raise_for_status():
         return failure_response(
-            UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR,
+            UseCaseFailureOutput(detail=FailureType.INVALID_REQUEST_ERROR,
                                  message="Failed get OAuth token info from Kakao")
         )
     kakao_token_info = token_result.json()
@@ -75,7 +77,7 @@ def fetch_kakao_access_token() -> Any:
     user_info_result = get_kakao_user_info(kakao_token_info)
     if user_info_result.raise_for_status():
         return failure_response(
-            UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR,
+            UseCaseFailureOutput(detail=FailureType.INVALID_REQUEST_ERROR,
                                  message="Failed get user info from Kakao")
         )
     user_info = user_info_result.json()
@@ -86,20 +88,21 @@ def fetch_kakao_access_token() -> Any:
             .validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
-            UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR,
+            UseCaseFailureOutput(detail=FailureType.INVALID_REQUEST_ERROR,
                                  message=f"{e.message}")
         )
     return OAuthPresenter().transform(CreateTokenWithUserUseCase().execute(dto=dto))
 
 
 @api.route("/v1/oauth/naver", methods=["GET"])
+@swag_from("fetch_naver_access_token.yml", methods=["GET"])
 def fetch_naver_access_token():
     provider = ProviderEnum.NAVER.value
     code = request.args.get("code")
 
     if not code:
         return failure_response(
-            UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR,
+            UseCaseFailureOutput(detail=FailureType.INVALID_REQUEST_ERROR,
                                  message="Failed get Authorization code from Naver")
         )
 
@@ -108,7 +111,7 @@ def fetch_naver_access_token():
 
     if token_result.raise_for_status():
         return failure_response(
-            UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR,
+            UseCaseFailureOutput(detail=FailureType.INVALID_REQUEST_ERROR,
                                  message="Failed get OAuth token info from Naver")
         )
     naver_token_info = token_result.json()
@@ -117,7 +120,7 @@ def fetch_naver_access_token():
     user_info_result = get_naver_user_info(naver_token_info)
     if user_info_result.raise_for_status():
         return failure_response(
-            UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR,
+            UseCaseFailureOutput(detail=FailureType.INVALID_REQUEST_ERROR,
                                  message="Failed get user info from naver")
         )
     user_info = user_info_result.json()
@@ -128,7 +131,7 @@ def fetch_naver_access_token():
             .validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
-            UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR,
+            UseCaseFailureOutput(detail=FailureType.INVALID_REQUEST_ERROR,
                                  message=f"{e.message}")
         )
     return OAuthPresenter().transform(CreateTokenWithUserUseCase().execute(dto=dto))

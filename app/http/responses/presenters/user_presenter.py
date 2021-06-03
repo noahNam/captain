@@ -19,7 +19,7 @@ class UserPresenter:
                 print(e)
                 return failure_response(
                     UseCaseFailureOutput(
-                        type=FailureType.SYSTEM_ERROR,
+                        detail=FailureType.SYSTEM_ERROR,
                         message="response schema validation error",
                     )
                 )

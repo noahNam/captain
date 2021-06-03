@@ -1,8 +1,0 @@
-error:
-  properties:
-    error_message:
-      type: string
-      example: ""
-    type:
-      type: string
-      example: unauthorized_error

@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Union
 
 from pydantic import ValidationError
@@ -22,7 +23,7 @@ class UpdateJwtPresenter:
                     f"[UpdateJwtPresenter][transform] value : {value} error : {e}")
                 return failure_response(
                     UseCaseFailureOutput(
-                        type=FailureType.SYSTEM_ERROR,
+                        detail=FailureType.SYSTEM_ERROR,
                         message="response schema validation error",
                     )
                 )
@@ -47,9 +48,9 @@ class LogoutPresenter:
                     f"[UpdateJwtPresenter][transform] value : {value} error : {e}")
                 return failure_response(
                     UseCaseFailureOutput(
-                        type=FailureType.SYSTEM_ERROR,
+                        detail=FailureType.INTERNAL_SERVER_ERROR,
                         message="response schema validation error",
-                    )
+                    ), status_code=HTTPStatus.INTERNAL_SERVER_ERROR
                 )
             result = {
                 "data": {"logout": schema.dict()},
@@ -71,7 +72,7 @@ class VerificationJwtPresenter:
                     f"[VerificationPresenter][transform] value : {value} error : {e}")
                 return failure_response(
                     UseCaseFailureOutput(
-                        type=FailureType.SYSTEM_ERROR,
+                        detail=FailureType.SYSTEM_ERROR,
                         message="response schema validation error",
                     )
                 )
