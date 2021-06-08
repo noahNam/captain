@@ -45,9 +45,9 @@ def request_oauth_to_third_party() -> Any:
         )
 
     if parameter == ProviderEnum.NAVER.value:
-        redirect_to = request.host_url + OAuthNaverEnum.REDIRECT_PATH.value
+        redirect_to = "https://www.apartalk.com" + OAuthNaverEnum.REDIRECT_PATH.value
         return oauth.naver.authorize_redirect(redirect_to)
-    redirect_to = request.host_url + OAuthKakaoEnum.REDIRECT_PATH.value
+    redirect_to = "https://www.apartalk.com" + OAuthKakaoEnum.REDIRECT_PATH.value
     return oauth.kakao.authorize_redirect(redirect_to)
 
 
