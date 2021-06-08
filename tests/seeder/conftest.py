@@ -1,24 +1,68 @@
 import pytest
 from datetime import date, timedelta, datetime
 from faker import Faker
-from tests.seeder.factory.data_service_factory import (
-    NormalUserFactory,
-)
+
+from tests.seeder.factory import UserFactory, JwtFactory, InvalidJwtFactory, UserBaseFactory, BlacklistFactory
 
 MODEL_FACTORIES = [
-    NormalUserFactory,
+    UserBaseFactory,
+    UserFactory,
+    JwtFactory,
+    InvalidJwtFactory,
+    BlacklistFactory,
 ]
-
 
 faker = Faker()
 
 
 @pytest.fixture
-def create_users(session, normal_user_factory):
-    users = normal_user_factory.build_batch(2)
+def create_base_users(session, user_base_factory):
+    users = user_base_factory.build_batch(size=2)
 
     session.add_all(users)
     session.commit()
+
+    return users
+
+
+@pytest.fixture
+def create_users(session, user_factory):
+    users = user_factory.build_batch(size=2)
+
+    session.add_all(users)
+    session.commit()
+
+    return users
+
+
+@pytest.fixture
+def create_jwts(session, jwt_factory):
+    jwts = jwt_factory.build_batch(size=2)
+
+    session.add_all(jwts)
+    session.commit()
+
+    return jwts
+
+
+@pytest.fixture
+def create_invalid_jwts(session, invalid_jwt_factory):
+    jwts = invalid_jwt_factory.build_batch(size=2)
+
+    session.add_all(jwts)
+    session.commit()
+
+    return jwts
+
+
+@pytest.fixture
+def create_blacklists(session, blacklist_factory):
+    blacklists = blacklist_factory.build_batch(size=2)
+
+    session.add_all(blacklists)
+    session.commit()
+
+    return blacklists
 
 
 def make_random_today_date(between_days: int = 1, year_ago: int = 2):

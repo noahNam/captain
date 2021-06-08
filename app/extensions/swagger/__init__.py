@@ -17,12 +17,12 @@ def swagger_config():
             "openapi": "3.0.2",
             "info": {
                 "description": "powered by Flasgger",
-                "termsOfService": "/captain",
+                "termsOfService": "/docs/captain",
                 "title": "A swagger API",
                 "version": "1.0.0",
             },
             "host": "localhost:5000",
-            "basePath": "/captain/",
+            "basePath": "/docs/captain/",
             "components": {
                 "schemas": _swagger_schema,
                 "securitySchemes": {
@@ -34,13 +34,13 @@ def swagger_config():
                     }
                 },
                 "servers": [
-                    {"url": "http://localhost:5000/", "description": "local server"},
+                    {"url": "http://localhost:5000/docs/captain/apidocs/", "description": "local server"},
                     {
-                        "url": "https://dev.apartalk.com/captain/",
+                        "url": "https://www.apartalk.com/docs/captain/apidocs/",
                         "description": "development server",
                     },
                     {
-                        "url": "https://www.apartalk.com/captain/",
+                        "url": "https://www.apartalk.com/docs/captain/apidocs/",
                         "description": "production server",
                     },
                 ],
@@ -49,14 +49,14 @@ def swagger_config():
             "specs": [
                 {
                     "endpoint": "apispec",
-                    "route": "/captain/apispec.json",
+                    "route": "/docs/captain/apispec.json",
                     "rule_filter": lambda rule: True,  # all in
                     "model_filter": lambda tag: True,  # all in
                 }
             ],
-            "static_url_path": "/captain/apidocs/flasgger_static",
+            "static_url_path": "/docs/captain/apidocs/flasgger_static",
             "swagger_ui": True,
-            "specs_route": "/captain/apidocs/",
+            "specs_route": "/docs/captain/apidocs/",
         },
         "template": {
             "info": {

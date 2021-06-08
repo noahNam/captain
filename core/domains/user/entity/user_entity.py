@@ -1,8 +1,12 @@
-from pydantic import BaseModel
+from dataclasses import dataclass
+from datetime import datetime
 
 
-class UserEntity(BaseModel):
-    id: int = None
-    nickname: str = None
-    status: str = None
-    sex: str = None
+@dataclass
+class UserEntity:
+    id: int
+    provider: str
+    provider_id: str
+    group: str
+    created_at: datetime
+    updated_at: datetime

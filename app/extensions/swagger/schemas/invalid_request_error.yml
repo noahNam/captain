@@ -1,0 +1,42 @@
+authentication:
+  yml:
+invalid_access_token_error:
+  properties:
+    detail:
+      type: string
+      example: "Invalid token input from header"
+    message:
+      type: string
+      example: "invalid_request_error"
+jwt_decode_error:
+  properties:
+    detail:
+      type: string
+      example: "Invalid Token, error: JWTDecodeError"
+    message:
+      type: string
+      example: "invalid_request_error"
+wrong_prefix_error:
+  properties:
+    detail:
+      type: string
+      example: "Invalid Authorization header prefix"
+    message:
+      type: string
+      example: "invalid_request_error"
+wrong_token_type_error:
+  properties:
+    detail:
+      type: string
+      example: "wrong token type, need access or refresh"
+    message:
+      type: string
+      example: "invalid_request_error"
+not_access_type_error:
+  properties:
+    detail:
+      type: string
+      example: "wrong token type, need access token"
+    message:
+      type: string
+      example: "invalid_request_error"
