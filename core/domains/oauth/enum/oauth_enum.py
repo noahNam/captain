@@ -3,8 +3,8 @@ from enum import Enum
 
 class OAuthKakaoEnum(Enum):
     # Kakao Secret_key for access kakao api
-    KAKAO_CLIENT_ID = "bd800185a84b3e7b269cf97845cccaec"
-    KAKAO_CLIENT_SECRET = "oyCAZ7f91qhzPkCn4ocUfuiaQQXjpkjr"
+    KAKAO_CLIENT_ID = "685d9d3691ad88dac84b6f06066c9e91"
+    KAKAO_CLIENT_SECRET = "waB8DtEHj1VMgMso8H0d9HwTXmSoat3a"
 
     AUTH_BASE_URL = "https://kauth.kakao.com"
     API_BASE_URL = "https://kapi.kakao.com"
@@ -26,8 +26,8 @@ class ProviderEnum(Enum):
 
 
 class OAuthNaverEnum(Enum):
-    NAVER_CLIENT_ID = "vThAON6VRNy5wdwFXVez"
-    NAVER_CLIENT_SECRET = "iNBqMV6f3b"
+    NAVER_CLIENT_ID = "Xs3HQd3K26WlaLe9IWsH"
+    NAVER_CLIENT_SECRET = "UARktCnNGd"
 
     AUTH_BASE_URL = "https://nid.naver.com"
     API_BASE_URL = "https://openapi.naver.com"
