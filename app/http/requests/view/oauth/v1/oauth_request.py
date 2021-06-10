@@ -46,7 +46,9 @@ class CreateUserRequest:
     def validate_request_and_make_dto(self):
         try:
             schema = GetProviderSchema(provider=self.provider).dict()
-            provider_id_schema = GetProviderIdSchema(provider_id=self.provider_id).dict()
+            provider_id_schema = GetProviderIdSchema(
+                provider_id=self.provider_id
+            ).dict()
             schema.update(provider_id_schema)
 
             # CreateUserDto : in User domain
@@ -56,4 +58,5 @@ class CreateUserRequest:
                 f"[CreateUserRequest][validate_request_and_make_dto] error : {e}"
             )
             raise InvalidRequestException(
-                message="provider_id must be str, or not receive id from Third_party server")
+                message="provider_id must be str, or not receive id from Third_party server"
+            )

@@ -7,19 +7,33 @@ from sqlalchemy.orm import scoped_session
 from app.extensions import RedisClient
 from app.persistence.model import JwtModel
 from core.domains.authentication.dto.authentication_dto import JwtDto, GetBlacklistDto
-from core.domains.authentication.repository.authentication_repository import AuthenticationRepository
-from core.domains.authentication.use_case.v1.authentication_use_case import UpdateJwtUseCase, LogoutUseCase, \
-    VerificationJwtUseCase
+from core.domains.authentication.repository.authentication_repository import (
+    AuthenticationRepository,
+)
+from core.domains.authentication.use_case.v1.authentication_use_case import (
+    UpdateJwtUseCase,
+    LogoutUseCase,
+    VerificationJwtUseCase,
+)
 from core.domains.user.dto.user_dto import GetUserDto
 from core.use_case_output import FailureType, UseCaseSuccessOutput
-from tests.app.http.requests.view.authentication.v1.test_authentication_request import create_invalid_access_token, \
-    create_invalid_refresh_token
-from tests.seeder.factory import InvalidJwtFactory, make_custom_jwt, UserBaseFactory, UserFactory
+from tests.app.http.requests.view.authentication.v1.test_authentication_request import (
+    create_invalid_access_token,
+    create_invalid_refresh_token,
+)
+from tests.seeder.factory import (
+    InvalidJwtFactory,
+    make_custom_jwt,
+    UserBaseFactory,
+    UserFactory,
+)
 
 
 def test_update_token_when_get_expired_token_then_success(
-        session: scoped_session, redis: RedisClient,
-        create_base_users: List[UserBaseFactory]):
+    session: scoped_session,
+    redis: RedisClient,
+    create_base_users: List[UserBaseFactory],
+):
     """
         given : 만료된 JWT access_token, 기존 사용자
         when : update token request from tanos
@@ -32,7 +46,9 @@ def test_update_token_when_get_expired_token_then_success(
     dto = JwtDto(token=token)
 
     result = UpdateJwtUseCase().execute(dto=dto)
-    updated_token_info = AuthenticationRepository().get_token_info_by_user_id(user_id=user_id)
+    updated_token_info = AuthenticationRepository().get_token_info_by_user_id(
+        user_id=user_id
+    )
 
     value_user_id = redis.get_by_key(key=updated_token_info.access_token)
     value_refresh_token = redis.get_by_key(key=user_id)
@@ -48,7 +64,8 @@ def test_update_token_when_get_expired_token_then_success(
 
 
 def test_update_token_when_get_expired_access_token_with_no_user_then_response_error(
-        session: scoped_session, create_invalid_jwts: List[InvalidJwtFactory]):
+    session: scoped_session, create_invalid_jwts: List[InvalidJwtFactory]
+):
     """
         given : 만료된 JWT access_token, 등록되지 않은 사용자
         when : update token request from tanos
@@ -62,7 +79,8 @@ def test_update_token_when_get_expired_access_token_with_no_user_then_response_e
 
 
 def test_update_token_when_get_token_with_wrong_type_then_response_error(
-        session: scoped_session, create_base_users: List[UserBaseFactory]):
+    session: scoped_session, create_base_users: List[UserBaseFactory]
+):
     """
         given : access, refresh 외 type JWT
         when : update token request from tanos
@@ -77,7 +95,10 @@ def test_update_token_when_get_token_with_wrong_type_then_response_error(
 
 
 def test_verification_token_when_detected_blacklist_then_response_401(
-        session: scoped_session, redis: RedisClient, create_base_users: List[UserBaseFactory]):
+    session: scoped_session,
+    redis: RedisClient,
+    create_base_users: List[UserBaseFactory],
+):
     """
         given : invalid access_token, blacklist in redis
         when : verification requset
@@ -101,7 +122,8 @@ def test_verification_token_when_detected_blacklist_then_response_401(
 
 
 def test_verification_token_with_no_redis_when_detected_blacklist_then_response_401(
-        session: scoped_session, create_base_users: List[UserBaseFactory]):
+    session: scoped_session, create_base_users: List[UserBaseFactory]
+):
     """
         given : invalid access_token, blacklist in DB
         when : verification requset
@@ -116,8 +138,10 @@ def test_verification_token_with_no_redis_when_detected_blacklist_then_response_
 
     AuthenticationRepository().create_blacklist(dto=blacklist_dto)
 
-    with patch("core.domains.authentication.repository.authentication_repository.AuthenticationRepository"
-               ".is_redis_ready") as mock_ready:
+    with patch(
+        "core.domains.authentication.repository.authentication_repository.AuthenticationRepository"
+        ".is_redis_ready"
+    ) as mock_ready:
         mock_ready.return_value = False
         result = VerificationJwtUseCase().execute(dto=jwt_dto)
 
@@ -125,7 +149,8 @@ def test_verification_token_with_no_redis_when_detected_blacklist_then_response_
 
 
 def test_verification_without_redis_when_get_invalid_access_token_then_success(
-        session: scoped_session, create_base_users: List[UserBaseFactory]):
+    session: scoped_session, create_base_users: List[UserBaseFactory]
+):
     """
         given : invalid access_token, valid refresh_token in DB
         when : Redis 장애시 DB만 토큰 업데이트
@@ -138,8 +163,10 @@ def test_verification_without_redis_when_get_invalid_access_token_then_success(
 
     jwt_dto = JwtDto(token=access_token)
 
-    with patch("core.domains.authentication.repository.authentication_repository.AuthenticationRepository"
-               ".is_redis_ready") as mock_ready:
+    with patch(
+        "core.domains.authentication.repository.authentication_repository.AuthenticationRepository"
+        ".is_redis_ready"
+    ) as mock_ready:
         mock_ready.return_value = False
         result = VerificationJwtUseCase().execute(dto=jwt_dto)
 
@@ -149,7 +176,10 @@ def test_verification_without_redis_when_get_invalid_access_token_then_success(
 
 
 def test_logout_when_get_token_with_user_id_then_success(
-        session: scoped_session, redis: RedisClient, create_base_users: List[UserBaseFactory]):
+    session: scoped_session,
+    redis: RedisClient,
+    create_base_users: List[UserBaseFactory],
+):
     """
         given : access_token, user_id
         when : logout request
@@ -175,9 +205,10 @@ def test_logout_when_get_token_with_user_id_then_success(
 
 
 def test_verification_when_get_expired_access_token_with_valid_refresh_token_then_success(
-        session: scoped_session,
-        redis: RedisClient,
-        create_base_users: List[UserBaseFactory]):
+    session: scoped_session,
+    redis: RedisClient,
+    create_base_users: List[UserBaseFactory],
+):
     """
         given : expired access_token, user_id, valid refresh_token(in redis)
         when : verification request
@@ -203,9 +234,10 @@ def test_verification_when_get_expired_access_token_with_valid_refresh_token_the
 
 
 def test_verification_when_get_expired_access_token_with_expired_refresh_token_then_failure(
-        session: scoped_session,
-        redis: RedisClient,
-        create_base_users: List[UserBaseFactory]):
+    session: scoped_session,
+    redis: RedisClient,
+    create_base_users: List[UserBaseFactory],
+):
     """
         given : expired access_token, user_id, expired refresh_token(in redis)
         when : verification request
@@ -226,8 +258,8 @@ def test_verification_when_get_expired_access_token_with_expired_refresh_token_t
 
 
 def test_verification_when_get_valid_access_token_then_return_same_token(
-        session: scoped_session,
-        create_base_users: List[UserBaseFactory]):
+    session: scoped_session, create_base_users: List[UserBaseFactory]
+):
     """
         given : valid access_token, user_id
         when : verification request

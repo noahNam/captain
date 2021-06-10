@@ -9,10 +9,7 @@ from core.domains.oauth.enum.oauth_enum import ProviderEnum
 from core.domains.user.dto.user_dto import CreateUserDto
 from core.domains.user.repository.user_repository import UserRepository
 
-kakao_user_dto = CreateUserDto(
-    provider=ProviderEnum.KAKAO.value,
-    provider_id="12345"
-)
+kakao_user_dto = CreateUserDto(provider=ProviderEnum.KAKAO.value, provider_id="12345")
 provider_list = tuple([provider.value for provider in list(ProviderEnum)])
 
 
@@ -25,7 +22,8 @@ def test_create_user_when_get_provider_id(session: scoped_session):
 
 
 def test_create_user_with_duplicate_provider_with_provider_id_then_pass_create_user(
-        session: scoped_session):
+    session: scoped_session,
+):
     UserRepository().create_user(dto=kakao_user_dto)
     UserRepository().create_user(dto=kakao_user_dto)
     count = session.query(UserModel).count()
@@ -34,16 +32,16 @@ def test_create_user_with_duplicate_provider_with_provider_id_then_pass_create_u
 
 
 def test_create_user_without_required_value_then_validation_error(
-        session: scoped_session):
+    session: scoped_session,
+):
     with pytest.raises(ValidationError):
-        dummy_dto = CreateUserDto(
-            provider=ProviderEnum.KAKAO.value,
-        )
+        dummy_dto = CreateUserDto(provider=ProviderEnum.KAKAO.value,)
         UserRepository().create_user(dto=dummy_dto)
 
 
 def test_create_user_when_use_create_users_fixture_then_make_two_users(
-        session: scoped_session, create_users: Any):
+    session: scoped_session, create_users: Any
+):
     users = session.query(UserModel).all()
 
     assert len(users) == 2
@@ -59,9 +57,12 @@ def test_get_user_with_factory_boy(session: scoped_session, create_users: Any):
 
 
 def test_compare_create_user_when_use_build_batch_and_create_users_fixture(
-        session: scoped_session, create_users: Any, user_factory):
+    session: scoped_session, create_users: Any, user_factory
+):
     fixture_users = session.query(UserModel).all()
-    build_batch_users = user_factory.build_batch(size=3, provider=ProviderEnum.KAKAO.value)
+    build_batch_users = user_factory.build_batch(
+        size=3, provider=ProviderEnum.KAKAO.value
+    )
 
     assert len(fixture_users) == 2
     assert len(build_batch_users) == 3

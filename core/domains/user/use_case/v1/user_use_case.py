@@ -13,7 +13,7 @@ class GetUserUseCase:
         self.__user_repo = user_repo
 
     def execute(
-            self, dto: GetUserDto
+        self, dto: GetUserDto
     ) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
         user = self.__user_repo.get_user_by_user_id(user_id=dto.user_id)
         if not user:
