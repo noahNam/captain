@@ -12,7 +12,9 @@ from core.domains.authentication.dto.authentication_dto import JwtDto, GetBlackl
 from core.domains.authentication.entity.blacklist_entity import BlacklistEntity
 from core.domains.authentication.entity.jwt_entity import JwtEntity
 from core.domains.authentication.enum import AuthenticationTopicEnum
-from core.domains.authentication.repository.authentication_repository import AuthenticationRepository
+from core.domains.authentication.repository.authentication_repository import (
+    AuthenticationRepository,
+)
 from core.domains.user.dto.user_dto import GetUserDto
 from core.domains.user.entity.user_entity import UserEntity
 from core.domains.user.enum import UserTopicEnum
@@ -25,7 +27,8 @@ class UpdateJwtUseCase:
             decoded = decode_token(dto.token, allow_expired=True)
         except JWTDecodeError as e:
             return UseCaseFailureOutput(
-                message=f"Invalid Token, error: {e}", detail=FailureType.INVALID_REQUEST_ERROR
+                message=f"Invalid Token, error: {e}",
+                detail=FailureType.INVALID_REQUEST_ERROR,
             )
 
         user_id = decoded.get("identity")
@@ -38,7 +41,8 @@ class UpdateJwtUseCase:
 
         if token_type != ("access" or "refresh"):
             return UseCaseFailureOutput(
-                message="wrong token type, need access or refresh", detail=FailureType.INVALID_REQUEST_ERROR
+                message="wrong token type, need access or refresh",
+                detail=FailureType.INVALID_REQUEST_ERROR,
             )
         user = self.__is_exists_user(user_id=user_id)
 
@@ -51,7 +55,9 @@ class UpdateJwtUseCase:
         token_info = self.__create_or_update_token(dto=GetUserDto(user_id=user_id))
 
         if not token_info:
-            return UseCaseFailureOutput(message="token_info", detail=FailureType.NOT_FOUND_ERROR)
+            return UseCaseFailureOutput(
+                message="token_info", detail=FailureType.NOT_FOUND_ERROR
+            )
 
         access_token = token_info.access_token
 
@@ -67,19 +73,27 @@ class UpdateJwtUseCase:
     def __create_or_update_token(self, dto: GetUserDto) -> Optional[JwtEntity]:
         send_message(topic_name=AuthenticationTopicEnum.CREATE_OR_UPDATE_TOKEN, dto=dto)
 
-        return get_event_object(topic_name=AuthenticationTopicEnum.CREATE_OR_UPDATE_TOKEN)
+        return get_event_object(
+            topic_name=AuthenticationTopicEnum.CREATE_OR_UPDATE_TOKEN
+        )
 
 
 class LogoutUseCase:
-    def execute(self, dto: GetBlacklistDto) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
+    def execute(
+        self, dto: GetBlacklistDto
+    ) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
         blacklist = self.__create_blacklist(dto=dto)
 
         if not blacklist:
-            return UseCaseFailureOutput(message="blacklist", detail=FailureType.INTERNAL_SERVER_ERROR)
+            return UseCaseFailureOutput(
+                message="blacklist", detail=FailureType.INTERNAL_SERVER_ERROR
+            )
 
-        result = jsonify(logout_user=blacklist.user_id,
-                         blacklist_token=blacklist.access_token.decode("utf-8"),
-                         expired_at=blacklist.expired_at)
+        result = jsonify(
+            logout_user=blacklist.user_id,
+            blacklist_token=blacklist.access_token.decode("utf-8"),
+            expired_at=blacklist.expired_at,
+        )
 
         return UseCaseSuccessOutput(value=result)
 
@@ -99,7 +113,8 @@ class VerificationJwtUseCase:
             decoded = decode_token(dto.token, allow_expired=True)
         except JWTDecodeError as e:
             return UseCaseFailureOutput(
-                message=f"Invalid Token, error: {e}", detail=FailureType.INVALID_REQUEST_ERROR
+                message=f"Invalid Token, error: {e}",
+                detail=FailureType.INVALID_REQUEST_ERROR,
             )
 
         user_id = int(decoded.get("identity"))
@@ -112,7 +127,8 @@ class VerificationJwtUseCase:
 
         if token_type != "access":
             return UseCaseFailureOutput(
-                message="wrong token type, need access token", detail=FailureType.INVALID_REQUEST_ERROR
+                message="wrong token type, need access token",
+                detail=FailureType.INVALID_REQUEST_ERROR,
             )
 
         # Blacklist check
@@ -126,7 +142,8 @@ class VerificationJwtUseCase:
 
         if is_blacklist:
             return UseCaseFailureOutput(
-                message=f"Blacklist Token detected, please retry login", detail=FailureType.UNAUTHORIZED_ERROR
+                message=f"Blacklist Token detected, please retry login",
+                detail=FailureType.UNAUTHORIZED_ERROR,
             )
 
         # Valid access_token check
@@ -141,19 +158,23 @@ class VerificationJwtUseCase:
             if self._auth_repo.is_valid_refresh_token_from_redis(user_id=user_id):
                 # update token
                 self._auth_repo.create_or_update_token(dto=GetUserDto(user_id=user_id))
-                new_token_info = self._auth_repo.get_token_info_by_user_id(user_id=user_id)
+                new_token_info = self._auth_repo.get_token_info_by_user_id(
+                    user_id=user_id
+                )
                 # update to redis
                 self._auth_repo.set_token_to_cache(token_info=new_token_info)
                 result = jsonify(access_token=new_token_info.access_token)
                 return UseCaseSuccessOutput(value=result)
             return UseCaseFailureOutput(
-                message=f"Refresh Token expired, please retry login", detail=FailureType.UNAUTHORIZED_ERROR
+                message=f"Refresh Token expired, please retry login",
+                detail=FailureType.UNAUTHORIZED_ERROR,
             )
         else:
             # redis 연결이 안될 경우 DB 에서 토큰 가져옴
             if not self._auth_repo.is_valid_refresh_token(user_id=user_id):
                 return UseCaseFailureOutput(
-                    message=f"Refresh Token expired, please retry login", detail=FailureType.UNAUTHORIZED_ERROR
+                    message=f"Refresh Token expired, please retry login",
+                    detail=FailureType.UNAUTHORIZED_ERROR,
                 )
             # DB 만 토큰 업데이트
             self._auth_repo.create_or_update_token(dto=GetUserDto(user_id=user_id))

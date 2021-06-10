@@ -35,7 +35,7 @@ class RedisClient:
         except StopIteration as e:
             return None
 
-    def set(self, key: Any, value: Any, ex: Union[int, timedelta] = None, ) -> Any:
+    def set(self, key: Any, value: Any, ex: Union[int, timedelta] = None,) -> Any:
         return self._redis_client.set(name=key, value=value, ex=ex)
 
     def clear_cache(self) -> None:
@@ -63,9 +63,7 @@ class RedisClient:
         try:
             self._redis_client.ping()
         except RedisError:
-            logger.error(
-                f"[RedisClient][is_available] ping error"
-            )
+            logger.error(f"[RedisClient][is_available] ping error")
             return False
         return True
 

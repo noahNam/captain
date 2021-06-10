@@ -24,14 +24,17 @@ class BlacklistModel(db.Model):
     )
     user_id = Column(BigInteger, ForeignKey(UserModel.id), nullable=False)
     access_token = Column(String(270), nullable=False)
-    expired_at = Column(DateTime, nullable=False, default=get_jwt_access_expired_timestamp())
+    expired_at = Column(
+        DateTime, nullable=False, default=get_jwt_access_expired_timestamp()
+    )
 
     def __repr__(self):
-        return f"Blacklists('{self.id}', "\
-               f"'{self.user_id}', " \
-               f"'{self.access_token}', "\
-               f"'{self.expired_at}'" \
-
+        return (
+            f"Blacklists('{self.id}', "
+            f"'{self.user_id}', "
+            f"'{self.access_token}', "
+            f"'{self.expired_at}'"
+        )
 
     def to_entity(self) -> BlacklistEntity:
         return BlacklistEntity(

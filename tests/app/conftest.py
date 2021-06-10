@@ -2,15 +2,17 @@ import pytest
 from authlib.integrations.flask_client import OAuth
 from flask_jwt_extended import JWTManager, create_access_token
 
-from tests.app.http.requests.view.authentication.v1.test_authentication_request import create_invalid_access_token
+from tests.app.http.requests.view.authentication.v1.test_authentication_request import (
+    create_invalid_access_token,
+)
 
 
 @pytest.fixture()
 def make_header():
     def _make_header(
-            authorization: str = None,
-            content_type: str = "application/json",
-            accept: str = "application/json",
+        authorization: str = None,
+        content_type: str = "application/json",
+        accept: str = "application/json",
     ):
         return {
             "Authorization": authorization,

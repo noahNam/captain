@@ -3,7 +3,9 @@ from pubsub import pub
 
 from core.domains.authentication.dto.authentication_dto import GetBlacklistDto
 from core.domains.authentication.enum import AuthenticationTopicEnum
-from core.domains.authentication.repository.authentication_repository import AuthenticationRepository
+from core.domains.authentication.repository.authentication_repository import (
+    AuthenticationRepository,
+)
 from core.domains.user.dto.user_dto import GetUserDto
 
 

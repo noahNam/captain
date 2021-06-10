@@ -23,7 +23,7 @@ from core.domains.authentication import event
 
 
 def init_config(
-        app: Flask, config_name: str, settings: Optional[Dict[str, Any]] = None
+    app: Flask, config_name: str, settings: Optional[Dict[str, Any]] = None
 ) -> None:
     app_config = config[config_name]
     app.config.from_object(app_config)
@@ -47,7 +47,7 @@ def init_extensions(app: Flask):
 
 
 def create_app(
-        config_name: str = "default", settings: Optional[Dict[str, Any]] = None
+    config_name: str = "default", settings: Optional[Dict[str, Any]] = None
 ) -> Flask:
     app = Flask(__name__)
     init_config(app, config_name, settings)

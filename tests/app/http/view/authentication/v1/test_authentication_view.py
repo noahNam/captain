@@ -9,13 +9,16 @@ from sqlalchemy.orm import scoped_session
 
 from app.extensions import RedisClient
 from app.persistence.model import BlacklistModel
-from core.domains.authentication.repository.authentication_repository import AuthenticationRepository
+from core.domains.authentication.repository.authentication_repository import (
+    AuthenticationRepository,
+)
 from core.use_case_output import FailureType
 from tests.seeder.factory import UserBaseFactory, UserFactory
 
 
 def test_update_view_when_request_without_jwt_then_raise_validation_error(
-        client: FlaskClient, test_request_context: RequestContext):
+    client: FlaskClient, test_request_context: RequestContext
+):
     """
         given : Nothing
         when : [GET] /api/captain/v1/refresh
@@ -29,10 +32,11 @@ def test_update_view_when_request_without_jwt_then_raise_validation_error(
 
 
 def test_update_view_when_request_with_token_with_wrong_prefix_then_raise_validation_error(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        make_header,
-        create_base_users: List[UserBaseFactory]):
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    make_header,
+    create_base_users: List[UserBaseFactory],
+):
     """
         given : JWT (Header with wrong prefix)
         when : [GET] /api/captain/v1/refresh
@@ -49,10 +53,11 @@ def test_update_view_when_request_with_token_with_wrong_prefix_then_raise_valida
 
 
 def test_update_view_when_request_with_token_with_wrong_token_then_raise_validation_error(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        make_header,
-        create_base_users: List[UserBaseFactory]):
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    make_header,
+    create_base_users: List[UserBaseFactory],
+):
     """
         given : wrong JWT
         when : [GET] /api/captain/v1/refresh
@@ -68,11 +73,13 @@ def test_update_view_when_request_with_token_with_wrong_token_then_raise_validat
     assert response.get_json()["detail"] == FailureType.INVALID_REQUEST_ERROR
 
 
-def test_update_view(client: FlaskClient,
-                     test_request_context: RequestContext,
-                     make_header,
-                     make_expired_authorization,
-                     create_base_users: List[UserBaseFactory]):
+def test_update_view(
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    make_header,
+    make_expired_authorization,
+    create_base_users: List[UserBaseFactory],
+):
     """
         given : wrong JWT
         when : [GET] /api/captain/v1/refresh
@@ -84,9 +91,7 @@ def test_update_view(client: FlaskClient,
     headers = make_header(authorization=authorization)
 
     with test_request_context:
-        response = client.get(
-            url_for("api.token_update_view"), headers=headers
-        )
+        response = client.get(url_for("api.token_update_view"), headers=headers)
     data = response.get_json().get("data")
 
     assert response.status_code == 200
@@ -94,7 +99,8 @@ def test_update_view(client: FlaskClient,
 
 
 def test_logout_view_when_request_with_not_jwt_then_response_405(
-        client: FlaskClient, test_request_context: RequestContext):
+    client: FlaskClient, test_request_context: RequestContext
+):
     """
         given : Nothing
         when : [GET] /api/captain/v1/logout
@@ -107,10 +113,11 @@ def test_logout_view_when_request_with_not_jwt_then_response_405(
 
 
 def test_logout_view_when_request_with_token_with_wrong_token_then_response_405(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        make_header,
-        create_base_users: List[UserBaseFactory]):
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    make_header,
+    create_base_users: List[UserBaseFactory],
+):
     """
         given : wrong JWT
         when : [GET] /api/captain/v1/logout
@@ -126,11 +133,11 @@ def test_logout_view_when_request_with_token_with_wrong_token_then_response_405(
 
 
 def test_logout_view_when_request_with_expired_jwt_then_response_401(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        make_header,
-        make_expired_authorization,
-        create_base_users: List[UserBaseFactory]
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    make_header,
+    make_expired_authorization,
+    create_base_users: List[UserBaseFactory],
 ):
     """
         given : Nothing
@@ -148,13 +155,15 @@ def test_logout_view_when_request_with_expired_jwt_then_response_401(
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
-def test_logout_view(client: FlaskClient,
-                     test_request_context: RequestContext,
-                     redis: RedisClient,
-                     session: scoped_session,
-                     make_header,
-                     make_authorization,
-                     create_base_users: List[UserBaseFactory]):
+def test_logout_view(
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    redis: RedisClient,
+    session: scoped_session,
+    make_header,
+    make_authorization,
+    create_base_users: List[UserBaseFactory],
+):
     """
         given : login with valid access_token
         when : [GET] /api/captain/v1/logout
@@ -166,9 +175,7 @@ def test_logout_view(client: FlaskClient,
     headers = make_header(authorization=authorization)
 
     with test_request_context:
-        response = client.post(
-            url_for("api.logout_view"), headers=headers
-        )
+        response = client.post(url_for("api.logout_view"), headers=headers)
 
     data = response.get_json().get("data")
 
@@ -186,12 +193,13 @@ def test_logout_view(client: FlaskClient,
 
 
 def test_verification_view_when_get_expired_token_with_valid_refresh_token(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        redis: RedisClient,
-        make_header,
-        make_expired_authorization,
-        create_base_users: List[UserBaseFactory]):
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    redis: RedisClient,
+    make_header,
+    make_expired_authorization,
+    create_base_users: List[UserBaseFactory],
+):
     """
         given: expired access_token from header, valid refresh_token
         when: [GET] /api/captain/v1/verification
@@ -210,9 +218,7 @@ def test_verification_view_when_get_expired_token_with_valid_refresh_token(
     bearer, _, expired_token = auth_header.partition(" ")
 
     with test_request_context:
-        response = client.get(
-            url_for("api.verification_view"), headers=headers
-        )
+        response = client.get(url_for("api.verification_view"), headers=headers)
 
     data = response.get_json().get("data")
 
@@ -222,12 +228,13 @@ def test_verification_view_when_get_expired_token_with_valid_refresh_token(
 
 
 def test_verification_view_when_get_expired_token_with_invalid_refresh_token(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        redis: RedisClient,
-        make_header,
-        make_expired_authorization,
-        create_base_users: List[UserBaseFactory]):
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    redis: RedisClient,
+    make_header,
+    make_expired_authorization,
+    create_base_users: List[UserBaseFactory],
+):
     """
         given: expired access_token from header, invalid refresh_token or None
         when: [GET] /api/captain/v1/verification
@@ -239,8 +246,6 @@ def test_verification_view_when_get_expired_token_with_invalid_refresh_token(
     headers = make_header(authorization=authorization)
 
     with test_request_context:
-        response = client.get(
-            url_for("api.verification_view"), headers=headers
-        )
+        response = client.get(url_for("api.verification_view"), headers=headers)
 
     assert response.status_code == 400
