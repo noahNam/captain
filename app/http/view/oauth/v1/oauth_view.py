@@ -6,7 +6,7 @@ from flask import request
 
 from app import oauth
 from app.http.responses import failure_response
-from core.domains.oauth.enum.oauth_enum import OAuthKakaoEnum, ProviderEnum, OAuthNaverEnum
+from core.domains.oauth.enum.oauth_enum import OAuthKakaoEnum, ProviderEnum, OAuthNaverEnum, OAuthBaseHostEnum
 from app.extensions.utils.oauth_helper import request_oauth_access_token_to_kakao, get_kakao_user_info, \
     request_oauth_access_token_to_naver, get_naver_user_info
 from app.http.requests.view.oauth.v1.oauth_request import GetOAuthRequest, CreateUserRequest
@@ -44,10 +44,12 @@ def request_oauth_to_third_party() -> Any:
                 message=f"Invalid provider input, Available parameters are {provider_list}")
         )
 
+    host_url = OAuthBaseHostEnum.REDIRECT_HOST.value if request.environ.get('HTTP_X_REAL_IP', request.remote_addr) != "127.0.0.1" else request.host_url
+
     if parameter == ProviderEnum.NAVER.value:
-        redirect_to = request.host_url + OAuthNaverEnum.REDIRECT_PATH.value
+        redirect_to = host_url + OAuthNaverEnum.REDIRECT_PATH.value
         return oauth.naver.authorize_redirect(redirect_to)
-    redirect_to = request.host_url + OAuthKakaoEnum.REDIRECT_PATH.value
+    redirect_to = host_url + OAuthKakaoEnum.REDIRECT_PATH.value
     return oauth.kakao.authorize_redirect(redirect_to)
 
 
