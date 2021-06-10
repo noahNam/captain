@@ -1,6 +1,10 @@
 from enum import Enum
 
 
+class OAuthBaseHostEnum(Enum):
+    REDIRECT_HOST = "https://apartalk.com/"
+
+
 class OAuthKakaoEnum(Enum):
     # Kakao Secret_key for access kakao api
     KAKAO_CLIENT_ID = "685d9d3691ad88dac84b6f06066c9e91"
