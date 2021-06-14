@@ -34,7 +34,10 @@ def swagger_config():
                     }
                 },
                 "servers": [
-                    {"url": "http://localhost:5000/docs/captain/apidocs/", "description": "local server"},
+                    {
+                        "url": "http://localhost:5000/docs/captain/apidocs/",
+                        "description": "local server",
+                    },
                     {
                         "url": "https://www.apartalk.com/docs/captain/apidocs/",
                         "description": "development server",

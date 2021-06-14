@@ -2,10 +2,12 @@ from typing import Optional
 from app import redis
 from app.extensions.database import session
 from app.extensions.utils.log_helper import logger_
-from app.extensions.utils.time_helper import (get_jwt_access_expired_timestamp,
-                                              get_jwt_refresh_expire_timedelta_to_seconds,
-                                              get_jwt_access_expire_timedelta_to_seconds,
-                                              get_jwt_refresh_expired_timestamp)
+from app.extensions.utils.time_helper import (
+    get_jwt_access_expired_timestamp,
+    get_jwt_refresh_expire_timedelta_to_seconds,
+    get_jwt_access_expire_timedelta_to_seconds,
+    get_jwt_refresh_expired_timestamp,
+)
 from app.persistence.model import BlacklistModel
 from app.persistence.model.jwt_model import JwtModel
 from core.domains.authentication.dto.authentication_dto import GetBlacklistDto, JwtDto
@@ -32,13 +34,12 @@ class AuthenticationRepository:
             update 시간 갱신
         """
         try:
-            session.query(JwtModel).filter_by(user_id=dto.user_id) \
-                .update(
+            session.query(JwtModel).filter_by(user_id=dto.user_id).update(
                 {
                     "access_token": create_access_token(identity=dto.user_id),
                     "refresh_token": create_refresh_token(identity=dto.user_id),
                     "access_expired_at": get_jwt_access_expired_timestamp(),
-                    "refresh_expired_at": get_jwt_refresh_expired_timestamp()
+                    "refresh_expired_at": get_jwt_refresh_expired_timestamp(),
                 }
             )
 
@@ -97,7 +98,7 @@ class AuthenticationRepository:
             redis.set(
                 key=token_info.access_token,
                 value=token_info.user_id,
-                ex=get_jwt_access_expire_timedelta_to_seconds()
+                ex=get_jwt_access_expire_timedelta_to_seconds(),
             )
         except Exception as e:
             logger.error(
@@ -110,7 +111,7 @@ class AuthenticationRepository:
             redis.set(
                 key=token_info.user_id,
                 value=token_info.refresh_token,
-                ex=get_jwt_refresh_expire_timedelta_to_seconds()
+                ex=get_jwt_refresh_expire_timedelta_to_seconds(),
             )
         except Exception as e:
             logger.error(
@@ -138,8 +139,7 @@ class AuthenticationRepository:
         return False
 
     def create_blacklist(self, dto: GetBlacklistDto) -> None:
-        blacklist = BlacklistModel(user_id=dto.user_id,
-                                   access_token=dto.access_token)
+        blacklist = BlacklistModel(user_id=dto.user_id, access_token=dto.access_token)
         try:
             session.add(blacklist)
             session.commit()
@@ -151,7 +151,11 @@ class AuthenticationRepository:
             )
 
     def get_blacklist_by_dto(self, dto: GetBlacklistDto) -> Optional[BlacklistEntity]:
-        blacklist = session.query(BlacklistModel).filter_by(access_token=dto.access_token).first()
+        blacklist = (
+            session.query(BlacklistModel)
+            .filter_by(access_token=dto.access_token)
+            .first()
+        )
 
         if not blacklist:
             return None
@@ -178,7 +182,9 @@ class AuthenticationRepository:
             # 집합 set 에 blacklist_token 추가
             redis.sadd(set_name=set_name, values=value)
             # 집합에 만료시간 지정 (30분)
-            redis.expire(key=set_name, time=get_jwt_access_expire_timedelta_to_seconds())
+            redis.expire(
+                key=set_name, time=get_jwt_access_expire_timedelta_to_seconds()
+            )
         except Exception as e:
             logger.error(
                 f"[AuthenticationRepository][set_access_token_to_cache] key : {blacklist_info.access_token}, "
@@ -186,7 +192,9 @@ class AuthenticationRepository:
             )
 
     def is_blacklist_from_redis(self, dto: GetBlacklistDto) -> bool:
-        return redis.sismember(set_name=redis.BLACKLIST_SET_NAME, value=dto.access_token)
+        return redis.sismember(
+            set_name=redis.BLACKLIST_SET_NAME, value=dto.access_token
+        )
 
     def is_valid_access_token(self, dto: JwtDto) -> bool:
         try:
