@@ -25,12 +25,14 @@ class UserModel(db.Model):
     blacklists_models = relationship("BlacklistModel", backref=backref("blacklists"))
 
     def __repr__(self):
-        return f"User('{self.id}', " \
-               f"'{self.provider}', " \
-               f"'{self.provider_id}', " \
-               f"'{self.group}', " \
-               f"'{self.created_at}', " \
-               f"'{self.updated_at}')"
+        return (
+            f"User('{self.id}', "
+            f"'{self.provider}', "
+            f"'{self.provider_id}', "
+            f"'{self.group}', "
+            f"'{self.created_at}', "
+            f"'{self.updated_at}')"
+        )
 
     def to_entity(self) -> UserEntity:
         return UserEntity(
@@ -39,5 +41,5 @@ class UserModel(db.Model):
             provider_id=self.provider_id,
             group=self.group,
             created_at=self.created_at,
-            updated_at=self.updated_at
+            updated_at=self.updated_at,
         )

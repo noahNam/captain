@@ -22,9 +22,7 @@ class GetJwtAllowedExpiredSchema(BaseModel):
             decode_token(token, allow_expired=True)
 
         except Exception as e:
-            logger.error(
-                f"[GetJwtAllowedExpiredSchema][check_token] Error : {e}"
-            )
+            logger.error(f"[GetJwtAllowedExpiredSchema][check_token] Error : {e}")
             raise ValidationError(f"[GetJwtAllowedExpiredSchema][check_token] Error")
 
         return token
@@ -42,8 +40,7 @@ class AllowedExpiredJwtTokenRequest:
             logger.error(
                 f"[AllowedExpiredJwtTokenRequest][validate_request_and_make_dto] error : {e}"
             )
-            raise InvalidRequestException(
-                message=e.errors())
+            raise InvalidRequestException(message=e.errors())
 
 
 class GetBlacklistSchema(BaseModel):
@@ -59,9 +56,7 @@ class GetBlacklistSchema(BaseModel):
             decode_token(access_token)
 
         except Exception as e:
-            logger.error(
-                f"[GetBlacklistSchema][check_access_token] Error : {e}"
-            )
+            logger.error(f"[GetBlacklistSchema][check_access_token] Error : {e}")
             raise ValidationError(f"[GetBlacklistSchema][check_access_token] error")
 
         return access_token
@@ -74,11 +69,10 @@ class LogoutRequest:
 
     def validate_request_and_make_dto(self):
         try:
-            schema = GetBlacklistSchema(access_token=self.access_token, user_id=self.user_id).dict()
+            schema = GetBlacklistSchema(
+                access_token=self.access_token, user_id=self.user_id
+            ).dict()
             return GetBlacklistDto(**schema)
         except ValidationError as e:
-            logger.error(
-                f"[LogoutRequest][validate_request_and_make_dto] error : {e}"
-            )
-            raise InvalidRequestException(
-                message=e.errors())
+            logger.error(f"[LogoutRequest][validate_request_and_make_dto] error : {e}")
+            raise InvalidRequestException(message=e.errors())

@@ -6,8 +6,11 @@ from flask.ctx import RequestContext, AppContext
 from flask.testing import FlaskClient
 from sqlalchemy.orm import scoped_session
 
-from app.extensions.utils.oauth_helper import request_oauth_access_token_to_kakao, get_kakao_user_info, \
-    request_oauth_access_token_to_naver
+from app.extensions.utils.oauth_helper import (
+    request_oauth_access_token_to_kakao,
+    get_kakao_user_info,
+    request_oauth_access_token_to_naver,
+)
 from core.domains.oauth.dto.oauth_dto import GetOAuthProviderDto
 from core.domains.oauth.enum.oauth_enum import ProviderEnum
 from core.use_case_output import FailureType
@@ -28,7 +31,8 @@ class MockResponse:
 
 
 def test_when_request_with_not_parameter_then_raise_validation_error(
-        client: FlaskClient, test_request_context: RequestContext):
+    client: FlaskClient, test_request_context: RequestContext
+):
     """
         given : Nothing
         when : [GET] /api/captain/v1/oauth
@@ -42,7 +46,8 @@ def test_when_request_with_not_parameter_then_raise_validation_error(
 
 
 def test_when_request_oauth_to_kakao_then_redirect_to_fetch_token_url(
-        client: FlaskClient, test_request_context: RequestContext):
+    client: FlaskClient, test_request_context: RequestContext
+):
     """
         given : GetOAuthDto(provider="kakao")
         when : [GET] /api/captain/v1/oauth?provider=kakao
@@ -50,7 +55,9 @@ def test_when_request_oauth_to_kakao_then_redirect_to_fetch_token_url(
     """
     with test_request_context:
         response = client.get(
-            url_for("api.request_oauth_to_third_party", provider=ProviderEnum.KAKAO.value)
+            url_for(
+                "api.request_oauth_to_third_party", provider=ProviderEnum.KAKAO.value
+            )
         )
 
     assert response.status_code == 302
@@ -62,7 +69,8 @@ def test_when_request_oauth_to_kakao_then_redirect_to_fetch_token_url(
 
 
 def test_when_request_oauth_to_naver_then_redirect_to_fetch_token_url(
-        client: FlaskClient, test_request_context: RequestContext):
+    client: FlaskClient, test_request_context: RequestContext
+):
     """
         given : GetOAuthDto(provider="naver")
         when : [GET] /api/captain/v1/oauth?provider=naver
@@ -70,7 +78,9 @@ def test_when_request_oauth_to_naver_then_redirect_to_fetch_token_url(
     """
     with test_request_context:
         response = client.get(
-            url_for("api.request_oauth_to_third_party", provider=ProviderEnum.NAVER.value)
+            url_for(
+                "api.request_oauth_to_third_party", provider=ProviderEnum.NAVER.value
+            )
         )
 
     assert response.status_code == 302
@@ -83,9 +93,8 @@ def test_when_request_oauth_to_naver_then_redirect_to_fetch_token_url(
 
 @patch("app.http.view.oauth.kakao.authorize_redirect")
 def test_mock_oauth_request_to_kakao_when_success(
-        mock_request: MagicMock,
-        client: FlaskClient,
-        test_request_context: RequestContext):
+    mock_request: MagicMock, client: FlaskClient, test_request_context: RequestContext
+):
     """
         <mocking test>
             when : [GET] /api/captain/v1/oauth?provider=kakao
@@ -93,11 +102,15 @@ def test_mock_oauth_request_to_kakao_when_success(
     """
     mock_request.return_value = Response()
     mock_request.return_value.status_code = 302
-    mock_request.return_value.data = b"https://kauth.kakao.com/oauth/authorize...something"
+    mock_request.return_value.data = (
+        b"https://kauth.kakao.com/oauth/authorize...something"
+    )
 
     with test_request_context:
         response = client.get(
-            url_for("api.request_oauth_to_third_party", provider=ProviderEnum.KAKAO.value)
+            url_for(
+                "api.request_oauth_to_third_party", provider=ProviderEnum.KAKAO.value
+            )
         )
 
     assert response.status_code == mock_request.return_value.status_code
@@ -107,9 +120,8 @@ def test_mock_oauth_request_to_kakao_when_success(
 
 @patch("app.http.view.oauth.naver.authorize_redirect")
 def test_mock_oauth_request_to_naver_when_success(
-        mock_request: MagicMock,
-        client: FlaskClient,
-        test_request_context: RequestContext):
+    mock_request: MagicMock, client: FlaskClient, test_request_context: RequestContext
+):
     """
         <mocking test>
             when : [GET] /api/captain/v1/oauth?provider=naver
@@ -117,11 +129,15 @@ def test_mock_oauth_request_to_naver_when_success(
     """
     mock_request.return_value = Response()
     mock_request.return_value.status_code = 302
-    mock_request.return_value.data = b"https://nid.naver.com/oauth2.0/authorize...something"
+    mock_request.return_value.data = (
+        b"https://nid.naver.com/oauth2.0/authorize...something"
+    )
 
     with test_request_context:
         response = client.get(
-            url_for("api.request_oauth_to_third_party", provider=ProviderEnum.NAVER.value)
+            url_for(
+                "api.request_oauth_to_third_party", provider=ProviderEnum.NAVER.value
+            )
         )
 
     assert response.status_code == mock_request.return_value.status_code
@@ -130,7 +146,8 @@ def test_mock_oauth_request_to_naver_when_success(
 
 
 def test_when_request_with_wrong_provider_then_raise_validation_error(
-        client: FlaskClient, test_request_context: RequestContext):
+    client: FlaskClient, test_request_context: RequestContext
+):
     """
         given : wrong provider value (not in ["naver" or "kakao"])
         when : [GET] /api/captain/v1/oauth?provider="mooyaho"
@@ -138,7 +155,9 @@ def test_when_request_with_wrong_provider_then_raise_validation_error(
     """
     dto = GetOAuthProviderDto(provider="mooyaho")
     with test_request_context:
-        response = client.get(url_for("api.request_oauth_to_third_party", provider=dto.provider))
+        response = client.get(
+            url_for("api.request_oauth_to_third_party", provider=dto.provider)
+        )
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
     assert response.get_json()["detail"] == FailureType.INVALID_REQUEST_ERROR
@@ -161,7 +180,10 @@ def test_mock_request_access_token_to_kakao(mock_post, test_request_context):
     mock_post.return_value.data = mock_contents
 
     with test_request_context:
-        assert request_oauth_access_token_to_kakao(code="code").status_code == mock_post.return_value.status_code
+        assert (
+            request_oauth_access_token_to_kakao(code="code").status_code
+            == mock_post.return_value.status_code
+        )
     assert "access_token" in mock_post.return_value.data
     assert mock_post.called is True
 
@@ -183,7 +205,10 @@ def test_mock_request_access_token_to_naver(mock_post, test_request_context):
     mock_post.return_value.data = mock_contents
 
     with test_request_context:
-        assert request_oauth_access_token_to_naver(code="code").status_code == mock_post.return_value.status_code
+        assert (
+            request_oauth_access_token_to_naver(code="code").status_code
+            == mock_post.return_value.status_code
+        )
     assert "access_token" in mock_post.return_value.data
     assert mock_post.called is True
 
@@ -194,16 +219,16 @@ def test_mock_request_get_kakao_user_info(mock_get):
         <mocking test>
             자원 서버 -> kakao ID 요청
     """
-    mock_contents = {
-        "id": "123456abcde"
-    }
+    mock_contents = {"id": "123456abcde"}
 
     mock_token = {"access_token": "something awesome token"}
 
     mock_get.return_value.data = mock_contents
     mock_get.return_value.status_code = 200
 
-    assert get_kakao_user_info(mock_token).status_code == mock_get.return_value.status_code
+    assert (
+        get_kakao_user_info(mock_token).status_code == mock_get.return_value.status_code
+    )
     assert get_kakao_user_info(mock_token).data == mock_get.return_value.data
     assert mock_get.called is True
 
@@ -214,25 +239,26 @@ def test_mock_request_get_naver_user_info(mock_get):
         <mocking test>
             자원 서버 -> naver ID 요청
     """
-    mock_contents = {
-        "id": "123456abcde"
-    }
+    mock_contents = {"id": "123456abcde"}
 
     mock_token = {"access_token": "something awesome token"}
 
     mock_get.return_value.data = mock_contents
     mock_get.return_value.status_code = 200
 
-    assert get_kakao_user_info(mock_token).status_code == mock_get.return_value.status_code
+    assert (
+        get_kakao_user_info(mock_token).status_code == mock_get.return_value.status_code
+    )
     assert get_kakao_user_info(mock_token).data == mock_get.return_value.data
     assert mock_get.called is True
 
 
 def test_when_redirect_kakao_and_success_token_request_then_success(
-        session: scoped_session,
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        application_context: AppContext):
+    session: scoped_session,
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    application_context: AppContext,
+):
     """
         given : OAuth tokens = "some token value from kakao" -> mocking
                 provider_id from kakao = str -> mocking
@@ -248,23 +274,30 @@ def test_when_redirect_kakao_and_success_token_request_then_success(
         "refresh_token_expires_in": 67890,
     }
 
-    mock_kakao_id = {
-        "id": "some123456"
-    }
+    mock_kakao_id = {"id": "some123456"}
 
     with patch("app.http.view.oauth.kakao.authorize_redirect") as mock_redirect:
         mock_redirect.return_value = Response()
         mock_redirect.return_value.status_code = 302
-        mock_redirect.return_value.data = b"https://kauth.kakao.com/oauth/authorize...something"
+        mock_redirect.return_value.data = (
+            b"https://kauth.kakao.com/oauth/authorize...something"
+        )
         with application_context:
             with test_request_context:
                 redirect_response = client.get(
-                    url_for("api.request_oauth_to_third_party", provider=ProviderEnum.KAKAO.value)
+                    url_for(
+                        "api.request_oauth_to_third_party",
+                        provider=ProviderEnum.KAKAO.value,
+                    )
                 )
                 with patch("requests.post") as mock_post:
-                    mock_post.return_value = MockResponse(json_data=mock_token_info, status_code=201)
+                    mock_post.return_value = MockResponse(
+                        json_data=mock_token_info, status_code=201
+                    )
                     with patch("requests.get") as mock_get:
-                        mock_get.return_value = MockResponse(json_data=mock_kakao_id, status_code=200)
+                        mock_get.return_value = MockResponse(
+                            json_data=mock_kakao_id, status_code=200
+                        )
                         with test_request_context:
                             response = client.get(
                                 url_for("api.fetch_kakao_access_token", code="code")
@@ -281,10 +314,11 @@ def test_when_redirect_kakao_and_success_token_request_then_success(
 
 
 def test_when_redirect_naver_and_success_token_request_then_success(
-        session: scoped_session,
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        application_context: AppContext):
+    session: scoped_session,
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    application_context: AppContext,
+):
     """
         given : OAuth tokens = "some token value from naver" -> mocking
                 provider_id from naver = str -> mocking
@@ -303,24 +337,31 @@ def test_when_redirect_naver_and_success_token_request_then_success(
     mock_naver_response = {
         "resultcode": "00",
         "message": "success",
-        "response": {
-            "id": "abcde12345"
-        }
+        "response": {"id": "abcde12345"},
     }
 
     with patch("app.http.view.oauth.naver.authorize_redirect") as mock_redirect:
         mock_redirect.return_value = Response()
         mock_redirect.return_value.status_code = 302
-        mock_redirect.return_value.data = b"https://nid.naver.com/oauth2.0/authorize...something"
+        mock_redirect.return_value.data = (
+            b"https://nid.naver.com/oauth2.0/authorize...something"
+        )
         with application_context:
             with test_request_context:
                 redirect_response = client.get(
-                    url_for("api.request_oauth_to_third_party", provider=ProviderEnum.NAVER.value)
+                    url_for(
+                        "api.request_oauth_to_third_party",
+                        provider=ProviderEnum.NAVER.value,
+                    )
                 )
                 with patch("requests.post") as mock_post:
-                    mock_post.return_value = MockResponse(json_data=mock_token_info, status_code=201)
+                    mock_post.return_value = MockResponse(
+                        json_data=mock_token_info, status_code=201
+                    )
                     with patch("requests.get") as mock_get:
-                        mock_get.return_value = MockResponse(json_data=mock_naver_response, status_code=200)
+                        mock_get.return_value = MockResponse(
+                            json_data=mock_naver_response, status_code=200
+                        )
                         with test_request_context:
                             response = client.get(
                                 url_for("api.fetch_naver_access_token", code="code")

@@ -12,9 +12,9 @@ class UserPresenter:
         if isinstance(output, UseCaseSuccessOutput):
             value = output.value
             try:
-                schema = UserResponseSchema(id=value.id,
-                                            provider=value.provider,
-                                            provider_id=value.provider_id)
+                schema = UserResponseSchema(
+                    id=value.id, provider=value.provider, provider_id=value.provider_id
+                )
             except ValidationError as e:
                 print(e)
                 return failure_response(
