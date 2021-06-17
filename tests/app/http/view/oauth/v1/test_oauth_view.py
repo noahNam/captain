@@ -375,3 +375,82 @@ def test_when_redirect_naver_and_success_token_request_then_success(
     assert mock_redirect.called is True
     assert mock_get.called is True
     assert mock_post.called is True
+
+
+def test_when_get_kakao_access_token_then_login_success(
+    session: scoped_session,
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    application_context: AppContext,
+):
+    """
+        given : OAuth tokens = "some token value from kakao" -> mocking
+                provider_id from kakao = str -> mocking
+        when : [GET] /api/captain/v1/oauth/kakao, header : Bearer OAuth token(mocking)
+        then : return JWT
+    """
+    mock_token = "something token string"
+    mock_kakao_id = {"id": "some123456"}
+
+    with patch("requests.get") as mock_get_token_validation:
+        mock_get_token_validation.return_value = MockResponse(
+            json_data=mock_kakao_id, status_code=200
+        )
+        with application_context:
+            with test_request_context:
+                validation_response = client.get(
+                    url_for("api.login_kakao_view"),
+                    headers={
+                        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+                        "Cache-Control": "no-cache",
+                        "Authorization": "Bearer " + mock_token,
+                    },
+                )
+    data = validation_response.get_json().get("data")
+
+    assert validation_response.status_code == 200
+    assert isinstance(data["token_info"]["access_token"], str)
+    assert mock_get_token_validation.called is True
+
+
+def test_when_get_naver_access_token_then_login_success(
+    session: scoped_session,
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    application_context: AppContext,
+):
+    """
+        given : OAuth tokens = "some token value from naver" -> mocking
+                provider_id from naver = str -> mocking
+        when : [GET] /api/captain/v1/oauth/naver, header : Bearer OAuth token(mocking)
+        then : return JWT
+    """
+    mock_token = "something token string"
+    mock_naver_id = {"id": "some123456"}
+
+    mock_naver_validation_response = {
+        "resultcode": "00",
+        "message": "success",
+    }
+
+    with application_context:
+        with test_request_context:
+            with patch("requests.get") as mock_get_user_info:
+                mock_get_user_info.return_value = MockResponse(
+                    json_data=mock_naver_id, status_code=200
+                )
+                validation_response = client.get(
+                    url_for("api.login_naver_view"),
+                    headers={
+                        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+                        "Cache-Control": "no-cache",
+                        "Authorization": "Bearer " + mock_token,
+                    },
+                )
+
+    data = validation_response.get_json().get("data")
+
+    assert validation_response.status_code == 200
+    assert isinstance(data["token_info"]["access_token"], str)
+    assert mock_get_user_info.called is True
+    assert mock_get_user_info.call_count == 2

@@ -72,3 +72,27 @@ def get_naver_user_info(token_info) -> Any:
             "Authorization": "Bearer " + token_info.get("access_token"),
         },
     )
+
+
+def request_validation_to_kakao(access_token) -> Any:
+    return requests.get(
+        url=OAuthKakaoEnum.API_BASE_URL.value
+        + OAuthKakaoEnum.ACCESS_TOKEN_VALIDATION_END_POINT.value,
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+            "Cache-Control": "no-cache",
+            "Authorization": "Bearer " + access_token,
+        },
+    )
+
+
+def request_validation_to_naver(access_token) -> Any:
+    return requests.get(
+        url=OAuthNaverEnum.API_BASE_URL.value
+        + OAuthNaverEnum.ACCESS_TOKEN_VALIDATION_END_POINT.value,
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+            "Cache-Control": "no-cache",
+            "Authorization": "Bearer " + access_token,
+        },
+    )
