@@ -15,7 +15,8 @@ class OAuthKakaoEnum(Enum):
     AUTHORIZE_END_POINT = "/oauth/authorize"
     ACCESS_TOKEN_END_POINT = "/oauth/token"
     USER_INFO_END_POINT = "/v2/user/me"
-    REDIRECT_PATH = "api/captain/v1/oauth/kakao"
+    REDIRECT_PATH = "api/captain/v1/oauth/kakao/web"
+    ACCESS_TOKEN_VALIDATION_END_POINT = "/v1/user/access_token_info"
 
     GRANT_TYPE = "authorization_code"
     REQUEST_DEFAULT_HEADER = {
@@ -37,8 +38,9 @@ class OAuthNaverEnum(Enum):
     API_BASE_URL = "https://openapi.naver.com"
     AUTHORIZE_END_POINT = "/oauth2.0/authorize"
     ACCESS_TOKEN_END_POINT = "/oauth2.0/token"
-    REDIRECT_PATH = "api/captain/v1/oauth/naver"
+    REDIRECT_PATH = "api/captain/v1/oauth/naver/web"
     USER_INFO_END_POINT = "/v1/nid/me"
+    ACCESS_TOKEN_VALIDATION_END_POINT = "/v1/nid/verify"
 
     GRANT_TYPE = "authorization_code"
     REQUEST_DEFAULT_HEADER = {
