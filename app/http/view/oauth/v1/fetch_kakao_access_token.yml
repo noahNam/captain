@@ -1,6 +1,6 @@
 openapi: "3.0.2"
 tags:
-  - OAuth
+  - OAuth_for_test_in_Backend
 security:
   - userAuth: [ ]
 parameters:

@@ -40,3 +40,27 @@ not_access_type_error:
     message:
       type: string
       example: "invalid_request_error"
+invalid_kakao_oauth_token_error:
+  properties:
+    detail:
+      type: string
+      example: "Validation Failed from Kakao"
+    message:
+      type: string
+      example: "invalid_request_error"
+invalid_naver_oauth_token_error:
+  properties:
+    detail:
+      type: string
+      example: "Validation Failed from Naver"
+    message:
+      type: string
+      example: "invalid_request_error"
+failed_get_user_info_from_naver_error:
+  properties:
+    detail:
+      type: string
+      example: "Failed get user info from naver"
+    message:
+      type: string
+      example: "invalid_request_error"
