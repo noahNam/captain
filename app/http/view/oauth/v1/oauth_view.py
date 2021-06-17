@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import Any
 
 from flasgger import swag_from
-from flask import request
+from flask import request, jsonify
 
 from app import oauth
 from app.http.responses import failure_response
@@ -17,6 +17,8 @@ from app.extensions.utils.oauth_helper import (
     get_kakao_user_info,
     request_oauth_access_token_to_naver,
     get_naver_user_info,
+    request_validation_to_kakao,
+    request_validation_to_naver,
 )
 from app.http.requests.view.oauth.v1.oauth_request import (
     GetOAuthRequest,
@@ -71,7 +73,7 @@ def request_oauth_to_third_party() -> Any:
     return oauth.kakao.authorize_redirect(redirect_to)
 
 
-@api.route("/v1/oauth/kakao", methods=["GET"])
+@api.route("/v1/oauth/kakao/web", methods=["GET"])
 @swag_from("fetch_kakao_access_token.yml", methods=["GET"])
 def fetch_kakao_access_token() -> Any:
     provider = ProviderEnum.KAKAO.value
@@ -122,9 +124,9 @@ def fetch_kakao_access_token() -> Any:
     return OAuthPresenter().transform(CreateTokenWithUserUseCase().execute(dto=dto))
 
 
-@api.route("/v1/oauth/naver", methods=["GET"])
+@api.route("/v1/oauth/naver/web", methods=["GET"])
 @swag_from("fetch_naver_access_token.yml", methods=["GET"])
-def fetch_naver_access_token():
+def fetch_naver_access_token() -> Any:
     provider = ProviderEnum.NAVER.value
     code = request.args.get("code")
 
@@ -163,6 +165,90 @@ def fetch_naver_access_token():
     try:
         dto = CreateUserRequest(
             provider=provider, provider_id=user_info.get("response")["id"]
+        ).validate_request_and_make_dto()
+    except InvalidRequestException as e:
+        return failure_response(
+            UseCaseFailureOutput(
+                detail=FailureType.INVALID_REQUEST_ERROR, message=f"{e.message}"
+            )
+        )
+    return OAuthPresenter().transform(CreateTokenWithUserUseCase().execute(dto=dto))
+
+
+@api.route("/v1/oauth/kakao", methods=["GET"])
+@swag_from("login_kakao_view.yml", methods=["GET"])
+def login_kakao_view() -> Any:
+    """
+        Live kakao login
+        header : Bearer token
+        return : Captain JWT access_token
+    """
+    auth_header = request.headers.get("Authorization")
+    bearer, _, token = auth_header.partition(" ")
+
+    validation_result = request_validation_to_kakao(access_token=token)
+
+    if validation_result.raise_for_status():
+        return failure_response(
+            UseCaseFailureOutput(
+                detail=FailureType.INVALID_REQUEST_ERROR,
+                message="Validation Failed from Kakao",
+            )
+        )
+    validation_data = validation_result.json()
+    provider = ProviderEnum.KAKAO.value
+    # DTO 생성
+    try:
+        dto = CreateUserRequest(
+            provider=provider, provider_id=str(validation_data.get("id"))
+        ).validate_request_and_make_dto()
+    except InvalidRequestException as e:
+        return failure_response(
+            UseCaseFailureOutput(
+                detail=FailureType.INVALID_REQUEST_ERROR, message=f"{e.message}"
+            )
+        )
+    return OAuthPresenter().transform(CreateTokenWithUserUseCase().execute(dto=dto))
+
+
+@api.route("/v1/oauth/naver", methods=["GET"])
+@swag_from("login_naver_view.yml", methods=["GET"])
+def login_naver_view() -> Any:
+    """
+        Live naver login
+        header : Bearer token
+        return : Captain JWT access_token
+    """
+    auth_header = request.headers.get("Authorization")
+    bearer, _, token = auth_header.partition(" ")
+
+    validation_result = request_validation_to_naver(access_token=token)
+
+    if validation_result.raise_for_status():
+        return failure_response(
+            UseCaseFailureOutput(
+                detail=FailureType.INVALID_REQUEST_ERROR,
+                message="Validation Failed from Naver",
+            )
+        )
+    token_info = {"access_token": token}
+
+    # 자원 서버 요청
+    user_info_result = get_naver_user_info(token_info)
+    if user_info_result.raise_for_status():
+        return failure_response(
+            UseCaseFailureOutput(
+                detail=FailureType.INVALID_REQUEST_ERROR,
+                message="Failed get user info from naver",
+            )
+        )
+    user_info = user_info_result.json()
+    provider = ProviderEnum.NAVER.value
+
+    # DTO 생성
+    try:
+        dto = CreateUserRequest(
+            provider=provider, provider_id=str(user_info.get("id"))
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
