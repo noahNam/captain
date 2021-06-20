@@ -59,7 +59,7 @@ COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
 ENV APP_DIR /server
 COPY app ${APP_DIR}/app
 COPY core ${APP_DIR}/core
-COPY application.py VERSION ${APP_DIR}/
+COPY application.py VERSION newrelic.ini ${APP_DIR}/
 
 EXPOSE 5000
 WORKDIR ${APP_DIR}/
