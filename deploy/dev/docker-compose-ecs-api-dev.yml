@@ -4,7 +4,7 @@ services:
     image: __ECR_ADDRESS__
     ports:
       - "5000:5000"
-    command: "gunicorn --timeout 30 -w 2 --threads 2 -k gevent -b :5000 --access-logfile - --error-logfile - application:app"
+    command: "newrelic-admin run-program gunicorn --timeout 30 -w 2 --threads 2 -k gevent -b :5000 --access-logfile - --error-logfile - application:app"
     logging:
       driver: awslogs
       options:
