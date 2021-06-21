@@ -12,6 +12,7 @@ from app.extensions.swagger import swagger_config
 from app.http.view.main import main as main_bp
 
 from app.http.view import api
+import sentry_sdk
 
 # event listener initialization
 from core.domains.user import event
@@ -23,7 +24,7 @@ from core.domains.authentication import event
 
 
 def init_config(
-    app: Flask, config_name: str, settings: Optional[Dict[str, Any]] = None
+        app: Flask, config_name: str, settings: Optional[Dict[str, Any]] = None
 ) -> None:
     app_config = config[config_name]
     app.config.from_object(app_config)
@@ -46,8 +47,21 @@ def init_extensions(app: Flask):
     redis.init_app(app)
 
 
+def init_sentry(app: Flask):
+    if app.config.get("SENTRY_KEY", None):
+        sentry_sdk.init(
+            app.config.get("SENTRY_KEY"),
+            environment=app.config.get("SENTRY_ENVIRONMENT"),
+
+            # Set traces_sample_rate to 1.0 to capture 100%
+            # of transactions for performance monitoring.
+            # We recommend adjusting this value in production.
+            traces_sample_rate=1.0
+        )
+
+
 def create_app(
-    config_name: str = "default", settings: Optional[Dict[str, Any]] = None
+        config_name: str = "default", settings: Optional[Dict[str, Any]] = None
 ) -> Flask:
     app = Flask(__name__)
     init_config(app, config_name, settings)
@@ -59,5 +73,6 @@ def create_app(
         init_db(app, db)
         init_provider()
         init_extensions(app)
+        init_sentry(app)
 
     return app
