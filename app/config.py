@@ -19,6 +19,7 @@ class Config:
 
 class LocalConfig(Config):
     os.environ["FLASK_ENV"] = "local"
+    SENTRY_ENVIRONMENT = "local"
     SQLALCHEMY_ECHO = True
     DEBUG = True
     # SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URL") or "sqlite:///:memory:"
@@ -28,7 +29,7 @@ class LocalConfig(Config):
 class TestConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = (
-        os.environ.get("TEST_DATABASE_URL") or "sqlite:///:memory:"
+            os.environ.get("TEST_DATABASE_URL") or "sqlite:///:memory:"
     )
 
     WTF_CSRF_ENABLED = False
@@ -36,12 +37,16 @@ class TestConfig(Config):
 
 class DevelopmentConfig(Config):
     os.environ["FLASK_ENV"] = "development"
+    SENTRY_ENVIRONMENT = "development"
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URL") or "sqlite:///:memory:"
+    SENTRY_KEY = os.environ.get("SENTRY_KEY")
 
 
 class ProductionConfig(Config):
     os.environ["FLASK_ENV"] = "production"
+    SENTRY_ENVIRONMENT = "production"
+    SENTRY_KEY = os.environ.get("SENTRY_KEY")
 
 
 config = dict(
