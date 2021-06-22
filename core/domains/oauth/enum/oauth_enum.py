@@ -1,8 +1,9 @@
+import os
 from enum import Enum
 
 
 class OAuthBaseHostEnum(Enum):
-    REDIRECT_HOST = "https://apartalk.com/"
+    OAUTH_REDIRECT_HOST = os.environ.get("OAUTH_REDIRECT_HOST") or ""
 
 
 class OAuthKakaoEnum(Enum):
