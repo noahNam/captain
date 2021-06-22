@@ -12,7 +12,7 @@ from core.domains.oauth.enum.oauth_enum import (
 
 def request_oauth_access_token_to_kakao(code: Optional[any]) -> Any:
     host_url = (
-        OAuthBaseHostEnum.REDIRECT_HOST.value
+        OAuthBaseHostEnum.OAUTH_REDIRECT_HOST.value
         if request.environ.get("HTTP_X_REAL_IP", request.remote_addr) != "127.0.0.1"
         else request.host_url
     )
@@ -44,7 +44,7 @@ def get_kakao_user_info(token_info) -> Any:
 
 def request_oauth_access_token_to_naver(code: Optional[any]) -> Any:
     host_url = (
-        OAuthBaseHostEnum.REDIRECT_HOST.value
+        OAuthBaseHostEnum.OAUTH_REDIRECT_HOST.value
         if request.environ.get("HTTP_X_REAL_IP", request.remote_addr) != "127.0.0.1"
         else request.host_url
     )
