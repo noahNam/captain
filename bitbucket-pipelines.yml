@@ -30,7 +30,7 @@ pipelines:
             - postgres
             - redis
       - step:
-          name: 'Build & Push to apartalk/captain-api-prod'
+          name: 'Build & Push to toadhome/captain-api-prod'
           image: 'python:3.8.2'
           trigger: manual
           script:
@@ -42,7 +42,7 @@ pipelines:
           caches:
             - docker
       - step:
-          name: 'Create TaskDefinition for apartalk/captain-api-prod'
+          name: 'Create TaskDefinition for toadhome/captain-api-prod'
           image: 'python:3.8.2'
           trigger: manual
           script:
