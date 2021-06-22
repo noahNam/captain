@@ -61,7 +61,7 @@ def request_oauth_to_third_party() -> Any:
         )
 
     host_url = (
-        OAuthBaseHostEnum.REDIRECT_HOST.value
+        OAuthBaseHostEnum.OAUTH_REDIRECT_HOST.value
         if request.environ.get("HTTP_X_REAL_IP", request.remote_addr) != "127.0.0.1"
         else request.host_url
     )
