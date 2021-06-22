@@ -52,7 +52,7 @@ class ECSCompose:
     @property
     def image(self) -> str:
         env = self.environment
-        return f"apartalk/captain-api-{env}"
+        return f"toadhome/captain-api-{env}"
 
     @property
     def cluster(self) -> str:
@@ -147,10 +147,10 @@ class ECSCompose:
     def ssm_parameter_name(self) -> str:
         env = self.environment
         if env == "dev":
-            return f"/apartalk/{self.service}"
+            return f"/toadhome/{self.service}"
 
         if env == "prod":
-            return f"/apartalk/{self.service}"
+            return f"/toadhome/{self.service}"
 
     def get_ssm_parameters(self) -> str:
         client = boto3.client("ssm")

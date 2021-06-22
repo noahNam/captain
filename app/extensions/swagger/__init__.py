@@ -43,7 +43,7 @@ def swagger_config():
                         "description": "development server",
                     },
                     {
-                        "url": "https://www.apartalk.com/docs/captain/apidocs/",
+                        "url": "https://www.toadhome.com/docs/captain/apidocs/",
                         "description": "production server",
                     },
                 ],

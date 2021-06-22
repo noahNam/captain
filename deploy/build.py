@@ -37,7 +37,7 @@ def intify(l: list):
 
 
 # constants
-IMAGE_NAME = "apartalk-api-dev"
+IMAGE_NAME = "captain-api-dev"
 BASE_DIR = Path(__file__).absolute().parent.parent
 AVAILABLE_ENVIRONMENT = ["dev", "prod"]
 
@@ -67,10 +67,10 @@ class ECRPush:
     def image_name(self) -> str:
         env = self.environment
         if env == "dev":
-            return "apartalk/captain-api-dev"
+            return "toadhome/captain-api-dev"
 
         if env == "prod":
-            return "apartalk/captain-api-prod"
+            return "toadhome/captain-api-prod"
 
     @property
     def dockerfile(self) -> PosixPath:

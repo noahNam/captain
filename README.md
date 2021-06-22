@@ -1,5 +1,5 @@
 # What is [captain](https://bitbucket.org/apartalk/captain/src)?
-* starting point of projects
+* starting point of toadhome
 * schema project
 * domain driven design
 * version 
