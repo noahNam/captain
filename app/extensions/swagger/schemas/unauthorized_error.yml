@@ -1,0 +1,18 @@
+authentication:
+  yml:
+blacklist_detected_error:
+  properties:
+    detail:
+      type: string
+      example: "Blacklist Token detected, please retry login"
+    message:
+      type: string
+      example: "unauthorized_error"
+expired_refresh_token_error:
+  properties:
+    detail:
+      type: string
+      example: "Refresh Token expired, please retry login"
+    message:
+      type: string
+      example: "unauthorized_error"

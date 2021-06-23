@@ -1,0 +1,11 @@
+fetch_jwt_access_token:
+  properties:
+    data:
+      type: object
+      properties:
+        token_info:
+          type: object
+          properties:
+            access_token:
+              type: string
+              example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2M....

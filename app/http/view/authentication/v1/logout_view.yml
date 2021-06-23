@@ -1,0 +1,48 @@
+openapi: "3.0.2"
+tags:
+  - Authentication
+security:
+  - userAuth: [ x ]
+parameters:
+  - name: Authorization
+    in: header
+    required: true
+    description: User's JWT access_token (Required Vaild) + Login state
+    schema:
+      type: string
+      example: Bearer eyJ0eXAiOiJKV1QiLC....JWT...values
+responses:
+  '200':
+    description: Return logout result (Success)
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/logout_response'
+  '405':
+    description: When get any wrong case access_token or not login state
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "None"
+  '400':
+    description: When given invalid access_token
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/invalid_access_token_error'
+  '500 #1':
+    description: When problem in create blacklist
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/create_blacklist_error'
+  '500 #2':
+    description: When logout failed
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/logout_failed_error'

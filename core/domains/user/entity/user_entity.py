@@ -1,7 +1,12 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 
 @dataclass
 class UserEntity:
-    id: int = None
-    nickname: str = None
+    id: int
+    provider: str
+    provider_id: str
+    group: str
+    created_at: datetime
+    updated_at: datetime

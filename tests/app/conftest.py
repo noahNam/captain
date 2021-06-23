@@ -1,5 +1,10 @@
 import pytest
-from flask_jwt_extended import JWTManager
+from authlib.integrations.flask_client import OAuth
+from flask_jwt_extended import JWTManager, create_access_token
+
+from tests.app.http.requests.view.authentication.v1.test_authentication_request import (
+    create_invalid_access_token,
+)
 
 
 @pytest.fixture()
@@ -9,7 +14,6 @@ def make_header():
         content_type: str = "application/json",
         accept: str = "application/json",
     ):
-
         return {
             "Authorization": authorization,
             "Content-Type": content_type,
@@ -17,6 +21,24 @@ def make_header():
         }
 
     return _make_header
+
+
+@pytest.fixture()
+def make_authorization():
+    def _make_authorization(user_id: int = None):
+        access_token = create_access_token(identity=user_id)
+        return "Bearer " + access_token
+
+    return _make_authorization
+
+
+@pytest.fixture()
+def make_expired_authorization():
+    def _make_authorization(user_id: int = None):
+        access_token = create_invalid_access_token(user_id).decode("utf-8")
+        return "Bearer " + access_token
+
+    return _make_authorization
 
 
 @pytest.fixture()
@@ -31,5 +53,16 @@ def test_request_context(app):
 
 
 @pytest.fixture()
+def application_context(app):
+    app.testing = True
+    return app.app_context()
+
+
+@pytest.fixture()
 def jwt_manager(app):
     return JWTManager(app)
+
+
+@pytest.fixture()
+def oauth(app):
+    return OAuth(app)
