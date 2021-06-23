@@ -2,8 +2,8 @@ from typing import Dict
 
 
 class UseCaseFailureOutput:
-    def __init__(self, type: str, message: str = None) -> None:
-        self.type = type
+    def __init__(self, detail: str, message: str = None) -> None:
+        self.detail = detail
         self.message = self._format_message(message)
 
     def _format_message(self, msg):
@@ -13,7 +13,7 @@ class UseCaseFailureOutput:
 
     @property
     def value(self) -> Dict:
-        return {"type": self.type, "message": self.message}
+        return {"type": self.detail, "message": self.message}
 
     def __bool__(self):
         return False
@@ -34,6 +34,6 @@ class UseCaseSuccessOutput:
 class FailureType:
     INVALID_REQUEST_ERROR = "invalid_request_error"
     UNAUTHORIZED_ERROR = "unauthorized_error"
-    INTERNAL_ERROR = "internal_error"
+    INTERNAL_SERVER_ERROR = "internal_server_error"
     NOT_FOUND_ERROR = "not_found_error"
     SYSTEM_ERROR = "system_error"

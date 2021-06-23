@@ -1,0 +1,156 @@
+image: docker:stable
+
+options:
+  docker: true
+
+pipelines:
+  default:
+    - step:
+        name: 'Run tests'
+        image: python:3.8.2
+        caches:
+          - pip
+        script:
+          - pip install poetry && poetry config virtualenvs.create false && poetry install
+          - FLASK_CONFIG=testing python -m pytest tests/ --ignore=tests/app/http
+        services:
+          - postgres
+          - redis
+  pull-requests:
+    'release/*':
+      - step:
+          name: 'Run tests'
+          image: python:3.8.2
+          caches:
+            - pip
+          script:
+            - pip install poetry && poetry config virtualenvs.create false && poetry install
+            - FLASK_CONFIG=testing python -m pytest tests/ --ignore=tests/app/http
+          services:
+            - postgres
+            - redis
+      - step:
+          name: 'Build & Push to toadhome/captain-api-prod'
+          image: 'python:3.8.2'
+          trigger: manual
+          script:
+            - export AWS_ACCESS_KEY_ID=$AWS_PROD_ACCESS_KEY_ID
+            - export AWS_SECRET_ACCESS_KEY=$AWS_PROD_SECRET_ACCESS_KEY
+            - export AWS_DEFAULT_REGION=$AWS_REGION
+            - pip3 install -U docker boto3
+            - python deploy/build.py -e prod
+          caches:
+            - docker
+      - step:
+          name: 'Create TaskDefinition for toadhome/captain-api-prod'
+          image: 'python:3.8.2'
+          trigger: manual
+          script:
+            - export AWS_ACCESS_KEY_ID=$AWS_PROD_ACCESS_KEY_ID
+            - export AWS_SECRET_ACCESS_KEY=$AWS_PROD_SECRET_ACCESS_KEY
+            - export AWS_DEFAULT_REGION=$AWS_REGION
+            - pip3 install -U boto3
+            - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+            - chmod +x /usr/local/bin/ecs-cli
+            - python deploy/update.py -e prod -s api
+      - step:
+          name: 'Update Service'
+          image: 'python:3.8.2'
+          trigger: manual
+          deployment: production
+          script:
+            - export AWS_ACCESS_KEY_ID=$AWS_PROD_ACCESS_KEY_ID
+            - export AWS_SECRET_ACCESS_KEY=$AWS_PROD_SECRET_ACCESS_KEY
+            - export AWS_DEFAULT_REGION=$AWS_REGION
+            - pip3 install -U boto3
+            - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+            - chmod +x /usr/local/bin/ecs-cli
+            - python deploy/deploy.py
+  custom:
+    '[dev] deploy-for-api':
+      - step:
+          name: 'Run tests'
+          image: python:3.8.2
+          caches:
+            - pip
+          script:
+            - pip install poetry && poetry config virtualenvs.create false && poetry install
+            - FLASK_CONFIG=testing python -m pytest tests/ --ignore=tests/app/http
+          services:
+            - postgres
+            - redis
+      - step:
+          name: 'Build & Push to captain-api-dev'
+          image: 'python:3.8.2'
+          trigger: manual
+          script:
+            - export AWS_ACCESS_KEY_ID=$AWS_TEST_ACCESS_KEY_ID
+            - export AWS_SECRET_ACCESS_KEY=$AWS_TEST_SECRET_ACCESS_KEY
+            - export AWS_DEFAULT_REGION=$AWS_REGION
+            - pip3 install -U docker boto3
+            - python deploy/build.py -e dev
+          caches:
+            - docker
+      - step:
+          name: 'Deploy to captain-api-dev'
+          image: 'python:3.8.2'
+          trigger: manual
+          deployment: test
+          script:
+            - export AWS_ACCESS_KEY_ID=$AWS_TEST_ACCESS_KEY_ID
+            - export AWS_SECRET_ACCESS_KEY=$AWS_TEST_SECRET_ACCESS_KEY
+            - export AWS_DEFAULT_REGION=$AWS_REGION
+            - pip3 install -U boto3
+            - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+            - chmod +x /usr/local/bin/ecs-cli
+            - python deploy/update.py -e dev -s api
+  branches:
+    'develop':
+      - step:
+          name: 'Run tests'
+          image: python:3.8.2
+          caches:
+            - pip
+          script:
+            - pip install poetry && poetry config virtualenvs.create false && poetry install
+            - FLASK_CONFIG=testing python -m pytest tests/ --ignore=tests/app/http
+          services:
+            - postgres
+            - redis
+      - step:
+          name: 'Build & Push to captain-api-dev'
+          image: 'python:3.8.2'
+          trigger: manual
+          script:
+            - export AWS_ACCESS_KEY_ID=$AWS_TEST_ACCESS_KEY_ID
+            - export AWS_SECRET_ACCESS_KEY=$AWS_TEST_SECRET_ACCESS_KEY
+            - export AWS_DEFAULT_REGION=$AWS_REGION
+            - pip3 install -U docker boto3
+            - python deploy/build.py -e dev
+          caches:
+            - docker
+      - step:
+          name: 'Deploy to captain-api-dev'
+          image: 'python:3.8.2'
+          trigger: manual
+          deployment: test
+          script:
+            - export AWS_ACCESS_KEY_ID=$AWS_TEST_ACCESS_KEY_ID
+            - export AWS_SECRET_ACCESS_KEY=$AWS_TEST_SECRET_ACCESS_KEY
+            - export AWS_DEFAULT_REGION=$AWS_REGION
+            - pip3 install -U boto3
+            - curl -o /usr/local/bin/ecs-cli https://amazon-ecs-cli.s3.amazonaws.com/ecs-cli-linux-amd64-latest
+            - chmod +x /usr/local/bin/ecs-cli
+            - python deploy/update.py -e dev -s api
+definitions:
+  services:
+    postgres:
+      image: postgres:11.4
+      variables:
+        POSTGRES_DB: 'captain'
+        POSTGRES_USER: 'postgres'
+        POSTGRES_PASSWORD: '1234'
+    redis:
+      image: redis:latest
+      ports:
+        - 6379:6379

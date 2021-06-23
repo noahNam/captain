@@ -1,12 +1,13 @@
 import os
 
-import pytest
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from pytest_factoryboy import register
 from sqlalchemy.orm import scoped_session
-
 from app import create_app
+from app.extensions import RedisClient
 from app.extensions.database import db as _db
+from .seeder.conftest import *
 
 
 @pytest.fixture(scope="session")
@@ -66,8 +67,37 @@ def session(db: SQLAlchemy) -> scoped_session:
 
     db.session = session
 
+    set_factories_session(session)
+
     yield db.session
 
     transaction.rollback()
     connection.close()
     session.remove()
+
+
+@pytest.fixture(scope="function")
+def redis(app: Flask):
+    redis_url = "redis://localhost:6379"
+    _redis = RedisClient()
+    _redis.init_app(app=app, url=redis_url)
+
+    yield _redis
+
+    _redis.flushall()
+    _redis.disconnect()
+
+
+def register_factories():
+    # 예시) register(StoreFactory) 이런 형태
+    for factory in MODEL_FACTORIES:
+        register(factory)
+
+
+register_factories()
+
+
+def set_factories_session(session):
+    # 예시) UserFactory._meta.sqlalchemy_session = session
+    for factory in MODEL_FACTORIES:
+        factory._meta.sqlalchemy_session = session

@@ -16,6 +16,13 @@ inject = "*"
 pydantic = "*"
 pypubsub = "*"
 flasgger = "*"
+Authlib = "^0.15.3"
+requests = "^2.25.1"
+redis = "^3.5.3"
+gevent = "^20.1.0"
+gunicorn = "==20.0.4"
+newrelic = "*"
+sentry-sdk = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
@@ -23,6 +30,7 @@ pytest-xdist = "*"
 pytest = "*"
 pytest-factoryboy = "*"
 faker = "*"
+pytest-mock = "^3.6.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

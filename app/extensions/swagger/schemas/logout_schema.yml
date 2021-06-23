@@ -1,0 +1,14 @@
+logout_response:
+  properties:
+    data:
+      type: object
+      properties:
+        logout:
+          type: object
+          properties:
+            blacklist_token:
+              type: string
+              example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2M....
+            expired_at:
+              type: string
+              example: Thu, 03 Jun 2021 18:07:13 GMT

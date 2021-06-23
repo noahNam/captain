@@ -1,0 +1,17 @@
+version: "3"
+services:
+  prod-captain-api:
+    image: __ECR_ADDRESS__
+    ports:
+      - "5000:5000"
+    command: "newrelic-admin run-program gunicorn --timeout 30 -w 2 --threads 2 -k gevent -b :5000 --access-logfile - --error-logfile - application:app"
+    logging:
+      driver: awslogs
+      options:
+        # FIX : Change log group
+        awslogs-group: toadhome/prod-captain-api-logs
+        awslogs-region: ap-northeast-2
+        awslogs-stream-prefix: toadhome/prod-captain-api-logs
+        awslogs-create-group: "true"
+    environment:
+    # Environment

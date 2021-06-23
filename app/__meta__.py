@@ -1,2 +1,2 @@
-__api_name__ = "flask-boilerplate"
+__api_name__ = "Captain"
 __version__ = "0.1.0"

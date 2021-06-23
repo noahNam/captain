@@ -1,0 +1,18 @@
+authentication:
+  yml:
+logout_failed_error:
+  properties:
+    detail:
+      type: string
+      example: "response schema validation error"
+    message:
+      type: string
+      example: "internal_server_error"
+create_blacklist_error:
+  properties:
+    detail:
+      type: string
+      example: "blacklist"
+    message:
+      type: string
+      example: "internal_server_error"

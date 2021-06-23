@@ -1,6 +1,8 @@
-from sqlalchemy import Column, BigInteger, Integer, String
+from sqlalchemy import Column, BigInteger, Integer, String, DateTime
+from sqlalchemy.orm import relationship, backref
 
 from app import db
+from app.extensions.utils.time_helper import get_server_timestamp
 from core.domains.user.entity.user_entity import UserEntity
 
 
@@ -13,7 +15,31 @@ class UserModel(db.Model):
         nullable=False,
         autoincrement=True,
     )
-    nickname = Column(String(45), nullable=False)
+    provider = Column(String(10), nullable=False)
+    provider_id = Column(String(50), nullable=False)
+    group = Column(String(10), nullable=True)
+    created_at = Column(DateTime, default=get_server_timestamp())
+    updated_at = Column(DateTime, default=get_server_timestamp())
+
+    jwt_models = relationship("JwtModel", backref=backref("jwts"))
+    blacklists_models = relationship("BlacklistModel", backref=backref("blacklists"))
+
+    def __repr__(self):
+        return (
+            f"User('{self.id}', "
+            f"'{self.provider}', "
+            f"'{self.provider_id}', "
+            f"'{self.group}', "
+            f"'{self.created_at}', "
+            f"'{self.updated_at}')"
+        )
 
     def to_entity(self) -> UserEntity:
-        return UserEntity(id=self.id, nickname=self.nickname)
+        return UserEntity(
+            id=self.id,
+            provider=self.provider,
+            provider_id=self.provider_id,
+            group=self.group,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+        )

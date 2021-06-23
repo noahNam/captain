@@ -1,0 +1,68 @@
+openapi: "3.0.2"
+tags:
+  - Authentication
+security:
+  - userAuth: [x]
+parameters:
+  - name: Authorization
+    in: header
+    required: true
+    description: User's JWT access_token (Expired), Only Use internal (Tanos to Captain)
+    schema:
+      type: string
+      example: Bearer eyJ0eXAiOiJKV1QiLC....JWT...values
+responses:
+  '200':
+    description: Return refreshed jwt - access_token (Success)
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/fetch_jwt_access_token'
+  '404 #1':
+    description: When no access_token in header
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/token_not_found_error'
+  '404 #2':
+    description: When user_id is not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/user_not_found_error'
+  '404 #3':
+    description: When user object is not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/user_object_not_found_error'
+  '404 #4':
+    description: When token_info is not found
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/token_info_not_found_error'
+  '400 #1':
+    description: When given token not starts with "Bearer"
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/wrong_prefix_error'
+  '400 #2':
+    description: When given invalid access_token
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/invalid_access_token_error'
+  '400 #3':
+    description: When can't decode access_token (wrong structure)
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/jwt_decode_error'
+  '400 #4':
+    description: When get not access or refresh type token
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/wrong_token_type_error'
