@@ -91,7 +91,7 @@ class LogoutUseCase:
 
         result = jsonify(
             logout_user=blacklist.user_id,
-            blacklist_token=blacklist.access_token.decode("utf-8"),
+            blacklist_token=blacklist.access_token,
             expired_at=blacklist.expired_at,
         )
 
