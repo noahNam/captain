@@ -44,7 +44,7 @@ class AllowedExpiredJwtTokenRequest:
 
 
 class GetBlacklistSchema(BaseModel):
-    access_token: StrictBytes
+    access_token: str
     user_id: StrictInt
 
     @validator("access_token")
@@ -53,7 +53,7 @@ class GetBlacklistSchema(BaseModel):
             allow_expired=False : 만료된 토큰 허용 안함
         """
         try:
-            decode_token(access_token)
+            decode_token(access_token.encode("utf-8"))
 
         except Exception as e:
             logger.error(f"[GetBlacklistSchema][check_access_token] Error : {e}")

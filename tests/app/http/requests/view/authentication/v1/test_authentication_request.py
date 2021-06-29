@@ -111,7 +111,8 @@ def test_logout_request_when_get_valid_access_token_then_success(create_base_use
     result = LogoutRequest(
         access_token=token_to_byte, user_id=user_id
     ).validate_request_and_make_dto()
-    assert result.access_token == token_to_byte
+
+    assert result.access_token.encode("utf-8") == token_to_byte
 
 
 def test_logout_token_request_when_get_expired_access_token_then_failure(
