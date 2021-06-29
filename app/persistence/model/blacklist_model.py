@@ -23,7 +23,7 @@ class BlacklistModel(db.Model):
         autoincrement=True,
     )
     user_id = Column(BigInteger, ForeignKey(UserModel.id), nullable=False)
-    access_token = Column(String(270), nullable=False)
+    access_token = Column(String(280), nullable=False)
     expired_at = Column(
         DateTime, nullable=False, default=get_jwt_access_expired_timestamp()
     )

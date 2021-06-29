@@ -189,7 +189,7 @@ def test_logout_view(
     assert isinstance(data["logout"]["blacklist_token"], str)
     assert isinstance(data["logout"]["expired_at"], str)
     assert blacklists_in_redis is not None
-    assert blacklist.access_token in blacklists_in_redis
+    assert blacklist.access_token.encode("utf-8") in blacklists_in_redis
 
 
 def test_verification_view_when_get_expired_token_with_valid_refresh_token(
