@@ -181,7 +181,7 @@ class AuthenticationRepository:
             value = blacklist_info.access_token
             # 집합 set 에 blacklist_token 추가
             redis.sadd(set_name=set_name, values=value)
-            # 집합에 만료시간 지정(테스트: 1분 설정)
+            # 집합에 만료시간 지정(테스트: 2분 설정)
             redis.expire(
                 key=set_name, time=get_jwt_access_expire_timedelta_to_seconds_for_test()
             )
