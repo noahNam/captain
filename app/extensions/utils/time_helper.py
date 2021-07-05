@@ -13,6 +13,10 @@ def get_jwt_access_expire_timedelta_to_seconds() -> int:
     return int(timedelta(minutes=30).total_seconds())
 
 
+def get_jwt_access_expire_timedelta_to_seconds_for_test() -> int:
+    return int(timedelta(minutes=2).total_seconds())
+
+
 def get_jwt_refresh_expired_time_delta() -> timedelta:
     return timedelta(days=14)
 
