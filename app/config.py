@@ -12,7 +12,7 @@ class Config:
     DEBUG = False
 
     # JWT Config
-    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=30)
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=1)
     JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(days=14)
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or "hawaii"
 
@@ -22,8 +22,8 @@ class LocalConfig(Config):
     SENTRY_ENVIRONMENT = "local"
     SQLALCHEMY_ECHO = True
     DEBUG = True
-    # SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URL") or "sqlite:///:memory:"
-    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres@localhost:5432/captain"
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URL") or "sqlite:///:memory:"
+    # SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres@localhost:5432/captain"
 
 
 class TestConfig(Config):
