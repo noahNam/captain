@@ -49,10 +49,10 @@ class UserRepository:
         return user.to_entity()
 
     def get_user_provider(self, dto: GetUserProviderDto) -> str:
-        user_provider = (
-            session.query(UserModel.provider)
+        user = (
+            session.query(UserModel)
                 .filter_by(id=dto.user_id)
                 .first()
         )
 
-        return user_provider
+        return user.provider
