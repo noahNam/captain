@@ -5,6 +5,7 @@ from app.http.requests.view.user.v1.user_request import GetUserRequest, GetUserP
 from app.http.responses import failure_response
 from app.http.responses.presenters.user_presenter import UserPresenter, GetUserProviderPresenter
 from app.http.view import auth_required, api
+from app.http.view.authentication import user_id
 from core.domains.user.use_case.v1.user_use_case import GetUserUseCase, GetUserProviderUseCase
 from core.use_case_output import FailureType, UseCaseFailureOutput
 
@@ -26,7 +27,7 @@ def get_user_view(user_id):
 @jwt_required
 @auth_required
 def get_user_provider_view():
-    dto = GetUserProviderRequest(user_id=current_user.id).validate_request_and_make_dto()
+    dto = GetUserProviderRequest(user_id=user_id).validate_request_and_make_dto()
     if not dto:
         return failure_response(
             UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR)
