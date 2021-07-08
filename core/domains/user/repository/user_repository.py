@@ -4,7 +4,7 @@ from sqlalchemy.sql import exists
 from app.extensions.database import session
 from app.extensions.utils.log_helper import logger_
 from app.persistence.model.user_model import UserModel
-from core.domains.user.dto.user_dto import CreateUserDto
+from core.domains.user.dto.user_dto import CreateUserDto, GetUserProviderDto
 from core.domains.user.entity.user_entity import UserEntity
 
 logger = logger_.getLogger(__name__)
@@ -13,14 +13,14 @@ logger = logger_.getLogger(__name__)
 class UserRepository:
     def create_user(self, dto: CreateUserDto) -> None:
         if session.query(
-            exists()
-            .where(UserModel.provider == dto.provider)
-            .where(UserModel.provider_id == dto.provider_id)
+                exists()
+                        .where(UserModel.provider == dto.provider)
+                        .where(UserModel.provider_id == dto.provider_id)
         ).scalar():
             return
 
         try:
-            user = UserModel(provider=dto.provider, provider_id=dto.provider_id,)
+            user = UserModel(provider=dto.provider, provider_id=dto.provider_id, )
             session.add(user)
             session.commit()
         except Exception as e:
@@ -40,10 +40,19 @@ class UserRepository:
     def get_user_by_create_user_dto(self, dto: CreateUserDto) -> Optional[UserEntity]:
         user = (
             session.query(UserModel)
-            .filter_by(provider=dto.provider, provider_id=dto.provider_id)
-            .first()
+                .filter_by(provider=dto.provider, provider_id=dto.provider_id)
+                .first()
         )
 
         if not user:
             return None
         return user.to_entity()
+
+    def get_user_provider(self, dto: GetUserProviderDto) -> str:
+        user_provider = (
+            session.query(UserModel.provider)
+                .filter_by(id=dto.user_id)
+                .first()
+        )
+
+        return user_provider
