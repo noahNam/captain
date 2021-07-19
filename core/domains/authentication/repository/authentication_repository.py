@@ -6,7 +6,7 @@ from app.extensions.utils.time_helper import (
     get_jwt_access_expired_timestamp,
     get_jwt_refresh_expire_timedelta_to_seconds,
     get_jwt_access_expire_timedelta_to_seconds,
-    get_jwt_refresh_expired_timestamp,
+    get_jwt_refresh_expired_timestamp, get_jwt_access_expire_timedelta_to_seconds_for_test,
 )
 from app.persistence.model import BlacklistModel
 from app.persistence.model.jwt_model import JwtModel
@@ -181,9 +181,9 @@ class AuthenticationRepository:
             value = blacklist_info.access_token
             # 집합 set 에 blacklist_token 추가
             redis.sadd(set_name=set_name, values=value)
-            # 집합에 만료시간 지정 (30분)
+            # 집합에 만료시간 지정(테스트: 2분 설정)
             redis.expire(
-                key=set_name, time=get_jwt_access_expire_timedelta_to_seconds()
+                key=set_name, time=get_jwt_access_expire_timedelta_to_seconds_for_test()
             )
         except Exception as e:
             logger.error(
@@ -199,10 +199,7 @@ class AuthenticationRepository:
     def is_valid_access_token(self, dto: JwtDto) -> bool:
         try:
             decode_token(encoded_token=dto.token)
-        except Exception as e:
-            logger.error(
-                f"[AuthenticationRepository][is_valid_access_token] Error : {e}, "
-            )
+        except Exception:
             return False
         return True
 
@@ -212,10 +209,7 @@ class AuthenticationRepository:
             return False
         try:
             decode_token(encoded_token=refresh_token)
-        except Exception as e:
-            logger.error(
-                f"[AuthenticationRepository][is_valid_refresh_token_from_redis] Error : {e}, "
-            )
+        except Exception:
             return False
         return True
 
@@ -226,9 +220,6 @@ class AuthenticationRepository:
             return False
         try:
             decode_token(encoded_token=refresh_token)
-        except Exception as e:
-            logger.error(
-                f"[AuthenticationRepository][is_valid_refresh_token] Error : {e}, "
-            )
+        except Exception:
             return False
         return True

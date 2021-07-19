@@ -7,4 +7,4 @@ class JwtDto(BaseModel):
 
 class GetBlacklistDto(BaseModel):
     user_id: StrictInt = None
-    access_token: StrictBytes = None
+    access_token: str = None

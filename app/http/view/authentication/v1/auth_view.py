@@ -104,11 +104,9 @@ def logout_view():
 
     user_id = get_jwt_identity()
 
-    token_to_bytes = token.encode("utf-8")
-
     try:
         dto = LogoutRequest(
-            access_token=token_to_bytes, user_id=user_id
+            access_token=token, user_id=user_id
         ).validate_request_and_make_dto()
     except InvalidRequestException:
         return failure_response(
