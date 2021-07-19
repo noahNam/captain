@@ -277,6 +277,7 @@ def test_set_blacklist_to_redis_when_get_blacklist_dto(
     AuthenticationRepository().create_blacklist(dto=dto)
 
     blacklist = AuthenticationRepository().get_blacklist_by_dto(dto=dto)
+
     # to redis
     AuthenticationRepository().set_blacklist_to_cache(blacklist)
     blacklists_in_redis = redis.smembers(redis.BLACKLIST_SET_NAME)
@@ -285,7 +286,7 @@ def test_set_blacklist_to_redis_when_get_blacklist_dto(
         redis.sismember(set_name=redis.BLACKLIST_SET_NAME, value=blacklist.access_token)
         is True
     )
-    assert blacklist.access_token in blacklists_in_redis
+    assert blacklist.access_token.encode("utf-8") in blacklists_in_redis
 
 
 def test_get_blacklist_from_redis_when_get_blacklist_dto(

@@ -1,15 +1,15 @@
-"""Create UserModel, JwtModel, BlacklistModel table
+"""create_users_jwts_blacklists_tables
 
-Revision ID: 4b9f5440b1a3
+Revision ID: e6c843f8a7a4
 Revises: 
-Create Date: 2021-06-01 10:56:47.743211
+Create Date: 2021-06-29 11:38:33.492492
 
 """
 from alembic import op
 import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
-revision = "4b9f5440b1a3"
+revision = "e6c843f8a7a4"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -41,7 +41,7 @@ def upgrade():
             nullable=False,
         ),
         sa.Column("user_id", sa.BigInteger(), nullable=False),
-        sa.Column("access_token", sa.String(length=270), nullable=False),
+        sa.Column("access_token", sa.String(length=280), nullable=False),
         sa.Column("expired_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"],),
         sa.PrimaryKeyConstraint("id"),
@@ -55,8 +55,8 @@ def upgrade():
             nullable=False,
         ),
         sa.Column("user_id", sa.BigInteger(), nullable=False),
-        sa.Column("access_token", sa.String(length=270), nullable=False),
-        sa.Column("refresh_token", sa.String(length=270), nullable=False),
+        sa.Column("access_token", sa.String(length=280), nullable=False),
+        sa.Column("refresh_token", sa.String(length=280), nullable=False),
         sa.Column("access_expired_at", sa.DateTime(), nullable=False),
         sa.Column("refresh_expired_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"],),
