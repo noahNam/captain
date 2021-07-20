@@ -47,6 +47,7 @@ class ProductionConfig(Config):
     os.environ["FLASK_ENV"] = "production"
     SENTRY_ENVIRONMENT = "production"
     SENTRY_KEY = os.environ.get("SENTRY_KEY")
+    SQLALCHEMY_DATABASE_URI = os.environ.get("PROD_DATABASE_URL")
 
 
 config = dict(
