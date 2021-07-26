@@ -10,7 +10,8 @@ from core.domains.oauth.enum.oauth_enum import (
     OAuthKakaoEnum,
     ProviderEnum,
     OAuthNaverEnum,
-    OAuthBaseHostEnum, OAuthGoogleEnum,
+    OAuthBaseHostEnum,
+    OAuthGoogleEnum,
 )
 from app.extensions.utils.oauth_helper import (
     request_oauth_access_token_to_kakao,
@@ -18,7 +19,9 @@ from app.extensions.utils.oauth_helper import (
     request_oauth_access_token_to_naver,
     get_naver_user_info,
     request_validation_to_kakao,
-    request_validation_to_naver, request_oauth_access_token_to_google, get_google_user_info,
+    request_validation_to_naver,
+    request_oauth_access_token_to_google,
+    get_google_user_info,
 )
 from app.http.requests.view.oauth.v1.oauth_request import (
     GetOAuthRequest,

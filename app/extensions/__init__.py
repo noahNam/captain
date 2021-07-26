@@ -48,5 +48,5 @@ oauth.register(
     authorize_url=OAuthGoogleEnum.AUTH_URL.value,
     authorize_params=None,
     api_base_url=OAuthGoogleEnum.API_BASE_URL.value,
-    client_kwargs={"scope": "openid"}
+    client_kwargs={"scope": "openid"},
 )
