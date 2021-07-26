@@ -9,7 +9,7 @@ from sqlalchemy.orm import scoped_session
 from app.extensions.utils.oauth_helper import (
     request_oauth_access_token_to_kakao,
     get_kakao_user_info,
-    request_oauth_access_token_to_naver,
+    request_oauth_access_token_to_naver, get_naver_user_info, get_google_user_info,
 )
 from core.domains.oauth.dto.oauth_dto import GetOAuthProviderDto
 from core.domains.oauth.enum.oauth_enum import ProviderEnum
@@ -31,7 +31,7 @@ class MockResponse:
 
 
 def test_when_request_with_not_parameter_then_raise_validation_error(
-    client: FlaskClient, test_request_context: RequestContext
+        client: FlaskClient, test_request_context: RequestContext
 ):
     """
         given : Nothing
@@ -46,7 +46,7 @@ def test_when_request_with_not_parameter_then_raise_validation_error(
 
 
 def test_when_request_oauth_to_kakao_then_redirect_to_fetch_token_url(
-    client: FlaskClient, test_request_context: RequestContext
+        client: FlaskClient, test_request_context: RequestContext
 ):
     """
         given : GetOAuthDto(provider="kakao")
@@ -69,7 +69,7 @@ def test_when_request_oauth_to_kakao_then_redirect_to_fetch_token_url(
 
 
 def test_when_request_oauth_to_naver_then_redirect_to_fetch_token_url(
-    client: FlaskClient, test_request_context: RequestContext
+        client: FlaskClient, test_request_context: RequestContext
 ):
     """
         given : GetOAuthDto(provider="naver")
@@ -93,7 +93,7 @@ def test_when_request_oauth_to_naver_then_redirect_to_fetch_token_url(
 
 @patch("app.http.view.oauth.kakao.authorize_redirect")
 def test_mock_oauth_request_to_kakao_when_success(
-    mock_request: MagicMock, client: FlaskClient, test_request_context: RequestContext
+        mock_request: MagicMock, client: FlaskClient, test_request_context: RequestContext
 ):
     """
         <mocking test>
@@ -120,7 +120,7 @@ def test_mock_oauth_request_to_kakao_when_success(
 
 @patch("app.http.view.oauth.naver.authorize_redirect")
 def test_mock_oauth_request_to_naver_when_success(
-    mock_request: MagicMock, client: FlaskClient, test_request_context: RequestContext
+        mock_request: MagicMock, client: FlaskClient, test_request_context: RequestContext
 ):
     """
         <mocking test>
@@ -146,7 +146,7 @@ def test_mock_oauth_request_to_naver_when_success(
 
 
 def test_when_request_with_wrong_provider_then_raise_validation_error(
-    client: FlaskClient, test_request_context: RequestContext
+        client: FlaskClient, test_request_context: RequestContext
 ):
     """
         given : wrong provider value (not in ["naver" or "kakao"])
@@ -181,8 +181,8 @@ def test_mock_request_access_token_to_kakao(mock_post, test_request_context):
 
     with test_request_context:
         assert (
-            request_oauth_access_token_to_kakao(code="code").status_code
-            == mock_post.return_value.status_code
+                request_oauth_access_token_to_kakao(code="code").status_code
+                == mock_post.return_value.status_code
         )
     assert "access_token" in mock_post.return_value.data
     assert mock_post.called is True
@@ -206,8 +206,8 @@ def test_mock_request_access_token_to_naver(mock_post, test_request_context):
 
     with test_request_context:
         assert (
-            request_oauth_access_token_to_naver(code="code").status_code
-            == mock_post.return_value.status_code
+                request_oauth_access_token_to_naver(code="code").status_code
+                == mock_post.return_value.status_code
         )
     assert "access_token" in mock_post.return_value.data
     assert mock_post.called is True
@@ -227,7 +227,7 @@ def test_mock_request_get_kakao_user_info(mock_get):
     mock_get.return_value.status_code = 200
 
     assert (
-        get_kakao_user_info(mock_token).status_code == mock_get.return_value.status_code
+            get_kakao_user_info(mock_token).status_code == mock_get.return_value.status_code
     )
     assert get_kakao_user_info(mock_token).data == mock_get.return_value.data
     assert mock_get.called is True
@@ -247,22 +247,42 @@ def test_mock_request_get_naver_user_info(mock_get):
     mock_get.return_value.status_code = 200
 
     assert (
-        get_kakao_user_info(mock_token).status_code == mock_get.return_value.status_code
+            get_naver_user_info(mock_token).status_code == mock_get.return_value.status_code
     )
-    assert get_kakao_user_info(mock_token).data == mock_get.return_value.data
+    assert get_naver_user_info(mock_token).data == mock_get.return_value.data
+    assert mock_get.called is True
+
+
+@patch("requests.get")
+def test_mock_request_get_google_user_info(mock_get):
+    """
+        <mocking test>
+            자원 서버 -> google ID 요청
+    """
+    mock_contents = {"sub": "123456abcde"}
+
+    mock_token = {"access_token": "something awesome token"}
+
+    mock_get.return_value.data = mock_contents
+    mock_get.return_value.status_code = 200
+
+    assert (
+            get_google_user_info(mock_token).status_code == mock_get.return_value.status_code
+    )
+    assert get_google_user_info(mock_token).data == mock_get.return_value.data
     assert mock_get.called is True
 
 
 def test_when_redirect_kakao_and_success_token_request_then_success(
-    session: scoped_session,
-    client: FlaskClient,
-    test_request_context: RequestContext,
-    application_context: AppContext,
+        session: scoped_session,
+        client: FlaskClient,
+        test_request_context: RequestContext,
+        application_context: AppContext,
 ):
     """
         given : OAuth tokens = "some token value from kakao" -> mocking
                 provider_id from kakao = str -> mocking
-        when : [POST] /api/captain/v1/oauth/kakao, code="some authorization code"
+        when : redirect to /api/captain/v1/oauth/kakao, code="some authorization code"
         then : return JWT
     """
 
@@ -314,15 +334,15 @@ def test_when_redirect_kakao_and_success_token_request_then_success(
 
 
 def test_when_redirect_naver_and_success_token_request_then_success(
-    session: scoped_session,
-    client: FlaskClient,
-    test_request_context: RequestContext,
-    application_context: AppContext,
+        session: scoped_session,
+        client: FlaskClient,
+        test_request_context: RequestContext,
+        application_context: AppContext,
 ):
     """
         given : OAuth tokens = "some token value from naver" -> mocking
                 provider_id from naver = str -> mocking
-        when : [POST] /api/captain/v1/oauth/naver, code="some authorization code"
+        when : redirect to /api/captain/v1/oauth/naver/web, code="some authorization code"
         then : return JWT
     """
 
@@ -378,10 +398,10 @@ def test_when_redirect_naver_and_success_token_request_then_success(
 
 
 def test_when_get_kakao_access_token_then_login_success(
-    session: scoped_session,
-    client: FlaskClient,
-    test_request_context: RequestContext,
-    application_context: AppContext,
+        session: scoped_session,
+        client: FlaskClient,
+        test_request_context: RequestContext,
+        application_context: AppContext,
 ):
     """
         given : OAuth tokens = "some token value from kakao" -> mocking
@@ -414,10 +434,10 @@ def test_when_get_kakao_access_token_then_login_success(
 
 
 def test_when_get_naver_access_token_then_login_success(
-    session: scoped_session,
-    client: FlaskClient,
-    test_request_context: RequestContext,
-    application_context: AppContext,
+        session: scoped_session,
+        client: FlaskClient,
+        test_request_context: RequestContext,
+        application_context: AppContext,
 ):
     """
         given : OAuth tokens = "some token value from naver" -> mocking
@@ -454,3 +474,98 @@ def test_when_get_naver_access_token_then_login_success(
     assert isinstance(data["token_info"]["access_token"], str)
     assert mock_get_user_info.called is True
     assert mock_get_user_info.call_count == 2
+
+
+def test_when_redirect_google_and_success_token_request_then_success(
+        session: scoped_session,
+        client: FlaskClient,
+        test_request_context: RequestContext,
+        application_context: AppContext,
+):
+    """
+        given : OAuth tokens = "some token value from google" -> mocking
+                provider_id from google = str -> mocking
+        when : redirect to /api/captain/v1/oauth/google, code="some authorization code"
+        then : return JWT
+    """
+
+    mock_token_info = {
+        "token_type": "bearer",
+        "access_token": "some token string",
+        "expires_in": 12345,
+    }
+
+    mock_google_id = {"sub": "some_string_123456"}
+
+    with patch("app.http.view.oauth.google.authorize_redirect") as mock_redirect:
+        mock_redirect.return_value = Response()
+        mock_redirect.return_value.status_code = 302
+        mock_redirect.return_value.data = (
+            b"https://accounts.google.com/o/oauth2/auth...something"
+        )
+        with application_context:
+            with test_request_context:
+                redirect_response = client.get(
+                    url_for(
+                        "api.request_oauth_to_third_party",
+                        provider=ProviderEnum.GOOGLE.value,
+                    )
+                )
+                with patch("requests.post") as mock_post:
+                    mock_post.return_value = MockResponse(
+                        json_data=mock_token_info, status_code=201
+                    )
+                    with patch("requests.get") as mock_get:
+                        mock_get.return_value = MockResponse(
+                            json_data=mock_google_id, status_code=200
+                        )
+                        with test_request_context:
+                            response = client.get(
+                                url_for("api.fetch_google_access_token", code="code")
+                            )
+
+    data = response.get_json().get("data")
+
+    assert redirect_response.status_code == mock_redirect.return_value.status_code
+    assert response.status_code == 200
+    assert isinstance(data["token_info"]["access_token"], str)
+    assert mock_redirect.called is True
+    assert mock_get.called is True
+    assert mock_post.called is True
+
+
+def test_when_get_google_access_token_then_login_success(
+        session: scoped_session,
+        client: FlaskClient,
+        test_request_context: RequestContext,
+        application_context: AppContext,
+):
+    """
+        given : OAuth tokens = "some token value from google" -> mocking
+                provider_id from naver = str -> mocking
+        when : [GET] /api/captain/v1/oauth/google, header : Bearer OAuth token(mocking)
+        then : return JWT
+    """
+    mock_token = "something token string"
+    mock_google_id = {"sub": "some_string_123456"}
+
+    with application_context:
+        with test_request_context:
+            with patch("requests.get") as mock_get_user_info:
+                mock_get_user_info.return_value = MockResponse(
+                    json_data=mock_google_id, status_code=200
+                )
+                validation_response = client.get(
+                    url_for("api.login_google_view"),
+                    headers={
+                        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+                        "Cache-Control": "no-cache",
+                        "Authorization": "Bearer " + mock_token,
+                    },
+                )
+
+    data = validation_response.get_json().get("data")
+
+    assert validation_response.status_code == 200
+    assert isinstance(data["token_info"]["access_token"], str)
+    assert mock_get_user_info.called is True

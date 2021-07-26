@@ -48,6 +48,14 @@ invalid_kakao_oauth_token_error:
     message:
       type: string
       example: "invalid_request_error"
+invalid_google_oauth_token_error:
+  properties:
+    detail:
+      type: string
+      example: "Validation Failed from Google"
+    message:
+      type: string
+      example: "invalid_request_error"
 invalid_naver_oauth_token_error:
   properties:
     detail:
