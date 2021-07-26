@@ -52,7 +52,9 @@ class OAuthNaverEnum(Enum):
 
 
 class OAuthGoogleEnum(Enum):
-    GOOGLE_CLIENT_ID = "154375598296-6gnkc9ds4tbflnqi45q0pht5cjb1o9b5.apps.googleusercontent.com"
+    GOOGLE_CLIENT_ID = (
+        "154375598296-6gnkc9ds4tbflnqi45q0pht5cjb1o9b5.apps.googleusercontent.com"
+    )
     GOOGLE_CLIENT_SECRET = "J0PxwoJ7xMcSHXflLY8sQm_t"
     PROJECT_ID = "toadhome-oauth"
 
