@@ -29,6 +29,7 @@ class OAuthKakaoEnum(Enum):
 class ProviderEnum(Enum):
     KAKAO = "kakao"
     NAVER = "naver"
+    GOOGLE = "google"
 
 
 class OAuthNaverEnum(Enum):
@@ -42,6 +43,25 @@ class OAuthNaverEnum(Enum):
     REDIRECT_PATH = "api/captain/v1/oauth/naver/web"
     USER_INFO_END_POINT = "/v1/nid/me"
     ACCESS_TOKEN_VALIDATION_END_POINT = "/v1/nid/verify"
+
+    GRANT_TYPE = "authorization_code"
+    REQUEST_DEFAULT_HEADER = {
+        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+        "Cache-Control": "no-cache",
+    }
+
+
+class OAuthGoogleEnum(Enum):
+    GOOGLE_CLIENT_ID = "154375598296-6gnkc9ds4tbflnqi45q0pht5cjb1o9b5.apps.googleusercontent.com"
+    GOOGLE_CLIENT_SECRET = "J0PxwoJ7xMcSHXflLY8sQm_t"
+    PROJECT_ID = "toadhome-oauth"
+
+    AUTH_URL = "https://accounts.google.com/o/oauth2/auth"
+    TOKEN_URL = "https://oauth2.googleapis.com/token"
+    API_BASE_URL = "https://oauth2.googleapis.com"
+    USER_INFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
+    AUTH_PROVIDER_X509_CERT_URI = "https://www.googleapis.com/oauth2/v1/certs"
+    REDIRECT_PATH = "api/captain/v1/oauth/google/web"
 
     GRANT_TYPE = "authorization_code"
     REQUEST_DEFAULT_HEADER = {
