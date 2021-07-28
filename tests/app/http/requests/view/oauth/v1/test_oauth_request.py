@@ -38,5 +38,5 @@ def test_when_valid_input_user_info_then_success():
 def test_when_invalid_input_user_info_then_fail():
     with pytest.raises(InvalidRequestException):
         CreateUserRequest(
-            provider="not_provider", provider_id=12345
+            provider="not_provider", provider_id="None"
         ).validate_request_and_make_dto()

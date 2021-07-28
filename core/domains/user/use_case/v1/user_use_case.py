@@ -15,7 +15,7 @@ class UserBaseUseCase:
 
 class GetUserUseCase(UserBaseUseCase):
     def execute(
-            self, dto: GetUserDto
+        self, dto: GetUserDto
     ) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
         user = self._user_repo.get_user_by_user_id(user_id=dto.user_id)
         if not user:
@@ -25,7 +25,7 @@ class GetUserUseCase(UserBaseUseCase):
 
 class GetUserProviderUseCase(UserBaseUseCase):
     def execute(
-            self, dto: GetUserProviderDto
+        self, dto: GetUserProviderDto
     ) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
         if not dto.user_id:
             return UseCaseFailureOutput(detail=FailureType.NOT_FOUND_ERROR)

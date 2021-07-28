@@ -6,6 +6,7 @@ from core.domains.oauth.enum.oauth_enum import (
     OAuthKakaoEnum,
     ProviderEnum,
     OAuthNaverEnum,
+    OAuthGoogleEnum,
 )
 
 jwt = JWTManager()
@@ -36,4 +37,16 @@ oauth.register(
     access_token_url=OAuthNaverEnum.AUTH_BASE_URL.value
     + OAuthNaverEnum.ACCESS_TOKEN_END_POINT.value,
     access_token_params=None,
+)
+
+oauth.register(
+    name=ProviderEnum.GOOGLE.value,
+    client_id=OAuthGoogleEnum.GOOGLE_CLIENT_ID.value,
+    client_secret=OAuthGoogleEnum.GOOGLE_CLIENT_SECRET.value,
+    access_token_url=OAuthGoogleEnum.TOKEN_URL.value,
+    access_token_params=None,
+    authorize_url=OAuthGoogleEnum.AUTH_URL.value,
+    authorize_params=None,
+    api_base_url=OAuthGoogleEnum.API_BASE_URL.value,
+    client_kwargs={"scope": "openid"},
 )
