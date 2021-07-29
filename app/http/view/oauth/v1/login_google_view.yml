@@ -1,0 +1,32 @@
+openapi: "3.0.2"
+tags:
+  - OAuth
+security:
+  - userAuth: [ ]
+parameters:
+  - name: Authorization
+    in: header
+    required: true
+    description: User's OAuth access_token from Google
+    schema:
+      type: string
+      example: Bearer eyJ0eXAiOiJKV1QiLC....JWT...values
+responses:
+  '200':
+    description: Return jwt - access_token (Success)
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/fetch_jwt_access_token'
+  '404 #1':
+    description: When no access_token in header
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/token_not_found_error'
+  '400 #1':
+    description: When given invalid access_token
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/invalid_google_oauth_token_error'

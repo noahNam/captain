@@ -22,6 +22,12 @@ class GetProviderSchema(BaseModel):
 class GetProviderIdSchema(BaseModel):
     provider_id: StrictStr = None
 
+    @validator("provider_id")
+    def provider_id_match(cls, provider_id):
+        if not provider_id or provider_id == "None":
+            raise ValidationError("no provider id")
+        return provider_id
+
 
 class GetOAuthRequest:
     def __init__(self, provider: str):
