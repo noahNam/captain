@@ -26,7 +26,7 @@ def upgrade():
             nullable=False,
         ),
         sa.Column("provider", sa.String(length=10), nullable=False),
-        sa.Column("provider_id", sa.String(length=50), nullable=False),
+        sa.Column("provider_id", sa.String(length=256), nullable=False),
         sa.Column("group", sa.String(length=10), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=True),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
