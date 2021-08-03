@@ -1,5 +1,6 @@
 import datetime
 import os
+from urllib.parse import quote as urlquote
 
 
 class Config:
@@ -22,9 +23,11 @@ class LocalConfig(Config):
     SENTRY_ENVIRONMENT = "local"
     SQLALCHEMY_ECHO = True
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URL") or "sqlite:///:memory:"
+
     # SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres@localhost:5432/captain"
 
+    # Prod migrate
+    SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://postgres:%s@localhost:5432/captain" % urlquote("password")
 
 class TestConfig(Config):
     TESTING = True
