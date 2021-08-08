@@ -9,6 +9,6 @@ class UserEntity(BaseModel):
     uuid: Optional[str]
     provider: str
     provider_id: str
-    group: str
+    group: Optional[str]
     created_at: datetime
     updated_at: datetime
