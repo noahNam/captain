@@ -1,12 +1,14 @@
-from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel
 
 
-@dataclass
-class UserEntity:
+class UserEntity(BaseModel):
     id: int
+    uuid: Optional[str]
     provider: str
     provider_id: str
-    group: str
+    group: Optional[str]
     created_at: datetime
     updated_at: datetime
