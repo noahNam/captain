@@ -15,6 +15,7 @@ class UserModel(db.Model):
         nullable=False,
         autoincrement=True,
     )
+    uuid = Column(String(36), nullable=True)  # todo. 오픈 전 uuid nullable = False로 변경 작업 필요.
     provider = Column(String(10), nullable=False)
     provider_id = Column(String(256), nullable=False)
     group = Column(String(10), nullable=True)
@@ -27,6 +28,7 @@ class UserModel(db.Model):
     def __repr__(self):
         return (
             f"User('{self.id}', "
+            f"'{self.uuid}', "
             f"'{self.provider}', "
             f"'{self.provider_id}', "
             f"'{self.group}', "
@@ -37,6 +39,7 @@ class UserModel(db.Model):
     def to_entity(self) -> UserEntity:
         return UserEntity(
             id=self.id,
+            uuid=self.uuid,
             provider=self.provider,
             provider_id=self.provider_id,
             group=self.group,
