@@ -19,7 +19,7 @@ class RedisClient:
     CLUSTER_NODE_2 = "REDIS_NODE_HOST_2"
 
     def __init__(self):
-        self._redis_client = None
+        self._redis_client: redis.Redis = redis.Redis
         self.keys = None
         self.copied_keys = []
 
