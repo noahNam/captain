@@ -37,7 +37,8 @@ class RedisClient:
         if app.config.get("REDIS_NODE_HOST_1"):
             startup_nodes = self.get_cluster_nodes(app=app)
             self._redis_client: RedisCluster = RedisCluster(startup_nodes=startup_nodes,
-                                                            decode_responses=True)
+                                                            decode_responses=True,
+                                                            skip_full_coverage_check=True)
         else:
             redis_url = url if url else app.config.get(RedisClient.CONFIG_NAME)
             self._redis_client = self._redis_client.from_url(redis_url)
