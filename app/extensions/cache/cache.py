@@ -1,9 +1,11 @@
+import os
 from datetime import timedelta
 from typing import Union, Optional, Any
 
 import redis
 from flask import Flask
 from redis import RedisError
+from rediscluster import RedisCluster
 
 from app.extensions.utils.log_helper import logger_
 
@@ -13,15 +15,32 @@ logger = logger_.getLogger(__name__)
 class RedisClient:
     CONFIG_NAME = "REDIS_URL"
     BLACKLIST_SET_NAME = "jwt_blacklist"
+    CLUSTER_NODE_1 = "REDIS_NODE_HOST_1"
+    CLUSTER_NODE_2 = "REDIS_NODE_HOST_2"
 
     def __init__(self):
-        self._redis_client: redis.Redis = redis.Redis
+        self._redis_client = None
         self.keys = None
         self.copied_keys = []
 
+    def get_cluster_nodes(self, app: Flask):
+        cluster_nodes = [RedisClient.CLUSTER_NODE_1, RedisClient.CLUSTER_NODE_2]
+        startup_node_list = list()
+        for node_host in cluster_nodes:
+            node = dict()
+            node["host"] = app.config.get(node_host)
+            node["post"] = "6379"
+            startup_node_list.append(node)
+        return startup_node_list
+
     def init_app(self, app: Flask, url=None):
-        redis_url = url if url else app.config.get(RedisClient.CONFIG_NAME)
-        self._redis_client = self._redis_client.from_url(redis_url)
+        if app.config.get("REDIS_NODE_HOST_1"):
+            startup_nodes = self.get_cluster_nodes(app=app)
+            self._redis_client: RedisCluster = RedisCluster(startup_nodes=startup_nodes,
+                                                            decode_responses=True)
+        else:
+            redis_url = url if url else app.config.get(RedisClient.CONFIG_NAME)
+            self._redis_client = self._redis_client.from_url(redis_url)
 
     def scan_pattern(self, pattern: str) -> None:
         self.keys = self._redis_client.scan_iter(pattern)
@@ -35,7 +54,7 @@ class RedisClient:
         except StopIteration as e:
             return None
 
-    def set(self, key: Any, value: Any, ex: Union[int, timedelta] = None,) -> Any:
+    def set(self, key: Any, value: Any, ex: Union[int, timedelta] = None, ) -> Any:
         return self._redis_client.set(name=key, value=value, ex=ex)
 
     def clear_cache(self) -> None:
