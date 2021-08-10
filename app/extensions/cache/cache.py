@@ -29,7 +29,7 @@ class RedisClient:
         for node_host in cluster_nodes:
             node = dict()
             node["host"] = app.config.get(node_host)
-            node["post"] = "6379"
+            node["port"] = "6379"
             startup_node_list.append(node)
         return startup_node_list
 
