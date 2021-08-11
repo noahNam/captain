@@ -13,7 +13,7 @@ class Config:
     DEBUG = False
 
     # JWT Config
-    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=2)
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=120)
     JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(days=14)
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or "hawaii"
 
@@ -29,10 +29,11 @@ class LocalConfig(Config):
     # Prod migrate
     SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://postgres:%s@localhost:5432/captain" % urlquote("password")
 
+
 class TestConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = (
-        os.environ.get("TEST_DATABASE_URL") or "sqlite:///:memory:"
+            os.environ.get("TEST_DATABASE_URL") or "sqlite:///:memory:"
     )
 
     WTF_CSRF_ENABLED = False
@@ -51,6 +52,8 @@ class ProductionConfig(Config):
     SENTRY_ENVIRONMENT = "production"
     SENTRY_KEY = os.environ.get("SENTRY_KEY")
     SQLALCHEMY_DATABASE_URI = os.environ.get("PROD_DATABASE_URL")
+    REDIS_NODE_HOST_1 = os.environ.get("REDIS_NODE_HOST_1")
+    REDIS_NODE_HOST_2 = os.environ.get("REDIS_NODE_HOST_2")
 
 
 config = dict(
