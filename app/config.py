@@ -13,7 +13,7 @@ class Config:
     DEBUG = False
 
     # JWT Config
-    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=2)
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=120)
     JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(days=14)
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or "hawaii"
 
