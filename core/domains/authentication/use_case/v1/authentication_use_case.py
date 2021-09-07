@@ -44,7 +44,7 @@ class UpdateJwtUseCase:
                 message="wrong token type, need access or refresh",
                 detail=FailureType.INVALID_REQUEST_ERROR,
             )
-        user = self.__is_exists_user(user_id=user_id)
+        user = self.__get_user(user_id=user_id)
 
         if not user:
             return UseCaseFailureOutput(
@@ -65,10 +65,10 @@ class UpdateJwtUseCase:
 
         return UseCaseSuccessOutput(value=result)
 
-    def __is_exists_user(self, user_id: int) -> Optional[UserEntity]:
-        send_message(topic_name=UserTopicEnum.IS_EXISTS, user_id=user_id)
+    def __get_user(self, user_id: int) -> Optional[UserEntity]:
+        send_message(topic_name=UserTopicEnum.GET_USER, user_id=user_id)
 
-        return get_event_object(topic_name=UserTopicEnum.IS_EXISTS)
+        return get_event_object(topic_name=UserTopicEnum.GET_USER)
 
     def __create_or_update_token(self, dto: GetUserDto) -> Optional[JwtEntity]:
         send_message(topic_name=AuthenticationTopicEnum.CREATE_OR_UPDATE_TOKEN, dto=dto)
