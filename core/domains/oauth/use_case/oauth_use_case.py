@@ -12,15 +12,20 @@ from core.use_case_output import UseCaseSuccessOutput, UseCaseFailureOutput, Fai
 class CreateTokenWithUserUseCase:
     """
         UserRepository
-        -> 1. create (신규 로그인)
-        -> 2. update if user exists (로그아웃 후 재로그인)
+        1. DB -> UserModel에 사용자가 존재한다 -> 로그인 -> UUID만 갱신한다 (update_user_uuid())
+        2. DB -> UserModel에 등록된 사용자가 없다 -> 신규가입 (create_user())
         return JWT
     """
-
     def execute(
-        self, dto: CreateUserDto
+            self, dto: CreateUserDto
     ) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
-        user = self.__create_user(dto=dto)
+        is_exists = self.__is_exists_user(provider_id=dto.provider_id,
+                                          provider=dto.provider)
+
+        if is_exists:
+            user = self.__update_user_uuid(dto=dto)
+        else:
+            user = self.__create_user(dto=dto)
 
         if not user:
             return UseCaseFailureOutput(
@@ -54,3 +59,15 @@ class CreateTokenWithUserUseCase:
         return get_event_object(
             topic_name=AuthenticationTopicEnum.CREATE_OR_UPDATE_TOKEN
         )
+
+    def __is_exists_user(self, provider_id: str, provider: str) -> bool:
+        send_message(topic_name=UserTopicEnum.IS_EXISTS_USER,
+                     provider_id=provider_id,
+                     provider=provider)
+
+        return get_event_object(topic_name=UserTopicEnum.IS_EXISTS_USER)
+
+    def __update_user_uuid(self, dto: CreateUserDto) -> Optional[UserEntity]:
+        send_message(topic_name=UserTopicEnum.UPDATE_USER_UUID, dto=dto)
+
+        return get_event_object(topic_name=UserTopicEnum.UPDATE_USER_UUID)
