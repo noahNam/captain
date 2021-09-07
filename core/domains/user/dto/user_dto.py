@@ -12,3 +12,4 @@ class GetUserProviderDto(BaseModel):
 class CreateUserDto(BaseModel):
     provider: str
     provider_id: str
+    uuid: str

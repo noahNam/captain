@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from typing import Any
+from uuid import UUID, uuid4
 
 from flasgger import swag_from
 from flask import request, jsonify, Response
@@ -82,6 +83,10 @@ def request_oauth_to_third_party() -> Any:
 @api.route("/v1/oauth/kakao/web", methods=["GET"])
 @swag_from("fetch_kakao_access_token.yml", methods=["GET"])
 def fetch_kakao_access_token() -> Any:
+    """
+        App Live가 아닌 Web Test에서는 uuid를 백엔드 자체에서 생성
+    """
+    uuid_v4 = str(uuid4())
     provider = ProviderEnum.KAKAO.value
     code = request.args.get("code")
 
@@ -119,7 +124,9 @@ def fetch_kakao_access_token() -> Any:
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider, provider_id=str(user_info.get("id"))
+            provider=provider,
+            provider_id=str(user_info.get("id")),
+            uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
@@ -133,6 +140,10 @@ def fetch_kakao_access_token() -> Any:
 @api.route("/v1/oauth/naver/web", methods=["GET"])
 @swag_from("fetch_naver_access_token.yml", methods=["GET"])
 def fetch_naver_access_token() -> Any:
+    """
+            App Live가 아닌 Web Test에서는 uuid를 백엔드 자체에서 생성
+    """
+    uuid_v4 = str(uuid4())
     provider = ProviderEnum.NAVER.value
     code = request.args.get("code")
 
@@ -170,7 +181,9 @@ def fetch_naver_access_token() -> Any:
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider, provider_id=user_info.get("response")["id"]
+            provider=provider,
+            provider_id=user_info.get("response")["id"],
+            uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
@@ -187,26 +200,33 @@ def login_kakao_view() -> Any:
     """
         Live kakao login
         header : Bearer token
+        parameter : uuid=some-uuid-value-from-frontend
         return : Captain JWT access_token
     """
     auth_header = request.headers.get("Authorization")
     bearer, _, token = auth_header.partition(" ")
+    uuid_v4 = request.args.get("uuid")
 
     validation_result = request_validation_to_kakao(access_token=token)
 
-    if validation_result.raise_for_status():
+    try:
+        validation_result.raise_for_status()
+    except Exception as e:
         return failure_response(
             UseCaseFailureOutput(
                 detail=FailureType.INVALID_REQUEST_ERROR,
-                message="Validation Failed from Kakao",
+                message=f"Validation Failed from Kakao, error: {e}, {validation_result.json()}",
             )
         )
+
     validation_data = validation_result.json()
     provider = ProviderEnum.KAKAO.value
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider, provider_id=str(validation_data.get("id"))
+            provider=provider,
+            provider_id=str(validation_data.get("id"),),
+            uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
@@ -223,29 +243,35 @@ def login_naver_view() -> Any:
     """
         Live naver login
         header : Bearer token
+        parameter : uuid=some-uuid-value-from-frontend
         return : Captain JWT access_token
     """
     auth_header = request.headers.get("Authorization")
     bearer, _, token = auth_header.partition(" ")
+    uuid_v4 = request.args.get("uuid")
 
     validation_result = request_validation_to_naver(access_token=token)
 
-    if validation_result.raise_for_status():
+    try:
+        validation_result.raise_for_status()
+    except Exception as e:
         return failure_response(
             UseCaseFailureOutput(
                 detail=FailureType.INVALID_REQUEST_ERROR,
-                message="Validation Failed from Naver",
+                message=f"Validation Failed from Naver, error: {e}, {validation_result.json()}",
             )
         )
     token_info = {"access_token": token}
 
     # 자원 서버 요청
     user_info_result = get_naver_user_info(token_info)
-    if user_info_result.raise_for_status():
+    try:
+        user_info_result.raise_for_status()
+    except Exception as e:
         return failure_response(
             UseCaseFailureOutput(
                 detail=FailureType.INVALID_REQUEST_ERROR,
-                message="Failed get user info from naver",
+                message=f"Failed get user info from naver, error: {e}",
             )
         )
     user_info = user_info_result.json()
@@ -254,7 +280,9 @@ def login_naver_view() -> Any:
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider, provider_id=str(user_info.get("id"))
+            provider=provider,
+            provider_id=str(user_info.get("id")),
+            uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
@@ -269,8 +297,9 @@ def login_naver_view() -> Any:
 @swag_from("fetch_google_access_token.yml", methods=["GET"])
 def fetch_google_access_token() -> Any:
     """
-        for test web in server
+            App Live가 아닌 Web Test에서는 uuid를 백엔드 자체에서 생성
     """
+    uuid_v4 = str(uuid4())
     provider = ProviderEnum.GOOGLE.value
     code = request.args.get("code")
 
@@ -288,7 +317,7 @@ def fetch_google_access_token() -> Any:
         return failure_response(
             UseCaseFailureOutput(
                 detail=FailureType.INVALID_REQUEST_ERROR,
-                message="Failed get OAuth token info from Google",
+                message=f"Failed get OAuth token info from Google, {token_result.json()}",
             )
         )
     google_token_info = token_result.json()
@@ -307,7 +336,9 @@ def fetch_google_access_token() -> Any:
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider, provider_id=str(user_info.get("sub"))
+            provider=provider,
+            provider_id=str(user_info.get("sub")),
+            uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
@@ -324,20 +355,24 @@ def login_google_view() -> Any:
     """
         Live google login
         header : Bearer token
+        parameter : uuid=some-uuid-value-from-frontend
         return : Captain JWT access_token
     """
     auth_header = request.headers.get("Authorization")
     bearer, _, token = auth_header.partition(" ")
+    uuid_v4 = request.args.get("uuid")
 
     token_info = {"access_token": token}
 
     # 자원 서버 요청
     user_info_result = get_google_user_info(token_info)
-    if user_info_result.raise_for_status():
+    try:
+        user_info_result.raise_for_status()
+    except Exception as e:
         return failure_response(
             UseCaseFailureOutput(
                 detail=FailureType.INVALID_REQUEST_ERROR,
-                message="Failed get user info from Google",
+                message=f"Failed get user info from Google, error:{e}, {user_info_result.json()}",
             )
         )
     user_info = user_info_result.json()
@@ -346,7 +381,9 @@ def login_google_view() -> Any:
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider, provider_id=str(user_info.get("sub"))
+            provider=provider,
+            provider_id=str(user_info.get("sub")),
+            uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
