@@ -1,4 +1,6 @@
 from pydantic import ValidationError, BaseModel, StrictStr, validator
+from pydantic.types import UUID4
+
 from app.extensions.utils.log_helper import logger_
 from core.domains.oauth.dto.oauth_dto import GetOAuthProviderDto
 from core.domains.oauth.enum.oauth_enum import ProviderEnum
@@ -29,6 +31,10 @@ class GetProviderIdSchema(BaseModel):
         return provider_id
 
 
+class GetUUIDv4Schema(BaseModel):
+    uuid: UUID4 = None
+
+
 class GetOAuthRequest:
     def __init__(self, provider: str):
         self.provider = provider
@@ -45,9 +51,10 @@ class GetOAuthRequest:
 
 
 class CreateUserRequest:
-    def __init__(self, provider: str, provider_id: str):
+    def __init__(self, provider: str, provider_id: str, uuid: str):
         self.provider = provider
         self.provider_id = provider_id
+        self.uuid = uuid
 
     def validate_request_and_make_dto(self):
         try:
@@ -55,7 +62,10 @@ class CreateUserRequest:
             provider_id_schema = GetProviderIdSchema(
                 provider_id=self.provider_id
             ).dict()
+            uuid_schema = GetUUIDv4Schema(uuid=UUID4(self.uuid)).dict()
+            uuid_schema["uuid"] = str(uuid_schema.get("uuid"))
             schema.update(provider_id_schema)
+            schema.update(uuid_schema)
 
             # CreateUserDto : in User domain
             return CreateUserDto(**schema)
