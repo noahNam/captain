@@ -168,11 +168,17 @@ def test_verification_without_redis_when_get_invalid_access_token_then_success(
         then : success
     """
     user_id = create_base_users[0].id
+    uuid = create_base_users[0].uuid
+    expired_token = create_invalid_access_token(user_id=user_id)
+    valid_refresh_token = create_refresh_token(identity=user_id)
 
-    access_token = create_invalid_access_token(user_id=user_id)
-    AuthenticationRepository().create_token(dto=GetUserDto(user_id=user_id))
+    jwt_model = JwtModel(
+        user_id=user_id, access_token=expired_token, refresh_token=valid_refresh_token,
+    )
+    session.add(jwt_model)
+    session.commit()
 
-    jwt_with_uuid_dto = JwtWithUUIDDto(token=access_token, uuid=uuid_v4)
+    jwt_with_uuid_dto = JwtWithUUIDDto(token=expired_token, uuid=uuid)
 
     with patch(
         "core.domains.authentication.repository.authentication_repository.AuthenticationRepository"
@@ -295,6 +301,7 @@ def test_verification_when_get_valid_access_token_then_return_same_token(
         then : same token return
     """
     user_id = create_base_users[0].id
+
     token = create_access_token(identity=user_id)
     jwt_with_uuid_dto = JwtWithUUIDDto(token=token.encode("utf-8"), uuid=uuid_v4)
 
