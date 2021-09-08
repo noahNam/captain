@@ -7,13 +7,13 @@ parameters:
   - name: provider
     in: path
     required: true
-    description: kakao or naver
+    description: kakao or naver or google
     schema:
       type: string
       example: kakao
 responses:
   '302':
-    description: Redirect to end_point - /v1/oauth/kakao or /v1/oauth/naver (Success)
+    description: Redirect to end_point - /v1/oauth/kakao/web or /v1/oauth/naver/web or /v1/oauth/google/web (Success)
     content:
       html/text:
         schema:
