@@ -183,9 +183,9 @@ class VerificationJwtUseCase(JwtBaseUseCase):
             )
         else:
             # redis 연결이 안될 경우 DB 에서 토큰 가져옴
-            if not self._auth_repo.is_valid_refresh_token(
+            if not (self._auth_repo.is_valid_refresh_token(
                 user_id=user_id
-            ) and self.__is_valid_user_uuid(uuid=dto.uuid, user_id=user_id):
+            ) and self.__is_valid_user_uuid(uuid=dto.uuid, user_id=user_id)):
                 return UseCaseFailureOutput(
                     message=f"Refresh Token expired, please retry login",
                     detail=FailureType.UNAUTHORIZED_ERROR,
