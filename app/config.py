@@ -27,13 +27,16 @@ class LocalConfig(Config):
     # SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres@localhost:5432/captain"
 
     # Prod migrate
-    SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://postgres:%s@localhost:5432/captain" % urlquote("password")
+    SQLALCHEMY_DATABASE_URI = (
+        f"postgresql+psycopg2://postgres:%s@localhost:5432/captain"
+        % urlquote("password")
+    )
 
 
 class TestConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = (
-            os.environ.get("TEST_DATABASE_URL") or "sqlite:///:memory:"
+        os.environ.get("TEST_DATABASE_URL") or "sqlite:///:memory:"
     )
 
     WTF_CSRF_ENABLED = False

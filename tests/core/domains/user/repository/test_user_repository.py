@@ -11,7 +11,9 @@ from core.domains.user.dto.user_dto import CreateUserDto
 from core.domains.user.repository.user_repository import UserRepository
 
 uuid_v4 = str(uuid4())
-kakao_user_dto = CreateUserDto(provider=ProviderEnum.KAKAO.value, provider_id="12345", uuid=uuid_v4)
+kakao_user_dto = CreateUserDto(
+    provider=ProviderEnum.KAKAO.value, provider_id="12345", uuid=uuid_v4
+)
 provider_list = tuple([provider.value for provider in list(ProviderEnum)])
 
 
@@ -30,17 +32,18 @@ def test_create_user_when_get_provider_id(session: scoped_session):
 
 
 def test_update_user_uuid_when_user_login_then_update_uuid(
-        session: scoped_session,
-        create_users: List[UserModel]
+    session: scoped_session, create_users: List[UserModel]
 ):
     """
         given: 기존 사용자
         when: OAuth 로그인
         then: uuid 업데이트
     """
-    dto = CreateUserDto(provider=create_users[0].provider,
-                        provider_id=create_users[0].provider_id,
-                        uuid=uuid_v4)
+    dto = CreateUserDto(
+        provider=create_users[0].provider,
+        provider_id=create_users[0].provider_id,
+        uuid=uuid_v4,
+    )
     UserRepository().update_user_uuid(dto=dto)
 
     assert create_users[0].provider == dto.provider
@@ -49,21 +52,21 @@ def test_update_user_uuid_when_user_login_then_update_uuid(
 
 
 def test_is_exists_user_when_user_in_db_then_return_true(
-        session: scoped_session,
-        create_users: List[UserModel]
+    session: scoped_session, create_users: List[UserModel]
 ):
     """
         given: 기존 사용자의 provider, provider_id
         when: 사용자 여부 체크
         then: True
     """
-    result = UserRepository().is_exists_user(provider=create_users[0].provider,
-                                             provider_id=create_users[0].provider_id)
+    result = UserRepository().is_exists_user(
+        provider=create_users[0].provider, provider_id=create_users[0].provider_id
+    )
     assert result is True
 
 
 def test_create_user_without_required_value_then_validation_error(
-        session: scoped_session,
+    session: scoped_session,
 ):
     """
         given: 적절하지 않은 CreateUserDto
@@ -71,13 +74,12 @@ def test_create_user_without_required_value_then_validation_error(
         then: validation error
     """
     with pytest.raises(ValidationError):
-        dummy_dto = CreateUserDto(provider=ProviderEnum.KAKAO.value, )
+        dummy_dto = CreateUserDto(provider=ProviderEnum.KAKAO.value,)
         UserRepository().create_user(dto=dummy_dto)
 
 
 def test_create_user_when_use_create_users_fixture_then_make_two_users(
-        session: scoped_session,
-        create_users: List[UserModel]
+    session: scoped_session, create_users: List[UserModel]
 ):
     """
         create_users fixture test
@@ -90,7 +92,9 @@ def test_create_user_when_use_create_users_fixture_then_make_two_users(
         assert type(users[i].provider_id) == str
 
 
-def test_get_user_with_factory_boy(session: scoped_session, create_users: List[UserModel]):
+def test_get_user_with_factory_boy(
+    session: scoped_session, create_users: List[UserModel]
+):
     """
         factory_boy instance test
     """
@@ -100,7 +104,7 @@ def test_get_user_with_factory_boy(session: scoped_session, create_users: List[U
 
 
 def test_compare_create_user_when_use_build_batch_and_create_users_fixture(
-        session: scoped_session, create_users: Any, user_factory
+    session: scoped_session, create_users: Any, user_factory
 ):
     """
         factory_boy build_batch test

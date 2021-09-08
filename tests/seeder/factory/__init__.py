@@ -130,6 +130,7 @@ class InvalidJwtFactory(BaseFactory):
     """
     Define invalid JwtModel factory (made yesterday)
     """
+
     class Meta:
         model = JwtModel
 

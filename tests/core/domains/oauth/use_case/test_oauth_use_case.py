@@ -14,9 +14,11 @@ uuid_v4 = str(uuid4())
 
 
 def test_create_token_when_create_user_by_pypubsub_then_success(
-        session: scoped_session,
+    session: scoped_session,
 ):
-    dto = CreateUserDto(provider=ProviderEnum.KAKAO.value, provider_id=12345, uuid=uuid_v4)
+    dto = CreateUserDto(
+        provider=ProviderEnum.KAKAO.value, provider_id=12345, uuid=uuid_v4
+    )
 
     result = CreateTokenWithUserUseCase().execute(dto=dto)
 
@@ -26,14 +28,14 @@ def test_create_token_when_create_user_by_pypubsub_then_success(
 
 
 def test_create_token_when_exists_user_by_pypubsub_then_update_only_uuid(
-        session: scoped_session,
-        db: SQLAlchemy,
-        create_users: List[UserModel]
+    session: scoped_session, db: SQLAlchemy, create_users: List[UserModel]
 ):
     before_uuid = create_users[0].uuid
-    dto = CreateUserDto(provider=create_users[0].provider,
-                        provider_id=create_users[0].provider_id,
-                        uuid=uuid_v4)
+    dto = CreateUserDto(
+        provider=create_users[0].provider,
+        provider_id=create_users[0].provider_id,
+        uuid=uuid_v4,
+    )
 
     result = CreateTokenWithUserUseCase().execute(dto=dto)
 
@@ -42,8 +44,11 @@ def test_create_token_when_exists_user_by_pypubsub_then_update_only_uuid(
     options = dict(bind=connection, binds={})
 
     session_2 = db.create_scoped_session(options=options)
-    after_user = session.query(UserModel).filter_by(provider=dto.provider,
-                                                    provider_id=dto.provider_id).first()
+    after_user = (
+        session.query(UserModel)
+        .filter_by(provider=dto.provider, provider_id=dto.provider_id)
+        .first()
+    )
     users = session_2.query(UserModel).filter_by(id=after_user.id).all()
 
     assert result.type == "success"

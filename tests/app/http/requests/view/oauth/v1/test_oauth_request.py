@@ -33,9 +33,7 @@ def test_when_invalid_request_then_raise_validation_error():
 
 def test_when_valid_input_user_info_then_success():
     result = CreateUserRequest(
-        provider=ProviderEnum.KAKAO.value,
-        provider_id="12345",
-        uuid=uuid_v4
+        provider=ProviderEnum.KAKAO.value, provider_id="12345", uuid=uuid_v4
     ).validate_request_and_make_dto()
 
     assert result.provider == ProviderEnum.KAKAO.value

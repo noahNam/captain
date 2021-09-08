@@ -15,7 +15,11 @@ from app.extensions.utils.time_helper import (
 )
 from app.persistence.model import BlacklistModel
 from app.persistence.model.jwt_model import JwtModel
-from core.domains.authentication.dto.authentication_dto import GetBlacklistDto, JwtDto, GetUserDto
+from core.domains.authentication.dto.authentication_dto import (
+    GetBlacklistDto,
+    JwtDto,
+    GetUserDto,
+)
 from core.domains.authentication.entity.blacklist_entity import BlacklistEntity
 from core.domains.authentication.entity.jwt_entity import JwtEntity
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token
@@ -30,9 +34,7 @@ class AuthenticationRepository:
         """
             기존 유저 토큰 존재 여부
         """
-        query = session.query(
-            exists().where(JwtModel.user_id == dto.user_id)
-        )
+        query = session.query(exists().where(JwtModel.user_id == dto.user_id))
         if query.scalar():
             return True
         return False
@@ -156,8 +158,8 @@ class AuthenticationRepository:
     def get_blacklist_by_dto(self, dto: GetBlacklistDto) -> Optional[BlacklistEntity]:
         blacklist = (
             session.query(BlacklistModel)
-                .filter_by(access_token=dto.access_token)
-                .first()
+            .filter_by(access_token=dto.access_token)
+            .first()
         )
 
         if not blacklist:
