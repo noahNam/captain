@@ -25,13 +25,21 @@ from tests.seeder.factory import make_custom_jwt, UserBaseFactory
 get_user_dto = GetUserDto(user_id=10)
 
 
+def test_is_exists_when_jwt_of_user_exists_then_return_true(
+        session: scoped_session,
+        create_users
+):
+    result = AuthenticationRepository().is_exists_token(dto=GetUserDto(user_id=create_users[0].id))
+    assert result is True
+
+
 def test_create_token_when_get_user_id(session: scoped_session):
     """
         given : User DTO (user_id)
         when : 로그인 로직 -> 신규 유저 생성 시점
         then : 토큰 생성 및 DB 저장
     """
-    AuthenticationRepository().create_or_update_token(dto=get_user_dto)
+    AuthenticationRepository().create_token(dto=get_user_dto)
     token_info = session.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
 
     assert token_info.user_id == get_user_dto.user_id
@@ -47,7 +55,7 @@ def test_create_token_without_user_id_then_validation_error(session: scoped_sess
     """
     with pytest.raises(ValidationError):
         dummy_dto = GetUserDto(user_id=None)
-        AuthenticationRepository().create_or_update_token(dto=dummy_dto)
+        AuthenticationRepository().create_token(dto=dummy_dto)
 
 
 def test_update_token_when_get_user_id(db: SQLAlchemy, session: scoped_session):
@@ -56,7 +64,7 @@ def test_update_token_when_get_user_id(db: SQLAlchemy, session: scoped_session):
         when : 로그인 로직 -> 기존 유저 재로그인
         then : update token
     """
-    AuthenticationRepository().create_or_update_token(dto=get_user_dto)
+    AuthenticationRepository().create_token(dto=get_user_dto)
     token_before = (
         session.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
     )
@@ -68,7 +76,7 @@ def test_update_token_when_get_user_id(db: SQLAlchemy, session: scoped_session):
     session_2 = db.create_scoped_session(options=options)
 
     # update token
-    AuthenticationRepository().create_or_update_token(dto=get_user_dto)
+    AuthenticationRepository().update_token(dto=get_user_dto)
     # query from new session
     token_after = (
         session_2.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
@@ -130,7 +138,7 @@ def test_redis_example(app):
 
 
 def test_set_token_to_redis_when_get_token_info(
-    session: scoped_session, redis: RedisClient, create_users: list
+        session: scoped_session, redis: RedisClient, create_users: list
 ):
     """
         given : 신규 JWT
@@ -158,7 +166,7 @@ def test_verify_token_when_get_valid_token_then_decode_success(session: scoped_s
         when : Valid Datetime
         then : Success decode
     """
-    AuthenticationRepository().create_or_update_token(dto=get_user_dto)
+    AuthenticationRepository().create_token(dto=get_user_dto)
     token_info = session.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
 
     decoded_access = decode_token(token_info.access_token)
@@ -170,7 +178,7 @@ def test_verify_token_when_get_valid_token_then_decode_success(session: scoped_s
 
 
 def test_verify_access_token_when_get_invalid_token_then_decode_fail(
-    session: scoped_session,
+        session: scoped_session,
 ):
     """
         given : JWT (access_token)
@@ -191,7 +199,7 @@ def test_verify_access_token_when_get_invalid_token_then_decode_fail(
 
 
 def test_verify_refresh_token_when_get_invalid_token_then_decode_fail(
-    session: scoped_session,
+        session: scoped_session,
 ):
     """
         given : JWT (refresh_token)
@@ -212,7 +220,7 @@ def test_verify_refresh_token_when_get_invalid_token_then_decode_fail(
 
 
 def test_create_blacklist_when_get_blacklist_dto(
-    session: scoped_session, create_users: list
+        session: scoped_session, create_users: list
 ):
     """
         given : Blacklist DTO (user_id, access_token)
@@ -259,7 +267,7 @@ def test_create_blacklist_when_get_blacklist_dto(
 
 
 def test_set_blacklist_to_redis_when_get_blacklist_dto(
-    session: scoped_session, redis: RedisClient, create_users: list
+        session: scoped_session, redis: RedisClient, create_users: list
 ):
     """
         given : Blacklist DTO (user_id, access_token)
@@ -283,17 +291,17 @@ def test_set_blacklist_to_redis_when_get_blacklist_dto(
     blacklists_in_redis = redis.smembers(redis.BLACKLIST_SET_NAME)
 
     assert (
-        redis.sismember(set_name=redis.BLACKLIST_SET_NAME, value=blacklist.access_token)
-        is True
+            redis.sismember(set_name=redis.BLACKLIST_SET_NAME, value=blacklist.access_token)
+            is True
     )
     assert blacklist.access_token.encode("utf-8") in blacklists_in_redis
 
 
 def test_get_blacklist_from_redis_when_get_blacklist_dto(
-    session: scoped_session,
-    redis: RedisClient,
-    create_users: list,
-    create_blacklists: list,
+        session: scoped_session,
+        redis: RedisClient,
+        create_users: list,
+        create_blacklists: list,
 ):
     """
         given : Blacklist DTO (user_id, access_token)
@@ -315,9 +323,9 @@ def test_get_blacklist_from_redis_when_get_blacklist_dto(
 
 
 def test_is_valid_refresh_token_from_redis_when_get_user_id(
-    session: scoped_session,
-    redis: RedisClient,
-    create_base_users: List[UserBaseFactory],
+        session: scoped_session,
+        redis: RedisClient,
+        create_base_users: List[UserBaseFactory],
 ):
     """
         given : user_id, valid refersh_token
@@ -325,7 +333,7 @@ def test_is_valid_refresh_token_from_redis_when_get_user_id(
         then : return True (valid)
     """
     user_id = create_base_users[0].id
-    AuthenticationRepository().create_or_update_token(dto=GetUserDto(user_id=user_id))
+    AuthenticationRepository().create_token(dto=GetUserDto(user_id=user_id))
     token_info = session.query(JwtModel).filter_by(user_id=user_id).first()
     # to redis
     AuthenticationRepository().set_token_to_cache(token_info=token_info)
@@ -338,9 +346,9 @@ def test_is_valid_refresh_token_from_redis_when_get_user_id(
 
 
 def test_is_valid_refresh_token_from_db_when_get_user_id(
-    session: scoped_session,
-    redis: RedisClient,
-    create_base_users: List[UserBaseFactory],
+        session: scoped_session,
+        redis: RedisClient,
+        create_base_users: List[UserBaseFactory],
 ):
     """
         given : user_id, valid refersh_token
@@ -348,7 +356,7 @@ def test_is_valid_refresh_token_from_db_when_get_user_id(
         then : return True (valid)
     """
     user_id = create_base_users[0].id
-    AuthenticationRepository().create_or_update_token(dto=GetUserDto(user_id=user_id))
+    AuthenticationRepository().create_token(dto=GetUserDto(user_id=user_id))
     token_info = session.query(JwtModel).filter_by(user_id=user_id).first()
 
     result = AuthenticationRepository().is_valid_refresh_token(

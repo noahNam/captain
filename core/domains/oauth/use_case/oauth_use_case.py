@@ -16,26 +16,36 @@ class CreateTokenWithUserUseCase:
         2. DB -> UserModel에 등록된 사용자가 없다 -> 신규가입 (create_user())
         return JWT
     """
+
     def execute(
             self, dto: CreateUserDto
     ) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
-        is_exists = self.__is_exists_user(provider_id=dto.provider_id,
-                                          provider=dto.provider)
+        is_exists_user = self.__is_exists_user(provider_id=dto.provider_id,
+                                               provider=dto.provider)
 
-        if is_exists:
-            user = self.__update_user_uuid(dto=dto)
+        if is_exists_user:
+            self.__update_user_uuid(dto=dto)
         else:
-            user = self.__create_user(dto=dto)
+            self.__create_user(dto=dto)
+        user = self.__get_user_by_create_user_dto(dto=dto)
 
         if not user:
             return UseCaseFailureOutput(
                 message="user id", detail=FailureType.NOT_FOUND_ERROR
             )
+        # Set UUID to redis
+        if self.__is_redis_ready():
+            self.__set_user_uuid_to_cache(user_id=user.id, uuid=dto.uuid)
 
         # JWT 발급 + DB 저장
-        user_dto = GetUserDto(user_id=user.id)
+        get_user_dto = GetUserDto(user_id=user.id)
+        is_jwt_exists = self.__is_exists_token(dto=get_user_dto)
+        if is_jwt_exists:
+            self.__update_token(dto=get_user_dto)
+        else:
+            self.__create_token(dto=get_user_dto)
 
-        token_info = self.__create_or_update_token(dto=user_dto)
+        token_info = self.__get_token_info(dto=get_user_dto)
 
         if not token_info:
             return UseCaseFailureOutput(
@@ -48,17 +58,31 @@ class CreateTokenWithUserUseCase:
 
         return UseCaseSuccessOutput(value=result)
 
-    def __create_user(self, dto: CreateUserDto) -> Optional[UserEntity]:
+    def __create_user(self, dto: CreateUserDto) -> None:
         send_message(topic_name=UserTopicEnum.CREATE_USER, dto=dto)
-
         return get_event_object(topic_name=UserTopicEnum.CREATE_USER)
 
-    def __create_or_update_token(self, dto: GetUserDto) -> Optional[JwtEntity]:
-        send_message(topic_name=AuthenticationTopicEnum.CREATE_OR_UPDATE_TOKEN, dto=dto)
+    def __get_user_by_create_user_dto(self, dto: CreateUserDto) -> Optional[UserEntity]:
+        send_message(topic_name=UserTopicEnum.GET_USER, dto=dto)
+        return get_event_object(topic_name=UserTopicEnum.GET_USER)
 
+    def __is_exists_token(self, dto: GetUserDto) -> bool:
+        send_message(topic_name=AuthenticationTopicEnum.IS_EXISTS_TOKEN, dto=dto)
+        return get_event_object(topic_name=AuthenticationTopicEnum.IS_EXISTS_TOKEN)
+
+    def __update_token(self, dto: GetUserDto) -> None:
+        send_message(topic_name=AuthenticationTopicEnum.UPDATE_TOKEN, dto=dto)
+        return get_event_object(topic_name=AuthenticationTopicEnum.UPDATE_TOKEN)
+
+    def __create_token(self, dto: GetUserDto) -> None:
+        send_message(topic_name=AuthenticationTopicEnum.CREATE_TOKEN, dto=dto)
         return get_event_object(
-            topic_name=AuthenticationTopicEnum.CREATE_OR_UPDATE_TOKEN
+            topic_name=AuthenticationTopicEnum.CREATE_TOKEN
         )
+
+    def __get_token_info(self, dto: GetUserDto) -> Optional[JwtEntity]:
+        send_message(topic_name=AuthenticationTopicEnum.GET_TOKEN_INFO, dto=dto)
+        return get_event_object(topic_name=AuthenticationTopicEnum.GET_TOKEN_INFO)
 
     def __is_exists_user(self, provider_id: str, provider: str) -> bool:
         send_message(topic_name=UserTopicEnum.IS_EXISTS_USER,
@@ -67,7 +91,15 @@ class CreateTokenWithUserUseCase:
 
         return get_event_object(topic_name=UserTopicEnum.IS_EXISTS_USER)
 
-    def __update_user_uuid(self, dto: CreateUserDto) -> Optional[UserEntity]:
+    def __update_user_uuid(self, dto: CreateUserDto) -> None:
         send_message(topic_name=UserTopicEnum.UPDATE_USER_UUID, dto=dto)
 
         return get_event_object(topic_name=UserTopicEnum.UPDATE_USER_UUID)
+
+    def __is_redis_ready(self) -> bool:
+        send_message(topic_name=AuthenticationTopicEnum.IS_REDIS_READY)
+        return get_event_object(topic_name=AuthenticationTopicEnum.IS_REDIS_READY)
+
+    def __set_user_uuid_to_cache(self, user_id: int, uuid: str) -> bool:
+        send_message(topic_name=UserTopicEnum.SET_USER_UUID_TO_CACHE, user_id=user_id, uuid=uuid)
+        return get_event_object(topic_name=UserTopicEnum.SET_USER_UUID_TO_CACHE)
