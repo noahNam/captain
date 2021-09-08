@@ -54,4 +54,6 @@ pub.subscribe(is_exists_user_by_user_id, UserTopicEnum.IS_EXISTS_USER_BY_USER_ID
 pub.subscribe(update_user_uuid, UserTopicEnum.UPDATE_USER_UUID)
 pub.subscribe(set_user_uuid_to_cache, UserTopicEnum.SET_USER_UUID_TO_CACHE)
 pub.subscribe(is_valid_user_uuid, UserTopicEnum.IS_VALID_USER_UUID)
-pub.subscribe(is_valid_user_uuid_from_redis, UserTopicEnum.IS_VALID_USER_UUID_FROM_REDIS)
+pub.subscribe(
+    is_valid_user_uuid_from_redis, UserTopicEnum.IS_VALID_USER_UUID_FROM_REDIS
+)

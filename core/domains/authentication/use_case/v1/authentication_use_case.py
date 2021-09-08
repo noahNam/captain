@@ -10,7 +10,7 @@ from core.domains.authentication.dto.authentication_dto import (
     JwtDto,
     GetBlacklistDto,
     GetUserDto,
-    JwtWithUUIDDto
+    JwtWithUUIDDto,
 )
 from core.domains.authentication.entity.blacklist_entity import BlacklistEntity
 from core.domains.authentication.enum import AuthenticationTopicEnum
@@ -83,13 +83,15 @@ class UpdateJwtUseCase(JwtBaseUseCase):
         return UseCaseSuccessOutput(value=result)
 
     def __is_exists_user_by_user_id(self, user_id: int) -> bool:
-        send_message(topic_name=UserTopicEnum.IS_EXISTS_USER_BY_USER_ID, user_id=user_id)
+        send_message(
+            topic_name=UserTopicEnum.IS_EXISTS_USER_BY_USER_ID, user_id=user_id
+        )
         return get_event_object(topic_name=UserTopicEnum.IS_EXISTS_USER_BY_USER_ID)
 
 
 class LogoutUseCase:
     def execute(
-            self, dto: GetBlacklistDto
+        self, dto: GetBlacklistDto
     ) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
         blacklist = self.__create_blacklist(dto=dto)
 
@@ -113,8 +115,9 @@ class LogoutUseCase:
 
 
 class VerificationJwtUseCase(JwtBaseUseCase):
-
-    def execute(self, dto: JwtWithUUIDDto) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
+    def execute(
+        self, dto: JwtWithUUIDDto
+    ) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
         try:
             decoded = decode_token(dto.token, allow_expired=True)
         except JWTDecodeError as e:
@@ -161,8 +164,9 @@ class VerificationJwtUseCase(JwtBaseUseCase):
         # Valid refresh_token check
         if self._auth_repo.is_redis_ready():
             # if refresh_token valid from redis
-            if self._auth_repo.is_valid_refresh_token_from_redis(user_id=user_id) and \
-                    self.__is_valid_user_uuid_from_redis(uuid=dto.uuid, user_id=user_id):
+            if self._auth_repo.is_valid_refresh_token_from_redis(
+                user_id=user_id
+            ) and self.__is_valid_user_uuid_from_redis(uuid=dto.uuid, user_id=user_id):
                 # update token
                 self._auth_repo.update_token(dto=GetUserDto(user_id=user_id))
                 new_token_info = self._auth_repo.get_token_info_by_user_id(
@@ -179,8 +183,9 @@ class VerificationJwtUseCase(JwtBaseUseCase):
             )
         else:
             # redis 연결이 안될 경우 DB 에서 토큰 가져옴
-            if not self._auth_repo.is_valid_refresh_token(user_id=user_id) and \
-                    self.__is_valid_user_uuid(uuid=dto.uuid, user_id=user_id):
+            if not self._auth_repo.is_valid_refresh_token(
+                user_id=user_id
+            ) and self.__is_valid_user_uuid(uuid=dto.uuid, user_id=user_id):
                 return UseCaseFailureOutput(
                     message=f"Refresh Token expired, please retry login",
                     detail=FailureType.UNAUTHORIZED_ERROR,
@@ -193,11 +198,15 @@ class VerificationJwtUseCase(JwtBaseUseCase):
             return UseCaseSuccessOutput(value=result)
 
     def __is_valid_user_uuid(self, uuid: str, user_id: int) -> bool:
-        send_message(topic_name=UserTopicEnum.IS_VALID_USER_UUID, uuid=uuid, user_id=user_id)
+        send_message(
+            topic_name=UserTopicEnum.IS_VALID_USER_UUID, uuid=uuid, user_id=user_id
+        )
         return get_event_object(topic_name=UserTopicEnum.IS_VALID_USER_UUID)
 
     def __is_valid_user_uuid_from_redis(self, uuid: str, user_id: int) -> bool:
-        send_message(topic_name=UserTopicEnum.IS_VALID_USER_UUID_FROM_REDIS,
-                     uuid=uuid,
-                     user_id=user_id)
+        send_message(
+            topic_name=UserTopicEnum.IS_VALID_USER_UUID_FROM_REDIS,
+            uuid=uuid,
+            user_id=user_id,
+        )
         return get_event_object(topic_name=UserTopicEnum.IS_VALID_USER_UUID_FROM_REDIS)

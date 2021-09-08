@@ -18,10 +18,11 @@ class CreateTokenWithUserUseCase:
     """
 
     def execute(
-            self, dto: CreateUserDto
+        self, dto: CreateUserDto
     ) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
-        is_exists_user = self.__is_exists_user(provider_id=dto.provider_id,
-                                               provider=dto.provider)
+        is_exists_user = self.__is_exists_user(
+            provider_id=dto.provider_id, provider=dto.provider
+        )
 
         if is_exists_user:
             self.__update_user_uuid(dto=dto)
@@ -76,18 +77,18 @@ class CreateTokenWithUserUseCase:
 
     def __create_token(self, dto: GetUserDto) -> None:
         send_message(topic_name=AuthenticationTopicEnum.CREATE_TOKEN, dto=dto)
-        return get_event_object(
-            topic_name=AuthenticationTopicEnum.CREATE_TOKEN
-        )
+        return get_event_object(topic_name=AuthenticationTopicEnum.CREATE_TOKEN)
 
     def __get_token_info(self, dto: GetUserDto) -> Optional[JwtEntity]:
         send_message(topic_name=AuthenticationTopicEnum.GET_TOKEN_INFO, dto=dto)
         return get_event_object(topic_name=AuthenticationTopicEnum.GET_TOKEN_INFO)
 
     def __is_exists_user(self, provider_id: str, provider: str) -> bool:
-        send_message(topic_name=UserTopicEnum.IS_EXISTS_USER,
-                     provider_id=provider_id,
-                     provider=provider)
+        send_message(
+            topic_name=UserTopicEnum.IS_EXISTS_USER,
+            provider_id=provider_id,
+            provider=provider,
+        )
 
         return get_event_object(topic_name=UserTopicEnum.IS_EXISTS_USER)
 
@@ -101,5 +102,7 @@ class CreateTokenWithUserUseCase:
         return get_event_object(topic_name=AuthenticationTopicEnum.IS_REDIS_READY)
 
     def __set_user_uuid_to_cache(self, user_id: int, uuid: str) -> bool:
-        send_message(topic_name=UserTopicEnum.SET_USER_UUID_TO_CACHE, user_id=user_id, uuid=uuid)
+        send_message(
+            topic_name=UserTopicEnum.SET_USER_UUID_TO_CACHE, user_id=user_id, uuid=uuid
+        )
         return get_event_object(topic_name=UserTopicEnum.SET_USER_UUID_TO_CACHE)

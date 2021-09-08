@@ -2,7 +2,11 @@ from flask_jwt_extended import decode_token
 from pydantic import BaseModel, ValidationError, validator, StrictBytes, StrictInt
 from pydantic.types import UUID4
 
-from core.domains.authentication.dto.authentication_dto import JwtDto, GetBlacklistDto, JwtWithUUIDDto
+from core.domains.authentication.dto.authentication_dto import (
+    JwtDto,
+    GetBlacklistDto,
+    JwtWithUUIDDto,
+)
 from app.extensions.utils.log_helper import logger_
 from core.exception import InvalidRequestException
 

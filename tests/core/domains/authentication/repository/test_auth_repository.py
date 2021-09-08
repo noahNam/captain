@@ -26,10 +26,11 @@ get_user_dto = GetUserDto(user_id=10)
 
 
 def test_is_exists_when_jwt_of_user_exists_then_return_true(
-        session: scoped_session,
-        create_users
+    session: scoped_session, create_users
 ):
-    result = AuthenticationRepository().is_exists_token(dto=GetUserDto(user_id=create_users[0].id))
+    result = AuthenticationRepository().is_exists_token(
+        dto=GetUserDto(user_id=create_users[0].id)
+    )
     assert result is True
 
 
@@ -138,7 +139,7 @@ def test_redis_example(app):
 
 
 def test_set_token_to_redis_when_get_token_info(
-        session: scoped_session, redis: RedisClient, create_users: list
+    session: scoped_session, redis: RedisClient, create_users: list
 ):
     """
         given : 신규 JWT
@@ -178,7 +179,7 @@ def test_verify_token_when_get_valid_token_then_decode_success(session: scoped_s
 
 
 def test_verify_access_token_when_get_invalid_token_then_decode_fail(
-        session: scoped_session,
+    session: scoped_session,
 ):
     """
         given : JWT (access_token)
@@ -199,7 +200,7 @@ def test_verify_access_token_when_get_invalid_token_then_decode_fail(
 
 
 def test_verify_refresh_token_when_get_invalid_token_then_decode_fail(
-        session: scoped_session,
+    session: scoped_session,
 ):
     """
         given : JWT (refresh_token)
@@ -220,7 +221,7 @@ def test_verify_refresh_token_when_get_invalid_token_then_decode_fail(
 
 
 def test_create_blacklist_when_get_blacklist_dto(
-        session: scoped_session, create_users: list
+    session: scoped_session, create_users: list
 ):
     """
         given : Blacklist DTO (user_id, access_token)
@@ -267,7 +268,7 @@ def test_create_blacklist_when_get_blacklist_dto(
 
 
 def test_set_blacklist_to_redis_when_get_blacklist_dto(
-        session: scoped_session, redis: RedisClient, create_users: list
+    session: scoped_session, redis: RedisClient, create_users: list
 ):
     """
         given : Blacklist DTO (user_id, access_token)
@@ -291,17 +292,17 @@ def test_set_blacklist_to_redis_when_get_blacklist_dto(
     blacklists_in_redis = redis.smembers(redis.BLACKLIST_SET_NAME)
 
     assert (
-            redis.sismember(set_name=redis.BLACKLIST_SET_NAME, value=blacklist.access_token)
-            is True
+        redis.sismember(set_name=redis.BLACKLIST_SET_NAME, value=blacklist.access_token)
+        is True
     )
     assert blacklist.access_token.encode("utf-8") in blacklists_in_redis
 
 
 def test_get_blacklist_from_redis_when_get_blacklist_dto(
-        session: scoped_session,
-        redis: RedisClient,
-        create_users: list,
-        create_blacklists: list,
+    session: scoped_session,
+    redis: RedisClient,
+    create_users: list,
+    create_blacklists: list,
 ):
     """
         given : Blacklist DTO (user_id, access_token)
@@ -323,9 +324,9 @@ def test_get_blacklist_from_redis_when_get_blacklist_dto(
 
 
 def test_is_valid_refresh_token_from_redis_when_get_user_id(
-        session: scoped_session,
-        redis: RedisClient,
-        create_base_users: List[UserBaseFactory],
+    session: scoped_session,
+    redis: RedisClient,
+    create_base_users: List[UserBaseFactory],
 ):
     """
         given : user_id, valid refersh_token
@@ -346,9 +347,9 @@ def test_is_valid_refresh_token_from_redis_when_get_user_id(
 
 
 def test_is_valid_refresh_token_from_db_when_get_user_id(
-        session: scoped_session,
-        redis: RedisClient,
-        create_base_users: List[UserBaseFactory],
+    session: scoped_session,
+    redis: RedisClient,
+    create_base_users: List[UserBaseFactory],
 ):
     """
         given : user_id, valid refersh_token

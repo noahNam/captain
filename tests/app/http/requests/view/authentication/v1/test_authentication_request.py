@@ -9,7 +9,8 @@ from app.extensions.utils.time_helper import (
 )
 from app.http.requests.view.authentication.authentication_request import (
     AllowedExpiredJwtTokenRequest,
-    LogoutRequest, AllowedExpiredJwtTokenWithUUIDRequest,
+    LogoutRequest,
+    AllowedExpiredJwtTokenWithUUIDRequest,
 )
 from core.exception import InvalidRequestException
 from tests.seeder.conftest import make_random_today_date
@@ -45,7 +46,7 @@ def create_invalid_refresh_token(user_id):
 
 
 def test_update_token_request_when_get_valid_access_token_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         유효한 토큰 -> 성공 (access)
@@ -58,8 +59,9 @@ def test_update_token_request_when_get_valid_access_token_then_success(
 
     assert result.token == token_to_byte
 
+
 def test_verification_request_when_get_valid_access_token_and_uuid_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         유효한 토큰, uuid -> 성공 (access)
@@ -67,8 +69,7 @@ def test_verification_request_when_get_valid_access_token_and_uuid_then_success(
     token = create_access_token(identity=create_base_users[0].id)
     token_to_byte = token.encode("utf-8")
     result = AllowedExpiredJwtTokenWithUUIDRequest(
-        token=token_to_byte,
-        uuid=uuid_v4
+        token=token_to_byte, uuid=uuid_v4
     ).validate_request_and_make_dto()
 
     assert result.token == token_to_byte
@@ -76,7 +77,7 @@ def test_verification_request_when_get_valid_access_token_and_uuid_then_success(
 
 
 def test_update_token_request_when_get_expired_access_token_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         Update_token : 만료된 토큰 허용
@@ -88,7 +89,7 @@ def test_update_token_request_when_get_expired_access_token_then_success(
 
 
 def test_verification_request_when_get_expired_access_token_and_uuid_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         Update_token : 만료된 토큰 허용
@@ -96,7 +97,9 @@ def test_verification_request_when_get_expired_access_token_and_uuid_then_succes
         만료된 토큰도 요청 성공 (access)
     """
     token = create_invalid_access_token(user_id=create_base_users[0].id)
-    result = AllowedExpiredJwtTokenWithUUIDRequest(token=token, uuid=uuid_v4).validate_request_and_make_dto()
+    result = AllowedExpiredJwtTokenWithUUIDRequest(
+        token=token, uuid=uuid_v4
+    ).validate_request_and_make_dto()
     assert result.token == token
     assert result.uuid == uuid_v4
 
@@ -116,11 +119,13 @@ def test_verification_request_when_get_invalid_token_then_failure(create_base_us
     """
     token = b"Wrong access token"
     with pytest.raises(InvalidRequestException):
-        AllowedExpiredJwtTokenWithUUIDRequest(token=token, uuid=uuid_v4).validate_request_and_make_dto()
+        AllowedExpiredJwtTokenWithUUIDRequest(
+            token=token, uuid=uuid_v4
+        ).validate_request_and_make_dto()
 
 
 def test_update_token_request_when_get_valid_refresh_token_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         유효한 토큰 -> 성공 (refresh)
@@ -134,7 +139,7 @@ def test_update_token_request_when_get_valid_refresh_token_then_success(
 
 
 def test_verification_request_when_get_valid_refresh_token_with_uuid_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         유효한 토큰 -> 성공 (refresh)
@@ -142,15 +147,14 @@ def test_verification_request_when_get_valid_refresh_token_with_uuid_then_succes
     token = create_refresh_token(identity=create_base_users[0].id)
     token_to_byte = token.encode("utf-8")
     result = AllowedExpiredJwtTokenWithUUIDRequest(
-        token=token_to_byte,
-        uuid=uuid_v4
+        token=token_to_byte, uuid=uuid_v4
     ).validate_request_and_make_dto()
     assert result.token == token_to_byte
     assert result.uuid == uuid_v4
 
 
 def test_update_token_request_when_get_expired_refresh_token_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         만료된 토큰도 요청 성공 (refresh)
@@ -161,13 +165,15 @@ def test_update_token_request_when_get_expired_refresh_token_then_success(
 
 
 def test_verification_request_when_get_expired_refresh_token_with_uuid_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         만료된 토큰도 요청 성공 (refresh)
     """
     token = create_invalid_refresh_token(user_id=create_base_users[0].id)
-    result = AllowedExpiredJwtTokenWithUUIDRequest(token=token, uuid=uuid_v4).validate_request_and_make_dto()
+    result = AllowedExpiredJwtTokenWithUUIDRequest(
+        token=token, uuid=uuid_v4
+    ).validate_request_and_make_dto()
     assert result.token == token
     assert result.uuid == uuid_v4
 
@@ -188,7 +194,7 @@ def test_logout_request_when_get_valid_access_token_then_success(create_base_use
 
 
 def test_logout_token_request_when_get_expired_access_token_then_failure(
-        create_base_users,
+    create_base_users,
 ):
     """
         logout_token : 만료된 토큰 허용 X

@@ -124,9 +124,7 @@ def fetch_kakao_access_token() -> Any:
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider,
-            provider_id=str(user_info.get("id")),
-            uuid=uuid_v4
+            provider=provider, provider_id=str(user_info.get("id")), uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
@@ -181,9 +179,7 @@ def fetch_naver_access_token() -> Any:
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider,
-            provider_id=user_info.get("response")["id"],
-            uuid=uuid_v4
+            provider=provider, provider_id=user_info.get("response")["id"], uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
@@ -224,9 +220,7 @@ def login_kakao_view() -> Any:
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider,
-            provider_id=str(validation_data.get("id"),),
-            uuid=uuid_v4
+            provider=provider, provider_id=str(validation_data.get("id"),), uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
@@ -280,9 +274,7 @@ def login_naver_view() -> Any:
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider,
-            provider_id=str(user_info.get("id")),
-            uuid=uuid_v4
+            provider=provider, provider_id=str(user_info.get("id")), uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
@@ -336,9 +328,7 @@ def fetch_google_access_token() -> Any:
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider,
-            provider_id=str(user_info.get("sub")),
-            uuid=uuid_v4
+            provider=provider, provider_id=str(user_info.get("sub")), uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
@@ -381,9 +371,7 @@ def login_google_view() -> Any:
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider,
-            provider_id=str(user_info.get("sub")),
-            uuid=uuid_v4
+            provider=provider, provider_id=str(user_info.get("sub")), uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(

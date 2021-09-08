@@ -5,7 +5,10 @@ from sqlalchemy.sql import exists
 from app import redis
 from app.extensions.database import session
 from app.extensions.utils.log_helper import logger_
-from app.extensions.utils.time_helper import get_server_timestamp, get_jwt_refresh_expire_timedelta_to_seconds
+from app.extensions.utils.time_helper import (
+    get_server_timestamp,
+    get_jwt_refresh_expire_timedelta_to_seconds,
+)
 from app.persistence.model.user_model import UserModel
 from core.domains.user.dto.user_dto import CreateUserDto
 from core.domains.user.entity.user_entity import UserEntity
@@ -20,8 +23,9 @@ class UserRepository:
             기존 사용자 로그인시 UUID를 갱신한다
         """
         try:
-            session.query(UserModel).filter_by(provider=dto.provider,
-                                               provider_id=dto.provider_id).update(
+            session.query(UserModel).filter_by(
+                provider=dto.provider, provider_id=dto.provider_id
+            ).update(
                 {
                     "provider": dto.provider,
                     "provider_id": dto.provider_id,
@@ -40,18 +44,15 @@ class UserRepository:
     def is_exists_user(self, provider_id: str, provider: str) -> bool:
         query = session.query(
             exists()
-                .where(UserModel.provider == provider)
-                .where(UserModel.provider_id == provider_id)
+            .where(UserModel.provider == provider)
+            .where(UserModel.provider_id == provider_id)
         )
         if query.scalar():
             return True
         return False
 
     def is_exists_user_by_user_id(self, user_id: int) -> bool:
-        query = session.query(
-            exists()
-                .where(UserModel.id == user_id)
-        )
+        query = session.query(exists().where(UserModel.id == user_id))
         if query.scalar():
             return True
         return False
@@ -61,7 +62,9 @@ class UserRepository:
             신규가입 사용자 -> DB 저장
         """
         try:
-            user = UserModel(provider=dto.provider, provider_id=dto.provider_id, uuid=dto.uuid)
+            user = UserModel(
+                provider=dto.provider, provider_id=dto.provider_id, uuid=dto.uuid
+            )
             session.add(user)
             session.commit()
         except Exception as e:
@@ -82,10 +85,10 @@ class UserRepository:
     def get_user_by_create_user_dto(self, dto: CreateUserDto) -> Optional[UserEntity]:
         user = (
             session.query(UserModel)
-                .filter_by(provider=dto.provider,
-                           provider_id=dto.provider_id,
-                           uuid=dto.uuid)
-                .first()
+            .filter_by(
+                provider=dto.provider, provider_id=dto.provider_id, uuid=dto.uuid
+            )
+            .first()
         )
 
         if not user:

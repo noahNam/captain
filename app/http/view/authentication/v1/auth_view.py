@@ -7,7 +7,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions.utils.log_helper import logger_
 from app.http.requests.view.authentication.authentication_request import (
     AllowedExpiredJwtTokenRequest,
-    LogoutRequest, AllowedExpiredJwtTokenWithUUIDRequest,
+    LogoutRequest,
+    AllowedExpiredJwtTokenWithUUIDRequest,
 )
 from app.http.responses import failure_response
 from app.http.responses.presenters.authentication_presenter import (
@@ -155,8 +156,7 @@ def verification_view():
     # 토큰 자체에 대한 유효성 검증
     try:
         dto = AllowedExpiredJwtTokenWithUUIDRequest(
-            token=token_to_bytes,
-            uuid=uuid_v4
+            token=token_to_bytes, uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException:
         return failure_response(

@@ -15,12 +15,14 @@ from core.domains.authentication.repository.authentication_repository import (
 )
 from core.domains.user.repository.user_repository import UserRepository
 from core.use_case_output import FailureType
-from tests.app.http.requests.view.authentication.v1.test_authentication_request import create_invalid_refresh_token
+from tests.app.http.requests.view.authentication.v1.test_authentication_request import (
+    create_invalid_refresh_token,
+)
 from tests.seeder.factory import UserBaseFactory, UserFactory
 
 
 def test_update_view_when_request_without_jwt_then_raise_validation_error(
-        client: FlaskClient, test_request_context: RequestContext
+    client: FlaskClient, test_request_context: RequestContext
 ):
     """
         given : Nothing
@@ -35,10 +37,10 @@ def test_update_view_when_request_without_jwt_then_raise_validation_error(
 
 
 def test_update_view_when_request_with_token_with_wrong_prefix_then_raise_validation_error(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        make_header,
-        create_base_users: List[UserBaseFactory],
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    make_header,
+    create_base_users: List[UserBaseFactory],
 ):
     """
         given : JWT (Header with wrong prefix)
@@ -56,10 +58,10 @@ def test_update_view_when_request_with_token_with_wrong_prefix_then_raise_valida
 
 
 def test_update_view_when_request_with_token_with_wrong_token_then_raise_validation_error(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        make_header,
-        create_base_users: List[UserBaseFactory],
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    make_header,
+    create_base_users: List[UserBaseFactory],
 ):
     """
         given : wrong JWT
@@ -77,12 +79,12 @@ def test_update_view_when_request_with_token_with_wrong_token_then_raise_validat
 
 
 def test_update_view(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        make_header,
-        make_expired_authorization,
-        create_base_users: List[UserBaseFactory],
-        session: scoped_session
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    make_header,
+    make_expired_authorization,
+    create_base_users: List[UserBaseFactory],
+    session: scoped_session,
 ):
     """
         given : wrong JWT
@@ -97,9 +99,7 @@ def test_update_view(
     expired_token = authorization[7:]
     valid_refresh_token = create_refresh_token(identity=user_id)
     jwt_model = JwtModel(
-        user_id=user_id,
-        access_token=expired_token,
-        refresh_token=valid_refresh_token,
+        user_id=user_id, access_token=expired_token, refresh_token=valid_refresh_token,
     )
     session.add(jwt_model)
     session.commit()
@@ -113,7 +113,7 @@ def test_update_view(
 
 
 def test_logout_view_when_request_with_not_jwt_then_response_405(
-        client: FlaskClient, test_request_context: RequestContext
+    client: FlaskClient, test_request_context: RequestContext
 ):
     """
         given : Nothing
@@ -127,10 +127,10 @@ def test_logout_view_when_request_with_not_jwt_then_response_405(
 
 
 def test_logout_view_when_request_with_token_with_wrong_token_then_response_405(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        make_header,
-        create_base_users: List[UserBaseFactory],
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    make_header,
+    create_base_users: List[UserBaseFactory],
 ):
     """
         given : wrong JWT
@@ -147,11 +147,11 @@ def test_logout_view_when_request_with_token_with_wrong_token_then_response_405(
 
 
 def test_logout_view_when_request_with_expired_jwt_then_response_401(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        make_header,
-        make_expired_authorization,
-        create_base_users: List[UserBaseFactory],
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    make_header,
+    make_expired_authorization,
+    create_base_users: List[UserBaseFactory],
 ):
     """
         given : Nothing
@@ -170,13 +170,13 @@ def test_logout_view_when_request_with_expired_jwt_then_response_401(
 
 
 def test_logout_view(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        redis: RedisClient,
-        session: scoped_session,
-        make_header,
-        make_authorization,
-        create_base_users: List[UserBaseFactory],
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    redis: RedisClient,
+    session: scoped_session,
+    make_header,
+    make_authorization,
+    create_base_users: List[UserBaseFactory],
 ):
     """
         given : login with valid access_token
@@ -207,13 +207,13 @@ def test_logout_view(
 
 
 def test_verification_view_when_get_expired_token_with_valid_refresh_token(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        redis: RedisClient,
-        make_header,
-        make_expired_authorization,
-        create_base_users: List[UserBaseFactory],
-        session: scoped_session
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    redis: RedisClient,
+    make_header,
+    make_expired_authorization,
+    create_base_users: List[UserBaseFactory],
+    session: scoped_session,
 ):
     """
         given: expired access_token from header, valid refresh_token
@@ -229,9 +229,7 @@ def test_verification_view_when_get_expired_token_with_valid_refresh_token(
     expired_token = authorization[7:]
     valid_refresh_token = create_refresh_token(identity=user_id)
     jwt_model = JwtModel(
-        user_id=user_id,
-        access_token=expired_token,
-        refresh_token=valid_refresh_token,
+        user_id=user_id, access_token=expired_token, refresh_token=valid_refresh_token,
     )
     session.add(jwt_model)
     session.commit()
@@ -243,7 +241,9 @@ def test_verification_view_when_get_expired_token_with_valid_refresh_token(
     UserRepository().set_user_uuid_to_cache(user_id=user_id, uuid=uuid)
 
     with test_request_context:
-        response = client.get(url_for("api.verification_view", uuid=uuid), headers=headers)
+        response = client.get(
+            url_for("api.verification_view", uuid=uuid), headers=headers
+        )
 
     data = response.get_json().get("data")
 
@@ -253,13 +253,13 @@ def test_verification_view_when_get_expired_token_with_valid_refresh_token(
 
 
 def test_verification_view_when_get_expired_token_with_invalid_refresh_token(
-        client: FlaskClient,
-        test_request_context: RequestContext,
-        redis: RedisClient,
-        make_header,
-        make_expired_authorization,
-        create_base_users: List[UserBaseFactory],
-        session: scoped_session
+    client: FlaskClient,
+    test_request_context: RequestContext,
+    redis: RedisClient,
+    make_header,
+    make_expired_authorization,
+    create_base_users: List[UserBaseFactory],
+    session: scoped_session,
 ):
     """
         given: expired access_token from header, invalid refresh_token or None
@@ -289,6 +289,8 @@ def test_verification_view_when_get_expired_token_with_invalid_refresh_token(
     UserRepository().set_user_uuid_to_cache(user_id=user_id, uuid=uuid)
 
     with test_request_context:
-        response = client.get(url_for("api.verification_view", uuid=uuid), headers=headers)
+        response = client.get(
+            url_for("api.verification_view", uuid=uuid), headers=headers
+        )
 
     assert response.status_code == 400
