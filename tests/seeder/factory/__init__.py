@@ -1,5 +1,5 @@
 import random
-import uuid
+from uuid import uuid4
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -32,7 +32,7 @@ def make_custom_jwt(
     now: Optional[datetime] = None,
     delta: Optional[timedelta] = None,
 ) -> bytes:
-    uid = str(uuid.uuid4())
+    uid = str(uuid4())
     if not now:
         now = datetime.utcnow()
     if not delta:
@@ -115,6 +115,7 @@ class UserBaseFactory(BaseFactory):
 
     provider = random.choice(provider_list)
     provider_id = factory.Sequence(lambda n: n + 1)
+    uuid = str(uuid4())
 
 
 class UserFactory(UserBaseFactory):
@@ -129,8 +130,6 @@ class InvalidJwtFactory(BaseFactory):
     """
     Define invalid JwtModel factory (made yesterday)
     """
-
-    pass
 
     class Meta:
         model = JwtModel

@@ -8,6 +8,7 @@ from app.extensions.utils.log_helper import logger_
 from app.http.requests.view.authentication.authentication_request import (
     AllowedExpiredJwtTokenRequest,
     LogoutRequest,
+    AllowedExpiredJwtTokenWithUUIDRequest,
 )
 from app.http.responses import failure_response
 from app.http.responses.presenters.authentication_presenter import (
@@ -53,6 +54,8 @@ def check_jwt_allow_expired(auth_header: str) -> bytes:
 def token_update_view():
     """
         Update request from tanos
+        - JWT 토큰만 업데이트
+        - UUID는 받지 않음
     """
     auth_header = request.headers.get("Authorization")
 
@@ -122,7 +125,13 @@ def logout_view():
 @api.route("/v1/verification", methods=["GET"])
 @swag_from("verification_token_view.yml", methods=["GET"])
 def verification_view():
+    """
+        Verification from Client
+        - Access, Refresh 토큰 모두 만료된 토큰도 허용
+        - UUID : UUID_v4
+    """
     auth_header = request.headers.get("Authorization")
+    uuid_v4 = request.args.get("uuid")
 
     try:
         token_to_bytes = check_jwt_allow_expired(auth_header=auth_header)
@@ -146,8 +155,8 @@ def verification_view():
 
     # 토큰 자체에 대한 유효성 검증
     try:
-        dto = AllowedExpiredJwtTokenRequest(
-            token=token_to_bytes
+        dto = AllowedExpiredJwtTokenWithUUIDRequest(
+            token=token_to_bytes, uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException:
         return failure_response(

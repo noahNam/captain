@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from unittest.mock import patch, MagicMock
+from uuid import uuid4
 
 from flask import url_for, Response
 from flask.ctx import RequestContext, AppContext
@@ -16,6 +17,8 @@ from app.extensions.utils.oauth_helper import (
 from core.domains.oauth.dto.oauth_dto import GetOAuthProviderDto
 from core.domains.oauth.enum.oauth_enum import ProviderEnum
 from core.use_case_output import FailureType
+
+uuid_v4 = str(uuid4())
 
 
 class MockResponse:
@@ -58,7 +61,7 @@ def test_when_request_oauth_to_kakao_then_redirect_to_fetch_token_url(
     with test_request_context:
         response = client.get(
             url_for(
-                "api.request_oauth_to_third_party", provider=ProviderEnum.KAKAO.value
+                "api.request_oauth_to_third_party", provider=ProviderEnum.KAKAO.value,
             )
         )
 
@@ -151,7 +154,7 @@ def test_when_request_with_wrong_provider_then_raise_validation_error(
     client: FlaskClient, test_request_context: RequestContext
 ):
     """
-        given : wrong provider value (not in ["naver" or "kakao"])
+        given : wrong provider value (not in ["naver" or "kakao" or "google"])
         when : [GET] /api/captain/v1/oauth?provider="mooyaho"
         then : raise InvalidRequestException
     """
@@ -422,7 +425,7 @@ def test_when_get_kakao_access_token_then_login_success(
         with application_context:
             with test_request_context:
                 validation_response = client.get(
-                    url_for("api.login_kakao_view"),
+                    url_for("api.login_kakao_view", uuid=uuid_v4),
                     headers={
                         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
                         "Cache-Control": "no-cache",
@@ -463,7 +466,7 @@ def test_when_get_naver_access_token_then_login_success(
                     json_data=mock_naver_id, status_code=200
                 )
                 validation_response = client.get(
-                    url_for("api.login_naver_view"),
+                    url_for("api.login_naver_view", uuid=uuid_v4),
                     headers={
                         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
                         "Cache-Control": "no-cache",
@@ -559,7 +562,7 @@ def test_when_get_google_access_token_then_login_success(
                     json_data=mock_google_id, status_code=200
                 )
                 validation_response = client.get(
-                    url_for("api.login_google_view"),
+                    url_for("api.login_google_view", uuid=uuid_v4),
                     headers={
                         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
                         "Cache-Control": "no-cache",

@@ -50,3 +50,13 @@ class NoAuthorizationControlException(Exception):
 class NotUniqueErrorException(Exception):
     code = HTTPStatus.BAD_REQUEST
     msg = "not_unique_error"
+
+
+class FailedSetTokenToCacheErrorException(Exception):
+    code = HTTPStatus.INTERNAL_SERVER_ERROR
+    msg = "failed_set_token_to_cache"
+
+
+class FailedSetUUIDToCacheErrorException(Exception):
+    code = HTTPStatus.INTERNAL_SERVER_ERROR
+    msg = "failed_set_uuid_to_cache"

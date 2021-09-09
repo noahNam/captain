@@ -1,7 +1,12 @@
 from flask_jwt_extended import decode_token
 from pydantic import BaseModel, ValidationError, validator, StrictBytes, StrictInt
+from pydantic.types import UUID4
 
-from core.domains.authentication.dto.authentication_dto import JwtDto, GetBlacklistDto
+from core.domains.authentication.dto.authentication_dto import (
+    JwtDto,
+    GetBlacklistDto,
+    JwtWithUUIDDto,
+)
 from app.extensions.utils.log_helper import logger_
 from core.exception import InvalidRequestException
 
@@ -28,8 +33,12 @@ class GetJwtAllowedExpiredSchema(BaseModel):
         return token
 
 
+class GetUUIDv4Schema(BaseModel):
+    uuid: UUID4 = None
+
+
 class AllowedExpiredJwtTokenRequest:
-    def __init__(self, token):
+    def __init__(self, token: bytes):
         self.token = token
 
     def validate_request_and_make_dto(self):
@@ -39,6 +48,25 @@ class AllowedExpiredJwtTokenRequest:
         except ValidationError as e:
             logger.error(
                 f"[AllowedExpiredJwtTokenRequest][validate_request_and_make_dto] error : {e}"
+            )
+            raise InvalidRequestException(message=e.errors())
+
+
+class AllowedExpiredJwtTokenWithUUIDRequest:
+    def __init__(self, token: bytes, uuid: str):
+        self.token = token
+        self.uuid = uuid
+
+    def validate_request_and_make_dto(self):
+        try:
+            schema = GetJwtAllowedExpiredSchema(token=self.token).dict()
+            uuid_schema = GetUUIDv4Schema(uuid=UUID4(self.uuid)).dict()
+            uuid_schema["uuid"] = str(uuid_schema.get("uuid"))
+            schema.update(uuid_schema)
+            return JwtWithUUIDDto(**schema)
+        except ValidationError as e:
+            logger.error(
+                f"[AllowedExpiredJwtTokenWithUUIDRequest][validate_request_and_make_dto] error : {e}"
             )
             raise InvalidRequestException(message=e.errors())
 

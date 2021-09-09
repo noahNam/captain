@@ -11,6 +11,13 @@ parameters:
     schema:
       type: string
       example: Bearer eyJ0eXAiOiJKV1QiLC....JWT...values
+  - name: uuid
+    in: parameter
+    required: true
+    description: User's UUID v4
+    schema:
+      type: string
+      example: a04bd38a-84d8-400c-966d-11e5c0302489
 responses:
   '200':
     description: Return jwt - access_token (Success)

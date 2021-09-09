@@ -15,7 +15,9 @@ class UserModel(db.Model):
         nullable=False,
         autoincrement=True,
     )
-    uuid = Column(String(36), nullable=True)  # todo. 오픈 전 uuid nullable = False로 변경 작업 필요.
+    uuid = Column(
+        String(36), nullable=True
+    )  # todo. 오픈 전 uuid nullable = False로 변경 작업 필요.
     provider = Column(String(10), nullable=False)
     provider_id = Column(String(256), nullable=False)
     group = Column(String(10), nullable=True)
