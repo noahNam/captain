@@ -124,6 +124,30 @@ def test_verification_request_when_get_invalid_token_then_failure(create_base_us
         ).validate_request_and_make_dto()
 
 
+def test_verification_request_when_get_invalid_uuid_then_failure(create_base_users):
+    """
+        uuid_v4 형식이 아닐 경우 실패
+    """
+    token = create_invalid_access_token(user_id=create_base_users[0].id)
+    uuid = "some-uuid-not-valid"
+    with pytest.raises(InvalidRequestException):
+        AllowedExpiredJwtTokenWithUUIDRequest(
+            token=token, uuid=uuid
+        ).validate_request_and_make_dto()
+
+
+def test_verification_request_when_get_no_uuid_then_failure(create_base_users):
+    """
+        uuid 파라미터가 없을 경우 실패
+    """
+    token = create_invalid_access_token(user_id=create_base_users[0].id)
+    uuid = None
+    with pytest.raises(InvalidRequestException):
+        AllowedExpiredJwtTokenWithUUIDRequest(
+            token=token, uuid=uuid
+        ).validate_request_and_make_dto()
+
+
 def test_update_token_request_when_get_valid_refresh_token_then_success(
     create_base_users,
 ):
