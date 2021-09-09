@@ -10,9 +10,8 @@ from app.extensions.utils.time_helper import (
     get_jwt_refresh_expire_timedelta_to_seconds,
 )
 from app.persistence.model.user_model import UserModel
-from core.domains.user.dto.user_dto import CreateUserDto
+from core.domains.user.dto.user_dto import CreateUserDto, GetUserProviderDto
 from core.domains.user.entity.user_entity import UserEntity
-from core.exception import FailedSetUUIDToCacheErrorException
 
 logger = logger_.getLogger(__name__)
 
@@ -44,8 +43,8 @@ class UserRepository:
     def is_exists_user(self, provider_id: str, provider: str) -> bool:
         query = session.query(
             exists()
-            .where(UserModel.provider == provider)
-            .where(UserModel.provider_id == provider_id)
+                .where(UserModel.provider == provider)
+                .where(UserModel.provider_id == provider_id)
         )
         if query.scalar():
             return True
@@ -85,10 +84,10 @@ class UserRepository:
     def get_user_by_create_user_dto(self, dto: CreateUserDto) -> Optional[UserEntity]:
         user = (
             session.query(UserModel)
-            .filter_by(
+                .filter_by(
                 provider=dto.provider, provider_id=dto.provider_id, uuid=dto.uuid
             )
-            .first()
+                .first()
         )
 
         if not user:
@@ -125,3 +124,8 @@ class UserRepository:
         if user_info.id != user_id:
             return False
         return True
+
+    def get_user_provider(self, dto: GetUserProviderDto) -> str:
+        user = session.query(UserModel).filter_by(id=dto.user_id).first()
+
+        return user.provider
