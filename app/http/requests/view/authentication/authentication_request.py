@@ -69,6 +69,11 @@ class AllowedExpiredJwtTokenWithUUIDRequest:
                 f"[AllowedExpiredJwtTokenWithUUIDRequest][validate_request_and_make_dto] error : {e}"
             )
             raise InvalidRequestException(message=e.errors())
+        except Exception as e:
+            logger.error(
+                f"[AllowedExpiredJwtTokenWithUUIDRequest][validate_request_and_make_dto] error : {e}"
+            )
+            raise InvalidRequestException(message=e)
 
 
 class GetBlacklistSchema(BaseModel):
