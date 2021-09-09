@@ -25,13 +25,22 @@ from tests.seeder.factory import make_custom_jwt, UserBaseFactory
 get_user_dto = GetUserDto(user_id=10)
 
 
+def test_is_exists_when_jwt_of_user_exists_then_return_true(
+    session: scoped_session, create_users
+):
+    result = AuthenticationRepository().is_exists_token(
+        dto=GetUserDto(user_id=create_users[0].id)
+    )
+    assert result is True
+
+
 def test_create_token_when_get_user_id(session: scoped_session):
     """
         given : User DTO (user_id)
         when : 로그인 로직 -> 신규 유저 생성 시점
         then : 토큰 생성 및 DB 저장
     """
-    AuthenticationRepository().create_or_update_token(dto=get_user_dto)
+    AuthenticationRepository().create_token(dto=get_user_dto)
     token_info = session.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
 
     assert token_info.user_id == get_user_dto.user_id
@@ -47,7 +56,7 @@ def test_create_token_without_user_id_then_validation_error(session: scoped_sess
     """
     with pytest.raises(ValidationError):
         dummy_dto = GetUserDto(user_id=None)
-        AuthenticationRepository().create_or_update_token(dto=dummy_dto)
+        AuthenticationRepository().create_token(dto=dummy_dto)
 
 
 def test_update_token_when_get_user_id(db: SQLAlchemy, session: scoped_session):
@@ -56,7 +65,7 @@ def test_update_token_when_get_user_id(db: SQLAlchemy, session: scoped_session):
         when : 로그인 로직 -> 기존 유저 재로그인
         then : update token
     """
-    AuthenticationRepository().create_or_update_token(dto=get_user_dto)
+    AuthenticationRepository().create_token(dto=get_user_dto)
     token_before = (
         session.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
     )
@@ -68,7 +77,7 @@ def test_update_token_when_get_user_id(db: SQLAlchemy, session: scoped_session):
     session_2 = db.create_scoped_session(options=options)
 
     # update token
-    AuthenticationRepository().create_or_update_token(dto=get_user_dto)
+    AuthenticationRepository().update_token(dto=get_user_dto)
     # query from new session
     token_after = (
         session_2.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
@@ -158,7 +167,7 @@ def test_verify_token_when_get_valid_token_then_decode_success(session: scoped_s
         when : Valid Datetime
         then : Success decode
     """
-    AuthenticationRepository().create_or_update_token(dto=get_user_dto)
+    AuthenticationRepository().create_token(dto=get_user_dto)
     token_info = session.query(JwtModel).filter_by(user_id=get_user_dto.user_id).first()
 
     decoded_access = decode_token(token_info.access_token)
@@ -325,7 +334,7 @@ def test_is_valid_refresh_token_from_redis_when_get_user_id(
         then : return True (valid)
     """
     user_id = create_base_users[0].id
-    AuthenticationRepository().create_or_update_token(dto=GetUserDto(user_id=user_id))
+    AuthenticationRepository().create_token(dto=GetUserDto(user_id=user_id))
     token_info = session.query(JwtModel).filter_by(user_id=user_id).first()
     # to redis
     AuthenticationRepository().set_token_to_cache(token_info=token_info)
@@ -348,7 +357,7 @@ def test_is_valid_refresh_token_from_db_when_get_user_id(
         then : return True (valid)
     """
     user_id = create_base_users[0].id
-    AuthenticationRepository().create_or_update_token(dto=GetUserDto(user_id=user_id))
+    AuthenticationRepository().create_token(dto=GetUserDto(user_id=user_id))
     token_info = session.query(JwtModel).filter_by(user_id=user_id).first()
 
     result = AuthenticationRepository().is_valid_refresh_token(

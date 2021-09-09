@@ -1,4 +1,8 @@
 from typing import Optional
+
+from pydantic import StrictBytes
+from sqlalchemy import exists
+
 from app import redis
 from app.extensions.database import session
 from app.extensions.utils.log_helper import logger_
@@ -11,25 +15,31 @@ from app.extensions.utils.time_helper import (
 )
 from app.persistence.model import BlacklistModel
 from app.persistence.model.jwt_model import JwtModel
-from core.domains.authentication.dto.authentication_dto import GetBlacklistDto, JwtDto
+from core.domains.authentication.dto.authentication_dto import (
+    GetBlacklistDto,
+    JwtDto,
+    GetUserDto,
+)
 from core.domains.authentication.entity.blacklist_entity import BlacklistEntity
 from core.domains.authentication.entity.jwt_entity import JwtEntity
-from core.domains.user.dto.user_dto import GetUserDto
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token
+
+from core.exception import FailedSetTokenToCacheErrorException
 
 logger = logger_.getLogger(__name__)
 
 
 class AuthenticationRepository:
-    def _is_exists(self, dto: GetUserDto) -> bool:
+    def is_exists_token(self, dto: GetUserDto) -> bool:
         """
             기존 유저 토큰 존재 여부
         """
-        if session.query(JwtModel).filter_by(user_id=dto.user_id).first():
+        query = session.query(exists().where(JwtModel.user_id == dto.user_id))
+        if query.scalar():
             return True
         return False
 
-    def _update_token(self, dto: GetUserDto) -> None:
+    def update_token(self, dto: GetUserDto) -> None:
         """
             새로운 Token 생성
             update 시간 갱신
@@ -43,7 +53,6 @@ class AuthenticationRepository:
                     "refresh_expired_at": get_jwt_refresh_expired_timestamp(),
                 }
             )
-
             session.commit()
         except Exception as e:
             session.rollback()
@@ -52,7 +61,7 @@ class AuthenticationRepository:
                 f"error : {e}"
             )
 
-    def _create_token(self, dto: GetUserDto) -> None:
+    def create_token(self, dto: GetUserDto) -> None:
         token_info = JwtModel(
             user_id=dto.user_id,
             access_token=create_access_token(identity=dto.user_id),
@@ -68,17 +77,6 @@ class AuthenticationRepository:
                 f"[AuthenticationRepository][create_token] user_id : {dto.user_id} "
                 f"error : {e}"
             )
-
-    def create_or_update_token(self, dto: GetUserDto) -> None:
-        """
-            case 1: 신규 회원가입 -> Create
-            case 2: 기존 유저가 로그아웃 후 재로그인 -> Update
-        """
-        if self._is_exists(dto=dto):
-            # 현재 시간 기준 업데이트
-            self._update_token(dto=dto)
-        else:
-            self._create_token(dto=dto)
 
     def get_token_info_by_dto(self, dto: GetUserDto) -> Optional[JwtEntity]:
         token_info = session.query(JwtModel).filter_by(user_id=dto.user_id).first()
@@ -106,6 +104,7 @@ class AuthenticationRepository:
                 f"[AuthenticationRepository][set_access_token_to_cache] key : {token_info.access_token}, "
                 f"value : {token_info.user_id} error : {e}"
             )
+            raise FailedSetTokenToCacheErrorException
 
     def _set_refresh_token_to_cache(self, token_info: Optional[JwtEntity]):
         try:
@@ -119,6 +118,7 @@ class AuthenticationRepository:
                 f"[AuthenticationRepository][set_refresh_token_to_cache] key : {token_info.user_id}, "
                 f"value : {token_info.refresh_token} error : {e}"
             )
+            raise FailedSetTokenToCacheErrorException
 
     def is_redis_ready(self) -> bool:
         return redis.is_available()
@@ -129,15 +129,19 @@ class AuthenticationRepository:
             - jwt_access_token : user_id
             - user_id : jwt_refresh_token
         """
-        if self.is_redis_ready() and token_info:
-            self._set_access_token_to_cache(token_info)
-            self._set_refresh_token_to_cache(token_info)
+        try:
+            if self.is_redis_ready() and token_info:
+                self._set_access_token_to_cache(token_info)
+                self._set_refresh_token_to_cache(token_info)
 
-            return True
-        logger.error(
-            f"[AuthenticationRepository][set_token_to_cache] token_info: {token_info}, Failed"
-        )
-        return False
+                return True
+            else:
+                return False
+        except FailedSetTokenToCacheErrorException as e:
+            logger.error(
+                f"[AuthenticationRepository][set_token_to_cache] token_info: {token_info}, Failed, error: {e}"
+            )
+            return False
 
     def create_blacklist(self, dto: GetBlacklistDto) -> None:
         blacklist = BlacklistModel(user_id=dto.user_id, access_token=dto.access_token)
@@ -182,7 +186,7 @@ class AuthenticationRepository:
             value = blacklist_info.access_token
             # 집합 set 에 blacklist_token 추가
             redis.sadd(set_name=set_name, values=value)
-            # 집합에 만료시간 지정(테스트: 2분 설정)
+            # 집합에 만료시간 지정
             redis.expire(
                 key=set_name, time=get_jwt_access_expire_timedelta_to_seconds_for_test()
             )
@@ -197,9 +201,9 @@ class AuthenticationRepository:
             set_name=redis.BLACKLIST_SET_NAME, value=dto.access_token
         )
 
-    def is_valid_access_token(self, dto: JwtDto) -> bool:
+    def is_valid_token(self, token: StrictBytes) -> bool:
         try:
-            decode_token(encoded_token=dto.token)
+            decode_token(encoded_token=token)
         except Exception:
             return False
         return True
