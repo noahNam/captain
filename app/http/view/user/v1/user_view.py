@@ -26,7 +26,7 @@ def get_user_view(user_id):
     dto = GetUserRequest(user_id=user_id).validate_request_and_make_dto()
     if not dto:
         return failure_response(
-            UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR)
+            UseCaseFailureOutput(detail=FailureType.INVALID_REQUEST_ERROR)
         )
 
     return UserPresenter().transform(GetUserUseCase().execute(dto=dto))
@@ -39,7 +39,7 @@ def get_user_provider_view():
     dto = GetUserProviderRequest(user_id=user_id).validate_request_and_make_dto()
     if not dto:
         return failure_response(
-            UseCaseFailureOutput(type=FailureType.INVALID_REQUEST_ERROR)
+            UseCaseFailureOutput(detail=FailureType.INVALID_REQUEST_ERROR)
         )
 
     return GetUserProviderPresenter().transform(

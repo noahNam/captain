@@ -8,11 +8,16 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 from sqlalchemy.orm import scoped_session
 
 from app.extensions import RedisClient
-from app.persistence.model import BlacklistModel
+from app.persistence.model import BlacklistModel, JwtModel
+from core.domains.authentication.dto.authentication_dto import JwtWithUUIDDto
 from core.domains.authentication.repository.authentication_repository import (
     AuthenticationRepository,
 )
+from core.domains.user.repository.user_repository import UserRepository
 from core.use_case_output import FailureType
+from tests.app.http.requests.view.authentication.v1.test_authentication_request import (
+    create_invalid_refresh_token,
+)
 from tests.seeder.factory import UserBaseFactory, UserFactory
 
 
@@ -79,6 +84,7 @@ def test_update_view(
     make_header,
     make_expired_authorization,
     create_base_users: List[UserBaseFactory],
+    session: scoped_session,
 ):
     """
         given : wrong JWT
@@ -89,6 +95,14 @@ def test_update_view(
 
     authorization = make_expired_authorization(user_id=user_id)
     headers = make_header(authorization=authorization)
+
+    expired_token = authorization[7:]
+    valid_refresh_token = create_refresh_token(identity=user_id)
+    jwt_model = JwtModel(
+        user_id=user_id, access_token=expired_token, refresh_token=valid_refresh_token,
+    )
+    session.add(jwt_model)
+    session.commit()
 
     with test_request_context:
         response = client.get(url_for("api.token_update_view"), headers=headers)
@@ -199,6 +213,7 @@ def test_verification_view_when_get_expired_token_with_valid_refresh_token(
     make_header,
     make_expired_authorization,
     create_base_users: List[UserBaseFactory],
+    session: scoped_session,
 ):
     """
         given: expired access_token from header, valid refresh_token
@@ -206,19 +221,29 @@ def test_verification_view_when_get_expired_token_with_valid_refresh_token(
         then: return updated access_token
     """
     user_id = create_base_users[0].id
-
-    refresh_token = create_refresh_token(identity=user_id)
-
-    redis.set(key=user_id, value=refresh_token)
+    uuid = create_base_users[0].uuid
 
     authorization = make_expired_authorization(user_id=user_id)
     headers = make_header(authorization=authorization)
 
-    auth_header = headers.get("Authorization")
-    bearer, _, expired_token = auth_header.partition(" ")
+    expired_token = authorization[7:]
+    valid_refresh_token = create_refresh_token(identity=user_id)
+    jwt_model = JwtModel(
+        user_id=user_id, access_token=expired_token, refresh_token=valid_refresh_token,
+    )
+    session.add(jwt_model)
+    session.commit()
+
+    token_info = jwt_model.to_entity()
+
+    # to redis
+    AuthenticationRepository().set_token_to_cache(token_info=token_info)
+    UserRepository().set_user_uuid_to_cache(user_id=user_id, uuid=uuid)
 
     with test_request_context:
-        response = client.get(url_for("api.verification_view"), headers=headers)
+        response = client.get(
+            url_for("api.verification_view", uuid=uuid), headers=headers
+        )
 
     data = response.get_json().get("data")
 
@@ -234,6 +259,7 @@ def test_verification_view_when_get_expired_token_with_invalid_refresh_token(
     make_header,
     make_expired_authorization,
     create_base_users: List[UserBaseFactory],
+    session: scoped_session,
 ):
     """
         given: expired access_token from header, invalid refresh_token or None
@@ -241,11 +267,30 @@ def test_verification_view_when_get_expired_token_with_invalid_refresh_token(
         then: response 400
     """
     user_id = create_base_users[0].id
+    uuid = create_base_users[0].uuid
 
     authorization = make_expired_authorization(user_id=user_id)
     headers = make_header(authorization=authorization)
 
+    expired_token = authorization[7:]
+    expired_refresh_token = create_invalid_refresh_token(user_id=user_id)
+    jwt_model = JwtModel(
+        user_id=user_id,
+        access_token=expired_token,
+        refresh_token=expired_refresh_token,
+    )
+    session.add(jwt_model)
+    session.commit()
+
+    token_info = jwt_model.to_entity()
+
+    # to redis
+    AuthenticationRepository().set_token_to_cache(token_info=token_info)
+    UserRepository().set_user_uuid_to_cache(user_id=user_id, uuid=uuid)
+
     with test_request_context:
-        response = client.get(url_for("api.verification_view"), headers=headers)
+        response = client.get(
+            url_for("api.verification_view", uuid=uuid), headers=headers
+        )
 
     assert response.status_code == 400
