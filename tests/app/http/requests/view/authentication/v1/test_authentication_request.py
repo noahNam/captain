@@ -46,7 +46,7 @@ def create_invalid_refresh_token(user_id):
 
 
 def test_update_token_request_when_get_valid_access_token_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         유효한 토큰 -> 성공 (access)
@@ -61,7 +61,7 @@ def test_update_token_request_when_get_valid_access_token_then_success(
 
 
 def test_verification_request_when_get_valid_access_token_and_uuid_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         유효한 토큰, uuid -> 성공 (access)
@@ -77,7 +77,7 @@ def test_verification_request_when_get_valid_access_token_and_uuid_then_success(
 
 
 def test_update_token_request_when_get_expired_access_token_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         Update_token : 만료된 토큰 허용
@@ -89,7 +89,7 @@ def test_update_token_request_when_get_expired_access_token_then_success(
 
 
 def test_verification_request_when_get_expired_access_token_and_uuid_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         Update_token : 만료된 토큰 허용
@@ -149,7 +149,7 @@ def test_verification_request_when_get_no_uuid_then_failure(create_base_users):
 
 
 def test_update_token_request_when_get_valid_refresh_token_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         유효한 토큰 -> 성공 (refresh)
@@ -163,7 +163,7 @@ def test_update_token_request_when_get_valid_refresh_token_then_success(
 
 
 def test_verification_request_when_get_valid_refresh_token_with_uuid_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         유효한 토큰 -> 성공 (refresh)
@@ -178,7 +178,7 @@ def test_verification_request_when_get_valid_refresh_token_with_uuid_then_succes
 
 
 def test_update_token_request_when_get_expired_refresh_token_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         만료된 토큰도 요청 성공 (refresh)
@@ -189,7 +189,7 @@ def test_update_token_request_when_get_expired_refresh_token_then_success(
 
 
 def test_verification_request_when_get_expired_refresh_token_with_uuid_then_success(
-        create_base_users,
+    create_base_users,
 ):
     """
         만료된 토큰도 요청 성공 (refresh)
@@ -218,7 +218,7 @@ def test_logout_request_when_get_valid_access_token_then_success(create_base_use
 
 
 def test_logout_token_request_when_get_expired_access_token_then_failure(
-        create_base_users,
+    create_base_users,
 ):
     """
         logout_token : 만료된 토큰 허용 X
