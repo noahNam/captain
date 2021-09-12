@@ -43,8 +43,8 @@ class UserRepository:
     def is_exists_user(self, provider_id: str, provider: str) -> bool:
         query = session.query(
             exists()
-                .where(UserModel.provider == provider)
-                .where(UserModel.provider_id == provider_id)
+            .where(UserModel.provider == provider)
+            .where(UserModel.provider_id == provider_id)
         )
         if query.scalar():
             return True
@@ -84,10 +84,10 @@ class UserRepository:
     def get_user_by_create_user_dto(self, dto: CreateUserDto) -> Optional[UserEntity]:
         user = (
             session.query(UserModel)
-                .filter_by(
+            .filter_by(
                 provider=dto.provider, provider_id=dto.provider_id, uuid=dto.uuid
             )
-                .first()
+            .first()
         )
 
         if not user:

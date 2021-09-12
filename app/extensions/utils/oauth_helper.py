@@ -20,7 +20,7 @@ def request_oauth_access_token_to_kakao(code: Optional[any]) -> Any:
     )
     return requests.post(
         url=OAuthKakaoEnum.AUTH_BASE_URL.value
-            + OAuthKakaoEnum.ACCESS_TOKEN_END_POINT.value,
+        + OAuthKakaoEnum.ACCESS_TOKEN_END_POINT.value,
         headers=OAuthKakaoEnum.REQUEST_DEFAULT_HEADER.value,
         data={
             "grant_type": OAuthKakaoEnum.GRANT_TYPE.value,
@@ -35,7 +35,7 @@ def request_oauth_access_token_to_kakao(code: Optional[any]) -> Any:
 def get_kakao_user_info(token_info) -> Any:
     return requests.get(
         url=OAuthKakaoEnum.API_BASE_URL.value
-            + OAuthKakaoEnum.USER_INFO_END_POINT.value,
+        + OAuthKakaoEnum.USER_INFO_END_POINT.value,
         headers={
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
             "Cache-Control": "no-cache",
@@ -52,7 +52,7 @@ def request_oauth_access_token_to_naver(code: Optional[any]) -> Any:
     )
     return requests.post(
         url=OAuthNaverEnum.AUTH_BASE_URL.value
-            + OAuthNaverEnum.ACCESS_TOKEN_END_POINT.value,
+        + OAuthNaverEnum.ACCESS_TOKEN_END_POINT.value,
         headers=OAuthNaverEnum.REQUEST_DEFAULT_HEADER.value,
         data={
             "grant_type": OAuthNaverEnum.GRANT_TYPE.value,
@@ -67,7 +67,7 @@ def request_oauth_access_token_to_naver(code: Optional[any]) -> Any:
 def get_naver_user_info(token_info) -> Any:
     return requests.get(
         url=OAuthNaverEnum.API_BASE_URL.value
-            + OAuthNaverEnum.USER_INFO_END_POINT.value,
+        + OAuthNaverEnum.USER_INFO_END_POINT.value,
         headers={
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
             "Cache-Control": "no-cache",
@@ -79,7 +79,7 @@ def get_naver_user_info(token_info) -> Any:
 def request_validation_to_kakao(access_token) -> Any:
     return requests.get(
         url=OAuthKakaoEnum.API_BASE_URL.value
-            + OAuthKakaoEnum.ACCESS_TOKEN_VALIDATION_END_POINT.value,
+        + OAuthKakaoEnum.ACCESS_TOKEN_VALIDATION_END_POINT.value,
         headers={
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
             "Cache-Control": "no-cache",
@@ -91,7 +91,7 @@ def request_validation_to_kakao(access_token) -> Any:
 def request_validation_to_naver(access_token) -> Any:
     return requests.get(
         url=OAuthNaverEnum.API_BASE_URL.value
-            + OAuthNaverEnum.ACCESS_TOKEN_VALIDATION_END_POINT.value,
+        + OAuthNaverEnum.ACCESS_TOKEN_VALIDATION_END_POINT.value,
         headers={
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
             "Cache-Control": "no-cache",

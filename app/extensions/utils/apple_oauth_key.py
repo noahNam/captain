@@ -31,15 +31,11 @@ class AppleOAuthKey:
         signing_key = header + "\n" + public_key + "\n" + footer
         try:
             decoded_token = jwt.decode(
-                jwt=token,
-                key=signing_key,
-                algorithms=[self.alg]
+                jwt=token, key=signing_key, algorithms=[self.alg]
             )
             return decoded_token
         except Exception as e:
-            logger.error(
-                f"[AppleOAuthKey][get_decoded_token] error : {e}"
-            )
+            logger.error(f"[AppleOAuthKey][get_decoded_token] error : {e}")
             raise InvalidRequestException(message=e)
 
     def is_valid_token(self, decoded_token: Dict[str, Any]) -> bool:
