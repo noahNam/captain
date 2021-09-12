@@ -15,7 +15,8 @@ from app.extensions.utils.oauth_helper import (
     request_validation_to_kakao,
     request_validation_to_naver,
     request_oauth_access_token_to_google,
-    get_google_user_info, get_apple_auth_keys,
+    get_google_user_info,
+    get_apple_auth_keys,
 )
 from app.http.requests.view.oauth.v1.oauth_request import (
     GetOAuthRequest,
@@ -221,7 +222,7 @@ def login_kakao_view() -> Any:
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider, provider_id=str(validation_data.get("id"), ), uuid=uuid_v4
+            provider=provider, provider_id=str(validation_data.get("id"),), uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
@@ -421,8 +422,10 @@ def login_apple_view() -> Any:
         )
     apple_correct_key = None
     for entry in public_keys:
-        if entry.get("kid") == apple_token_header["kid"] and \
-                entry.get("alg") == apple_token_header["alg"]:
+        if (
+            entry.get("kid") == apple_token_header["kid"]
+            and entry.get("alg") == apple_token_header["alg"]
+        ):
             apple_correct_key = AppleOAuthKey(
                 kty=entry.get("kty"),
                 kid=entry.get("kid"),
