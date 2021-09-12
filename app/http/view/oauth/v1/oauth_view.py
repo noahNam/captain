@@ -1,19 +1,12 @@
 from http import HTTPStatus
-from typing import Any
-from uuid import UUID, uuid4
-
+from typing import Any, List
+from uuid import uuid4
+import jwt
 from flasgger import swag_from
-from flask import request, jsonify, Response
+from flask import request
 
 from app import oauth
-from app.http.responses import failure_response
-from core.domains.oauth.enum.oauth_enum import (
-    OAuthKakaoEnum,
-    ProviderEnum,
-    OAuthNaverEnum,
-    OAuthBaseHostEnum,
-    OAuthGoogleEnum,
-)
+from app.extensions.utils.apple_oauth_key import AppleOAuthKey
 from app.extensions.utils.oauth_helper import (
     request_oauth_access_token_to_kakao,
     get_kakao_user_info,
@@ -22,14 +15,22 @@ from app.extensions.utils.oauth_helper import (
     request_validation_to_kakao,
     request_validation_to_naver,
     request_oauth_access_token_to_google,
-    get_google_user_info,
+    get_google_user_info, get_apple_auth_keys,
 )
 from app.http.requests.view.oauth.v1.oauth_request import (
     GetOAuthRequest,
     CreateUserRequest,
 )
+from app.http.responses import failure_response
 from app.http.responses.presenters.oauth_presenter import OAuthPresenter
 from app.http.view import api
+from core.domains.oauth.enum.oauth_enum import (
+    OAuthKakaoEnum,
+    ProviderEnum,
+    OAuthNaverEnum,
+    OAuthBaseHostEnum,
+    OAuthGoogleEnum,
+)
 from core.domains.oauth.use_case.oauth_use_case import CreateTokenWithUserUseCase
 from core.exception import InvalidRequestException
 from core.use_case_output import UseCaseFailureOutput, FailureType
@@ -220,7 +221,7 @@ def login_kakao_view() -> Any:
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider, provider_id=str(validation_data.get("id"),), uuid=uuid_v4
+            provider=provider, provider_id=str(validation_data.get("id"), ), uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
@@ -372,6 +373,94 @@ def login_google_view() -> Any:
     try:
         dto = CreateUserRequest(
             provider=provider, provider_id=str(user_info.get("sub")), uuid=uuid_v4
+        ).validate_request_and_make_dto()
+    except InvalidRequestException as e:
+        return failure_response(
+            UseCaseFailureOutput(
+                detail=FailureType.INVALID_REQUEST_ERROR, message=f"{e.message}"
+            )
+        )
+    return OAuthPresenter().transform(CreateTokenWithUserUseCase().execute(dto=dto))
+
+
+@api.route("/v1/oauth/apple", methods=["GET"])
+def login_apple_view() -> Any:
+    """
+        Live apple login
+        header : Bearer token (id_token value)
+        parameter : uuid=some-uuid-value-from-frontend
+        return : Captain JWT access_token
+    """
+    auth_header = request.headers.get("Authorization")
+    bearer, _, token = auth_header.partition(" ")
+    uuid_v4 = request.args.get("uuid")
+
+    # Get Apple auth public keys
+    public_keys_result = get_apple_auth_keys()
+    try:
+        public_keys_result.raise_for_status()
+    except Exception as e:
+        return failure_response(
+            UseCaseFailureOutput(
+                detail=FailureType.INVALID_REQUEST_ERROR,
+                message=f"Failed get auth public keys from Apple, error:{e}, {public_keys_result.json()}",
+            )
+        )
+    public_keys: List[dict] = list()
+    for key in public_keys_result.json().get("keys"):
+        public_keys.append(key)
+
+    # Find Apple correct auth public key
+    apple_token_header = jwt.get_unverified_header(token)
+    if not apple_token_header.get("kid") or apple_token_header.get("alg"):
+        return failure_response(
+            UseCaseFailureOutput(
+                detail=FailureType.INVALID_REQUEST_ERROR,
+                message=f"Invalid auth public key header, Not Apple's id_token",
+            )
+        )
+    apple_correct_key = None
+    for entry in public_keys:
+        if entry.get("kid") == apple_token_header["kid"] and \
+                entry.get("alg") == apple_token_header["alg"]:
+            apple_correct_key = AppleOAuthKey(
+                kty=entry.get("kty"),
+                kid=entry.get("kid"),
+                use=entry.get("use"),
+                alg=entry.get("alg"),
+                n=entry.get("n"),
+                e=entry.get("e"),
+            )
+    if not apple_correct_key:
+        return failure_response(
+            UseCaseFailureOutput(
+                detail=FailureType.INVALID_REQUEST_ERROR,
+                message=f"Not found correct Apple public key, Failed Apple OAuth Login",
+            )
+        )
+    try:
+        decoded_token = apple_correct_key.get_decoded_token(token=token)
+    except InvalidRequestException as e:
+        return failure_response(
+            UseCaseFailureOutput(
+                detail=FailureType.INVALID_REQUEST_ERROR,
+                message=f"Failed decode token, {e.message}",
+            )
+        )
+
+    if not apple_correct_key.is_valid_token(decoded_token):
+        return failure_response(
+            UseCaseFailureOutput(
+                detail=FailureType.INVALID_REQUEST_ERROR,
+                message=f"Invalid Apple auth token",
+            )
+        )
+    provider = ProviderEnum.APPLE.value
+
+    # DTO 생성
+    try:
+        dto = CreateUserRequest(
+            provider=provider, provider_id=str(decoded_token.get("sub")), uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
