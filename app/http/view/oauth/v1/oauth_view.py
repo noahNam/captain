@@ -413,7 +413,7 @@ def login_apple_view() -> Any:
 
     # Find Apple correct auth public key
     apple_token_header = jwt.get_unverified_header(token)
-    if not apple_token_header.get("kid") or apple_token_header.get("alg"):
+    if not (apple_token_header.get("kid") or apple_token_header.get("alg")):
         return failure_response(
             UseCaseFailureOutput(
                 detail=FailureType.INVALID_REQUEST_ERROR,
