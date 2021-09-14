@@ -30,6 +30,7 @@ class ProviderEnum(Enum):
     KAKAO = "kakao"
     NAVER = "naver"
     GOOGLE = "google"
+    APPLE = "apple"
 
 
 class OAuthNaverEnum(Enum):
@@ -70,3 +71,8 @@ class OAuthGoogleEnum(Enum):
         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
         "Cache-Control": "no-cache",
     }
+
+
+class OAuthAppleEnum(Enum):
+    AUTH_KEYS_URL = "https://appleid.apple.com/auth/keys"
+    APPLE_ISS = "https://appleid.apple.com"

@@ -8,6 +8,7 @@ from core.domains.oauth.enum.oauth_enum import (
     OAuthNaverEnum,
     OAuthBaseHostEnum,
     OAuthGoogleEnum,
+    OAuthAppleEnum,
 )
 
 
@@ -125,5 +126,15 @@ def get_google_user_info(token_info) -> Any:
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
             "Cache-Control": "no-cache",
             "Authorization": "Bearer " + token_info.get("access_token"),
+        },
+    )
+
+
+def get_apple_auth_keys() -> Any:
+    return requests.get(
+        url=OAuthAppleEnum.AUTH_KEYS_URL.value,
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+            "Cache-Control": "no-cache",
         },
     )
