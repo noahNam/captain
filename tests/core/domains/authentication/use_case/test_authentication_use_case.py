@@ -307,7 +307,9 @@ def test_verification_when_get_valid_access_token_then_return_new_token(
     token_info = AuthenticationRepository().get_token_info_by_user_id(user_id=user_id)
     AuthenticationRepository().set_token_to_cache(token_info=token_info)
     UserRepository().set_user_uuid_to_cache(user_id=user_id, uuid=uuid)
-    jwt_with_uuid_dto = JwtWithUUIDDto(token=token_info.access_token.encode("utf-8"), uuid=uuid)
+    jwt_with_uuid_dto = JwtWithUUIDDto(
+        token=token_info.access_token.encode("utf-8"), uuid=uuid
+    )
 
     result = VerificationJwtUseCase().execute(dto=jwt_with_uuid_dto)
     assert result.type == "success"
