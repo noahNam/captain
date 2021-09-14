@@ -118,6 +118,7 @@ class VerificationJwtUseCase(JwtBaseUseCase):
     """
         만료된 access_token -> access, refresh 토큰 모두 갱신 처리
     """
+
     def execute(
         self, dto: JwtWithUUIDDto
     ) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:

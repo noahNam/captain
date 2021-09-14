@@ -19,7 +19,7 @@ class CreateTokenWithUserUseCase:
     """
 
     def execute(
-            self, dto: CreateUserDto
+        self, dto: CreateUserDto
     ) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
         is_exists_user = self.__is_exists_user(
             provider_id=dto.provider_id, provider=dto.provider
