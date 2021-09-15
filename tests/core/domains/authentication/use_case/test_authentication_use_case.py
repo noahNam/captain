@@ -292,21 +292,26 @@ def test_verification_when_get_expired_access_token_with_expired_refresh_token_t
     assert result.detail == FailureType.UNAUTHORIZED_ERROR
 
 
-def test_verification_when_get_valid_access_token_then_return_same_token(
+def test_verification_when_get_valid_access_token_then_return_new_token(
     session: scoped_session, create_base_users: List[UserBaseFactory]
 ):
     """
         given : valid access_token, user_id
         when : verification request
-        then : same token return
+        then : updated new token return
     """
     user_id = create_base_users[0].id
+    uuid = create_base_users[0].uuid
 
-    token = create_access_token(identity=user_id)
-    jwt_with_uuid_dto = JwtWithUUIDDto(token=token.encode("utf-8"), uuid=uuid_v4)
+    AuthenticationRepository().create_token(GetUserDto(user_id=user_id))
+    token_info = AuthenticationRepository().get_token_info_by_user_id(user_id=user_id)
+    AuthenticationRepository().set_token_to_cache(token_info=token_info)
+    UserRepository().set_user_uuid_to_cache(user_id=user_id, uuid=uuid)
+    jwt_with_uuid_dto = JwtWithUUIDDto(
+        token=token_info.access_token.encode("utf-8"), uuid=uuid
+    )
 
     result = VerificationJwtUseCase().execute(dto=jwt_with_uuid_dto)
-
     assert result.type == "success"
     assert isinstance(result, UseCaseSuccessOutput)
-    assert token.encode("utf-8") in result.value.data
+    assert token_info.access_token.encode("utf-8") != result.value.data
