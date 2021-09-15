@@ -1,8 +1,11 @@
-from typing import Optional, Any
-
+from typing import Optional, Any, Dict
+import jwt
+from cryptography import x509
 import requests
+from cryptography.hazmat.backends import default_backend
 from flask import request
 
+from app.extensions.utils.log_helper import logger_
 from core.domains.oauth.enum.oauth_enum import (
     OAuthKakaoEnum,
     OAuthNaverEnum,
@@ -10,6 +13,9 @@ from core.domains.oauth.enum.oauth_enum import (
     OAuthGoogleEnum,
     OAuthAppleEnum,
 )
+from core.exception import InvalidRequestException
+
+logger = logger_.getLogger(__name__)
 
 
 def request_oauth_access_token_to_kakao(code: Optional[any]) -> Any:
@@ -130,11 +136,29 @@ def get_google_user_info(token_info) -> Any:
     )
 
 
-def get_apple_auth_keys() -> Any:
+def get_firebase_auth_keys() -> Any:
     return requests.get(
-        url=OAuthAppleEnum.AUTH_KEYS_URL.value,
+        url=OAuthAppleEnum.FIREBASE_AUTH_URL.value,
         headers={
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
             "Cache-Control": "no-cache",
         },
     )
+
+
+def get_decoded_firebase_token(token: str, cert: str, algorithm: str) -> Dict[str, Any]:
+    cert_to_bytes = cert.encode("utf-8")
+    public_key = x509.load_pem_x509_certificate(
+        data=cert_to_bytes, backend=default_backend()
+    ).public_key()
+    try:
+        decoded_token = jwt.decode(
+            jwt=token,
+            key=public_key,
+            algorithms=[algorithm],
+            audience=OAuthAppleEnum.FIREBASE_AUDIENCE.value,
+        )
+        return decoded_token
+    except Exception as e:
+        logger.error(f"[login_apple_view][get_decoded_firebase_token] error : {e}")
+        raise InvalidRequestException(message=e)

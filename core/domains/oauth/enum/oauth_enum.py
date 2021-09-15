@@ -74,5 +74,5 @@ class OAuthGoogleEnum(Enum):
 
 
 class OAuthAppleEnum(Enum):
-    AUTH_KEYS_URL = "https://appleid.apple.com/auth/keys"
-    APPLE_ISS = "https://appleid.apple.com"
+    FIREBASE_AUTH_URL = "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
+    FIREBASE_AUDIENCE = "apartalktoadhome"
