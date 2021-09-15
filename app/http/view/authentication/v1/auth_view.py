@@ -53,6 +53,8 @@ def check_jwt_allow_expired(auth_header: str) -> bytes:
 @swag_from("update_token_view.yml", methods=["GET"])
 def token_update_view():
     """
+        * 위 API는 현재 로그인 정책 변경으로 인해 사용하지 않습니다.
+        - JWT verification_view()에서 무조건 토큰 갱신처리 합니다.
         Update request from tanos
         - JWT 토큰만 업데이트
         - UUID는 받지 않음
@@ -127,7 +129,7 @@ def logout_view():
 def verification_view():
     """
         Verification from Client
-        - Access, Refresh 토큰 모두 만료된 토큰도 허용
+        - 만료된 Access 토큰이 요청오면 무조건 갱신 처리
         - UUID : UUID_v4
     """
     auth_header = request.headers.get("Authorization")

@@ -30,6 +30,7 @@ class ProviderEnum(Enum):
     KAKAO = "kakao"
     NAVER = "naver"
     GOOGLE = "google"
+    APPLE = "apple"
 
 
 class OAuthNaverEnum(Enum):
@@ -70,3 +71,8 @@ class OAuthGoogleEnum(Enum):
         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
         "Cache-Control": "no-cache",
     }
+
+
+class OAuthAppleEnum(Enum):
+    FIREBASE_AUTH_URL = "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
+    FIREBASE_AUDIENCE = "apartalktoadhome"

@@ -115,6 +115,10 @@ class LogoutUseCase:
 
 
 class VerificationJwtUseCase(JwtBaseUseCase):
+    """
+        만료된 access_token -> access, refresh 토큰 모두 갱신 처리
+    """
+
     def execute(
         self, dto: JwtWithUUIDDto
     ) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
@@ -155,12 +159,6 @@ class VerificationJwtUseCase(JwtBaseUseCase):
                 detail=FailureType.UNAUTHORIZED_ERROR,
             )
 
-        # Valid access_token check
-        if self._auth_repo.is_valid_token(token=dto.token):
-            result = jsonify(access_token=dto.token.decode("utf-8"))
-            return UseCaseSuccessOutput(value=result)
-
-        # Expired access_token from this line
         # Valid refresh_token check
         if self._auth_repo.is_redis_ready():
             # if refresh_token valid from redis

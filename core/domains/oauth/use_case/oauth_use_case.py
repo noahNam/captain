@@ -14,6 +14,7 @@ class CreateTokenWithUserUseCase:
         UserRepository
         1. DB -> UserModel에 사용자가 존재한다 -> 로그인 -> UUID만 갱신한다 (update_user_uuid())
         2. DB -> UserModel에 등록된 사용자가 없다 -> 신규가입 (create_user())
+        <공통 로직: 로그인 후 토큰과 UUID 캐싱처리>
         return JWT
     """
 
@@ -34,9 +35,6 @@ class CreateTokenWithUserUseCase:
             return UseCaseFailureOutput(
                 message="user id", detail=FailureType.NOT_FOUND_ERROR
             )
-        # Set UUID to redis
-        if self.__is_redis_ready():
-            self.__set_user_uuid_to_cache(user_id=user.id, uuid=dto.uuid)
 
         # JWT 발급 + DB 저장
         get_user_dto = GetUserDto(user_id=user.id)
@@ -52,6 +50,11 @@ class CreateTokenWithUserUseCase:
             return UseCaseFailureOutput(
                 message="token_info", detail=FailureType.NOT_FOUND_ERROR
             )
+
+        # Set UUID, token_info to redis
+        if self.__is_redis_ready():
+            self.__set_user_uuid_to_cache(user_id=user.id, uuid=dto.uuid)
+            self.__set_token_to_cache(token_info=token_info)
 
         access_token = token_info.access_token
 
@@ -106,3 +109,9 @@ class CreateTokenWithUserUseCase:
             topic_name=UserTopicEnum.SET_USER_UUID_TO_CACHE, user_id=user_id, uuid=uuid
         )
         return get_event_object(topic_name=UserTopicEnum.SET_USER_UUID_TO_CACHE)
+
+    def __set_token_to_cache(self, token_info: Optional[JwtEntity]) -> bool:
+        send_message(
+            topic_name=AuthenticationTopicEnum.SET_TOKEN_TO_CACHE, token_info=token_info
+        )
+        return get_event_object(topic_name=AuthenticationTopicEnum.SET_TOKEN_TO_CACHE)
