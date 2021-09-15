@@ -1,12 +1,12 @@
 from http import HTTPStatus
-from typing import Any, List
+from typing import Any
 from uuid import uuid4
+
 import jwt
 from flasgger import swag_from
 from flask import request
 
 from app import oauth
-from app.extensions.utils.apple_oauth_key import AppleOAuthKey
 from app.extensions.utils.oauth_helper import (
     request_oauth_access_token_to_kakao,
     get_kakao_user_info,
@@ -16,7 +16,8 @@ from app.extensions.utils.oauth_helper import (
     request_validation_to_naver,
     request_oauth_access_token_to_google,
     get_google_user_info,
-    get_apple_auth_keys,
+    get_firebase_auth_keys,
+    get_decoded_firebase_token,
 )
 from app.http.requests.view.oauth.v1.oauth_request import (
     GetOAuthRequest,
@@ -396,53 +397,48 @@ def login_apple_view() -> Any:
     bearer, _, token = auth_header.partition(" ")
     uuid_v4 = request.args.get("uuid")
 
-    # Get Apple auth public keys
-    public_keys_result = get_apple_auth_keys()
+    # Get Firebase Apple auth public keys
+    public_keys_result = get_firebase_auth_keys()
     try:
         public_keys_result.raise_for_status()
     except Exception as e:
         return failure_response(
             UseCaseFailureOutput(
                 detail=FailureType.INVALID_REQUEST_ERROR,
-                message=f"Failed get auth public keys from Apple, error:{e}, {public_keys_result.json()}",
+                message=f"Failed get auth public keys from Firebase, error:{e}, {public_keys_result.json()}",
             )
         )
-    public_keys: List[dict] = list()
-    for key in public_keys_result.json().get("keys"):
-        public_keys.append(key)
+
+    public_keys: dict = public_keys_result.json()
 
     # Find Apple correct auth public key
-    apple_token_header = jwt.get_unverified_header(token)
-    if not (apple_token_header.get("kid") or apple_token_header.get("alg")):
+    firebase_token_header = jwt.get_unverified_header(token)
+    if not (
+        firebase_token_header.get("kid")
+        or firebase_token_header.get("alg")
+        or firebase_token_header.get("typ")
+    ):
         return failure_response(
             UseCaseFailureOutput(
                 detail=FailureType.INVALID_REQUEST_ERROR,
-                message=f"Invalid auth public key header, Not Apple's id_token",
+                message=f"Invalid auth public key header, Not Firebase Apple's id_token",
             )
         )
-    apple_correct_key = None
-    for entry in public_keys:
-        if (
-            entry.get("kid") == apple_token_header["kid"]
-            and entry.get("alg") == apple_token_header["alg"]
-        ):
-            apple_correct_key = AppleOAuthKey(
-                kty=entry.get("kty"),
-                kid=entry.get("kid"),
-                use=entry.get("use"),
-                alg=entry.get("alg"),
-                n=entry.get("n"),
-                e=entry.get("e"),
-            )
-    if not apple_correct_key:
+    firebase_cert_key = public_keys.get(firebase_token_header.get("kid"))
+
+    if not firebase_cert_key:
         return failure_response(
             UseCaseFailureOutput(
                 detail=FailureType.INVALID_REQUEST_ERROR,
-                message=f"Not found correct Apple public key, Failed Apple OAuth Login",
+                message=f"Not found correct Firebase cert key, Failed Apple OAuth Login",
             )
         )
     try:
-        decoded_token = apple_correct_key.get_decoded_token(token=token)
+        decoded_token = get_decoded_firebase_token(
+            token=token,
+            cert=firebase_cert_key,
+            algorithm=firebase_token_header.get("alg"),
+        )
     except InvalidRequestException as e:
         return failure_response(
             UseCaseFailureOutput(
@@ -451,19 +447,12 @@ def login_apple_view() -> Any:
             )
         )
 
-    if not apple_correct_key.is_valid_token(decoded_token):
-        return failure_response(
-            UseCaseFailureOutput(
-                detail=FailureType.INVALID_REQUEST_ERROR,
-                message=f"Invalid Apple auth token",
-            )
-        )
     provider = ProviderEnum.APPLE.value
-
+    apple_sub = decoded_token.get("firebase")["identities"]["apple.com"][0]
     # DTO 생성
     try:
         dto = CreateUserRequest(
-            provider=provider, provider_id=str(decoded_token.get("sub")), uuid=uuid_v4
+            provider=provider, provider_id=str(apple_sub), uuid=uuid_v4
         ).validate_request_and_make_dto()
     except InvalidRequestException as e:
         return failure_response(
