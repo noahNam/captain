@@ -133,9 +133,10 @@ class AuthenticationRepository:
             if self.is_redis_ready() and token_info:
                 self._set_access_token_to_cache(token_info)
                 self._set_refresh_token_to_cache(token_info)
-
+                print(f"[VerificationJwtUseCase][set_token_to_cache] saved token to redis")
                 return True
             else:
+                print(f"[VerificationJwtUseCase][set_token_to_cache] Failed saved token to redis")
                 return False
         except FailedSetTokenToCacheErrorException as e:
             logger.error(
@@ -214,8 +215,10 @@ class AuthenticationRepository:
             return False
         try:
             decode_token(encoded_token=refresh_token)
-        except Exception:
+        except Exception as e:
+            print(f"[VerificationJwtUseCase][is_valid_refresh_token_from_redis] exception raised, {e}")
             return False
+        print(f"[VerificationJwtUseCase][is_valid_refresh_token_from_redis] passed")
         return True
 
     def is_valid_refresh_token(self, user_id: int) -> bool:
