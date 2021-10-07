@@ -175,12 +175,22 @@ class VerificationJwtUseCase(JwtBaseUseCase):
                 new_token_info = self._auth_repo.get_token_info_by_user_id(
                     user_id=user_id
                 )
-                print(f"[VerificationJwtUseCase]token updated, new_token_info: {new_token_info}")
+                print(f"[VerificationJwtUseCase]token updated, new_token_info: {new_token_info.access_token}")
                 # update to redis
-                self._auth_repo.set_token_to_cache(token_info=new_token_info)
-                result = jsonify(access_token=new_token_info.access_token)
-                print(f"[VerificationJwtUseCase]result : {result}")
-                return UseCaseSuccessOutput(value=result)
+                if self._auth_repo.set_token_to_cache(token_info=new_token_info):
+                    result = jsonify(access_token=new_token_info.access_token)
+                    print(f"[VerificationJwtUseCase]result : {result}")
+                    return UseCaseSuccessOutput(value=result)
+                else:
+                    return UseCaseFailureOutput(
+                        message=f"Failed set_token_cache, check redis enabled",
+                        detail=FailureType.INTERNAL_SERVER_ERROR,
+                    )
+            else:
+                return UseCaseFailureOutput(
+                    message=f"Not valid refresh_token or not valid uuid",
+                    detail=FailureType.INVALID_REQUEST_ERROR,
+                )
             print(f"[VerificationJwtUseCase] not passed if statement")
             return UseCaseFailureOutput(
                 message=f"Refresh Token expired, please retry login",
