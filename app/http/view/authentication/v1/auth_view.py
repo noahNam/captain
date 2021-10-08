@@ -135,10 +135,6 @@ def verification_view():
     auth_header = request.headers.get("Authorization")
     uuid_v4 = request.args.get("uuid")
 
-    print(f"[verification_view] start")
-    print(f"[verification_view] {auth_header}")
-    print(f"[verification_view] {uuid_v4}")
-
     try:
         token_to_bytes = check_jwt_allow_expired(auth_header=auth_header)
     except TokenNotFoundError as e:
@@ -171,7 +167,6 @@ def verification_view():
                 message=f"Invalid token input from header",
             )
         )
-    print(f"[verification_view] request passed, dto.token: {dto.token}, dto.uuid: {dto.uuid}")
     return VerificationJwtPresenter().transform(
         VerificationJwtUseCase().execute(dto=dto)
     )

@@ -54,7 +54,6 @@ class AuthenticationRepository:
                 }
             )
             session.commit()
-            print(f"[AuthenticationRepository][update_token] session committed")
         except Exception as e:
             session.rollback()
             logger.error(
@@ -90,7 +89,6 @@ class AuthenticationRepository:
         token_info = session.query(JwtModel).filter_by(user_id=user_id).first()
 
         if not token_info:
-            print("[AuthenticationRepository][get_token_info_by_user_id] no token info")
             return None
         return token_info.to_entity()
 
@@ -135,10 +133,8 @@ class AuthenticationRepository:
             if self.is_redis_ready() and token_info:
                 self._set_access_token_to_cache(token_info)
                 self._set_refresh_token_to_cache(token_info)
-                print(f"[VerificationJwtUseCase][set_token_to_cache] saved token to redis")
                 return True
             else:
-                print(f"[VerificationJwtUseCase][set_token_to_cache] Failed saved token to redis")
                 return False
         except FailedSetTokenToCacheErrorException as e:
             logger.error(
@@ -217,10 +213,8 @@ class AuthenticationRepository:
             return False
         try:
             decode_token(encoded_token=refresh_token)
-        except Exception as e:
-            print(f"[VerificationJwtUseCase][is_valid_refresh_token_from_redis] exception raised, {e}")
+        except Exception:
             return False
-        print(f"[VerificationJwtUseCase][is_valid_refresh_token_from_redis] passed")
         return True
 
     def is_valid_refresh_token(self, user_id: int) -> bool:
