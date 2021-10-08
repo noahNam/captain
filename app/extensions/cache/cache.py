@@ -38,7 +38,7 @@ class RedisClient:
             startup_nodes = self.get_cluster_nodes(app=app)
             self._redis_client: RedisCluster = RedisCluster(
                 startup_nodes=startup_nodes,
-                decode_responses=True,
+                decode_responses=False,
                 skip_full_coverage_check=True,
             )
         else:
