@@ -54,6 +54,7 @@ class AuthenticationRepository:
                 }
             )
             session.commit()
+            print(f"[AuthenticationRepository][update_token] session committed")
         except Exception as e:
             session.rollback()
             logger.error(
@@ -89,6 +90,7 @@ class AuthenticationRepository:
         token_info = session.query(JwtModel).filter_by(user_id=user_id).first()
 
         if not token_info:
+            print("[AuthenticationRepository][get_token_info_by_user_id] no token info")
             return None
         return token_info.to_entity()
 

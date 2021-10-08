@@ -117,7 +117,10 @@ class UserRepository:
         user_id_value = redis.get_by_key(key=uuid)
         print(f"[UserRepository][is_valid_user_uuid_from_redis] start")
         print(f"[UserRepository][is_valid_user_uuid_from_redis] user_id_value: {user_id_value}")
+        print(f"[UserRepository][is_valid_user_uuid_from_redis] type(user_id_value): {type(user_id_value)}")
+        print(f"[UserRepository][is_valid_user_uuid_from_redis] str(user_id).encode('UTF-8'): {str(user_id).encode('UTF-8')}")
         if user_id_value != str(user_id).encode("UTF-8"):
+            print(f"[UserRepository][is_valid_user_uuid_from_redis] Failed by False")
             return False
         print(f"[UserRepository][is_valid_user_uuid_from_redis] passed by True")
         return True

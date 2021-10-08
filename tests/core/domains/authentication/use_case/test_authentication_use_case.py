@@ -282,14 +282,13 @@ def test_verification_when_get_expired_access_token_with_expired_refresh_token_t
     expired_token = create_invalid_access_token(user_id=user_id)
 
     expired_refresh_token = create_invalid_refresh_token(user_id=user_id)
-
     jwt_with_uuid_dto = JwtWithUUIDDto(token=expired_token, uuid=uuid_v4)
     # to redis
     redis.set(key=user_id, value=expired_refresh_token)
-
+    UserRepository().set_user_uuid_to_cache(user_id=user_id, uuid=uuid_v4)
     result = VerificationJwtUseCase().execute(dto=jwt_with_uuid_dto)
 
-    assert result.detail == FailureType.UNAUTHORIZED_ERROR
+    assert result.detail == FailureType.INVALID_REQUEST_ERROR
 
 
 def test_verification_when_get_valid_access_token_then_return_new_token(
