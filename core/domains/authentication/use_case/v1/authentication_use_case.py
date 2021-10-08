@@ -122,7 +122,6 @@ class VerificationJwtUseCase(JwtBaseUseCase):
     def execute(
         self, dto: JwtWithUUIDDto
     ) -> Union[UseCaseSuccessOutput, UseCaseFailureOutput]:
-        print(f"[VerificationJwtUseCase] start")
         try:
             decoded = decode_token(dto.token, allow_expired=True)
         except JWTDecodeError as e:
@@ -145,8 +144,6 @@ class VerificationJwtUseCase(JwtBaseUseCase):
                 detail=FailureType.INVALID_REQUEST_ERROR,
             )
 
-        print(f"[VerificationJwtUseCase] decoded, user_id: {user_id}")
-
         # Blacklist check
         blacklist_dto = GetBlacklistDto(user_id=user_id, access_token=dto.token)
 
@@ -161,25 +158,20 @@ class VerificationJwtUseCase(JwtBaseUseCase):
                 message=f"Blacklist Token detected, please retry login",
                 detail=FailureType.UNAUTHORIZED_ERROR,
             )
-        print(f"[VerificationJwtUseCase] blacklist_check passed")
         # Valid refresh_token check
         if self._auth_repo.is_redis_ready():
-            print(f"[VerificationJwtUseCase] redis is ready passed")
             # if refresh_token valid from redis
             if self._auth_repo.is_valid_refresh_token_from_redis(
                 user_id=user_id
             ) and self.__is_valid_user_uuid_from_redis(uuid=dto.uuid, user_id=user_id):
                 # update token
-                print(f"[VerificationJwtUseCase][updated_token] if statement True")
                 self._auth_repo.update_token(dto=GetUserDto(user_id=user_id))
                 new_token_info = self._auth_repo.get_token_info_by_user_id(
                     user_id=user_id
                 )
-                print(f"[VerificationJwtUseCase]token updated, new_token_info: {new_token_info.access_token}")
                 # update to redis
                 if self._auth_repo.set_token_to_cache(token_info=new_token_info):
                     result = jsonify(access_token=new_token_info.access_token)
-                    print(f"[VerificationJwtUseCase]result : {result}")
                     return UseCaseSuccessOutput(value=result)
                 else:
                     return UseCaseFailureOutput(
@@ -191,7 +183,6 @@ class VerificationJwtUseCase(JwtBaseUseCase):
                     message=f"Not valid refresh_token or not valid uuid",
                     detail=FailureType.INVALID_REQUEST_ERROR,
                 )
-            print(f"[VerificationJwtUseCase] not passed if statement")
             return UseCaseFailureOutput(
                 message=f"Refresh Token expired, please retry login",
                 detail=FailureType.UNAUTHORIZED_ERROR,
@@ -220,7 +211,6 @@ class VerificationJwtUseCase(JwtBaseUseCase):
         return get_event_object(topic_name=UserTopicEnum.IS_VALID_USER_UUID)
 
     def __is_valid_user_uuid_from_redis(self, uuid: str, user_id: int) -> bool:
-        print(f"[VerificationJwtUseCase][__is_valid_user_uuid_from_redis] start")
         send_message(
             topic_name=UserTopicEnum.IS_VALID_USER_UUID_FROM_REDIS,
             uuid=uuid,
