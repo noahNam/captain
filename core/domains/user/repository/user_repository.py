@@ -114,6 +114,7 @@ class UserRepository:
             return False
 
     def is_valid_user_uuid_from_redis(self, uuid: str, user_id: int) -> bool:
+        # user_id_value : bytes type from redis
         user_id_value = redis.get_by_key(key=uuid)
         print(f"[UserRepository][is_valid_user_uuid_from_redis] start")
         print(f"[UserRepository][is_valid_user_uuid_from_redis] user_id_value: {user_id_value}")
