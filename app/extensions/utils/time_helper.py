@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
+from pytz import timezone
 
 
 def get_server_timestamp() -> datetime:
-    return datetime.now()
+    return datetime.now(timezone("Asia/Seoul"))
 
 
 def get_jwt_access_expired_time_delta() -> timedelta:
