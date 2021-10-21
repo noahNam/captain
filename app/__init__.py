@@ -2,6 +2,9 @@ from typing import Optional, Dict, Any
 
 from flasgger import Swagger
 from flask import Flask
+from sentry_sdk.integrations.flask import FlaskIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
+
 from flask_sqlalchemy import SQLAlchemy
 
 from app.config import config
@@ -50,7 +53,8 @@ def init_extensions(app: Flask):
 def init_sentry(app: Flask):
     if app.config.get("SENTRY_KEY", None):
         sentry_sdk.init(
-            app.config.get("SENTRY_KEY"),
+            dsn=app.config.get("SENTRY_KEY"),
+            integrations=[FlaskIntegration(), RedisIntegration()],
             environment=app.config.get("SENTRY_ENVIRONMENT"),
             # Set traces_sample_rate to 1.0 to capture 100%
             # of transactions for performance monitoring.
