@@ -7,3 +7,4 @@ class UserTopicEnum:
     SET_USER_UUID_TO_CACHE = "set_user_uuid_to_cache"
     IS_VALID_USER_UUID = "is_valid_user_uuid"
     IS_VALID_USER_UUID_FROM_REDIS = "is_valid_user_uuid_from_redis"
+    UPDATE_CURRENT_CONNECTION_TIME = "update_current_connection_time"

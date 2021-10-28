@@ -47,6 +47,11 @@ def is_valid_user_uuid_from_redis(uuid: str, user_id: int) -> None:
     setattr(g, UserTopicEnum.IS_VALID_USER_UUID_FROM_REDIS, result)
 
 
+def update_current_connection_time(user_id: int) -> None:
+    UserRepository().update_current_connection_time(user_id=user_id)
+    setattr(g, UserTopicEnum.UPDATE_CURRENT_CONNECTION_TIME, None)
+
+
 pub.subscribe(create_user, UserTopicEnum.CREATE_USER)
 pub.subscribe(get_user_by_create_user_dto, UserTopicEnum.GET_USER)
 pub.subscribe(is_exists_user, UserTopicEnum.IS_EXISTS_USER)
@@ -56,4 +61,7 @@ pub.subscribe(set_user_uuid_to_cache, UserTopicEnum.SET_USER_UUID_TO_CACHE)
 pub.subscribe(is_valid_user_uuid, UserTopicEnum.IS_VALID_USER_UUID)
 pub.subscribe(
     is_valid_user_uuid_from_redis, UserTopicEnum.IS_VALID_USER_UUID_FROM_REDIS
+)
+pub.subscribe(
+    update_current_connection_time, UserTopicEnum.UPDATE_CURRENT_CONNECTION_TIME
 )
