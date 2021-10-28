@@ -137,7 +137,7 @@ class UserRepository:
             최근 접속 일자
         """
         try:
-            session.query(UserModel).filter_by(user_id=user_id).update(
+            session.query(UserModel).filter_by(id=user_id).update(
                 {"current_connection_time": get_server_timestamp()}
             )
             session.commit()
