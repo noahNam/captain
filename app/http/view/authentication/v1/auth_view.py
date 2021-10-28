@@ -130,6 +130,7 @@ def verification_view():
     """
         Verification from Client
         - 만료된 Access 토큰이 요청오면 무조건 갱신 처리
+            - UUID와 user_id 맵핑으로 확인
         - UUID : UUID_v4
     """
     auth_header = request.headers.get("Authorization")

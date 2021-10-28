@@ -172,6 +172,9 @@ class VerificationJwtUseCase(JwtBaseUseCase):
                 # update to redis
                 if self._auth_repo.set_token_to_cache(token_info=new_token_info):
                     result = jsonify(access_token=new_token_info.access_token)
+
+                    # 최근접속 일자 갱신
+                    self.__update_current_connection_time(user_id=user_id)
                     return UseCaseSuccessOutput(value=result)
                 else:
                     return UseCaseFailureOutput(
@@ -183,10 +186,6 @@ class VerificationJwtUseCase(JwtBaseUseCase):
                     message=f"Not valid refresh_token or not valid uuid",
                     detail=FailureType.INVALID_REQUEST_ERROR,
                 )
-            return UseCaseFailureOutput(
-                message=f"Refresh Token expired, please retry login",
-                detail=FailureType.UNAUTHORIZED_ERROR,
-            )
         else:
             # redis 연결이 안될 경우 DB 에서 토큰 가져옴
             if not (
@@ -201,8 +200,17 @@ class VerificationJwtUseCase(JwtBaseUseCase):
             self._auth_repo.update_token(dto=GetUserDto(user_id=user_id))
             new_token_info = self._auth_repo.get_token_info_by_user_id(user_id=user_id)
 
+            # 최근접속 일자 갱신
+            self.__update_current_connection_time(user_id=user_id)
+
             result = jsonify(access_token=new_token_info.access_token)
             return UseCaseSuccessOutput(value=result)
+
+    def __update_current_connection_time(self, user_id: int) -> bool:
+        send_message(
+            topic_name=UserTopicEnum.UPDATE_CURRENT_CONNECTION_TIME, user_id=user_id
+        )
+        return get_event_object(topic_name=UserTopicEnum.UPDATE_CURRENT_CONNECTION_TIME)
 
     def __is_valid_user_uuid(self, uuid: str, user_id: int) -> bool:
         send_message(
