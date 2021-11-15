@@ -29,6 +29,7 @@ class UserRepository:
                     "provider": dto.provider,
                     "provider_id": dto.provider_id,
                     "uuid": dto.uuid,
+                    "current_connection_time": get_server_timestamp(),
                     "updated_at": get_server_timestamp(),
                 }
             )
@@ -62,7 +63,10 @@ class UserRepository:
         """
         try:
             user = UserModel(
-                provider=dto.provider, provider_id=dto.provider_id, uuid=dto.uuid
+                provider=dto.provider,
+                provider_id=dto.provider_id,
+                uuid=dto.uuid,
+                created_at=get_server_timestamp(),
             )
             session.add(user)
             session.commit()
@@ -130,3 +134,19 @@ class UserRepository:
         user = session.query(UserModel).filter_by(id=dto.user_id).first()
 
         return user.provider
+
+    def update_current_connection_time(self, user_id: int) -> None:
+        """
+            최근 접속 일자
+        """
+        try:
+            session.query(UserModel).filter_by(id=user_id).update(
+                {"current_connection_time": get_server_timestamp()}
+            )
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            logger.error(
+                f"[UserRepository][update_current_connection_time] user_id : {user_id} "
+                f"error : {e}"
+            )

@@ -10,5 +10,6 @@ class UserEntity(BaseModel):
     provider: str
     provider_id: str
     group: Optional[str]
+    current_connection_time: datetime
     created_at: datetime
     updated_at: datetime
