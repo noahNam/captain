@@ -66,6 +66,8 @@ class AuthenticationRepository:
             user_id=dto.user_id,
             access_token=create_access_token(identity=dto.user_id),
             refresh_token=create_refresh_token(identity=dto.user_id),
+            access_expired_at=get_jwt_access_expired_timestamp(),
+            refresh_expired_at=get_jwt_refresh_expired_timestamp(),
         )
 
         try:
@@ -143,7 +145,11 @@ class AuthenticationRepository:
             return False
 
     def create_blacklist(self, dto: GetBlacklistDto) -> None:
-        blacklist = BlacklistModel(user_id=dto.user_id, access_token=dto.access_token)
+        blacklist = BlacklistModel(
+            user_id=dto.user_id,
+            access_token=dto.access_token,
+            expired_at=get_jwt_access_expired_timestamp(),
+        )
         try:
             session.add(blacklist)
             session.commit()
