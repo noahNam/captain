@@ -24,13 +24,15 @@ class LocalConfig(Config):
     SQLALCHEMY_ECHO = True
     DEBUG = True
 
-    # SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres@localhost:5432/captain"
+    SQLALCHEMY_DATABASE_URI = (
+        "postgresql+psycopg2://captain:!Dkvkxhr117@localhost:5433/captain"
+    )
 
     # Prod migrate
-    SQLALCHEMY_DATABASE_URI = (
-        f"postgresql+psycopg2://postgres:%s@localhost:5432/captain"
-        % urlquote("password")
-    )
+    # SQLALCHEMY_DATABASE_URI = (
+    #     f"postgresql+psycopg2://postgres:%s@localhost:5432/captain"
+    #     % urlquote("password")
+    # )
 
 
 class TestConfig(Config):

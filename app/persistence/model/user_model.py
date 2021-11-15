@@ -15,12 +15,11 @@ class UserModel(db.Model):
         nullable=False,
         autoincrement=True,
     )
-    uuid = Column(
-        String(36), nullable=True
-    )  # todo. 오픈 전 uuid nullable = False로 변경 작업 필요.
+    uuid = Column(String(36), nullable=False)
     provider = Column(String(10), nullable=False)
     provider_id = Column(String(256), nullable=False)
     group = Column(String(10), nullable=True)
+    current_connection_time = Column(DateTime, default=get_server_timestamp())
     created_at = Column(DateTime, default=get_server_timestamp())
     updated_at = Column(DateTime, default=get_server_timestamp())
 
@@ -34,6 +33,7 @@ class UserModel(db.Model):
             f"'{self.provider}', "
             f"'{self.provider_id}', "
             f"'{self.group}', "
+            f"'{self.current_connection_time}', "
             f"'{self.created_at}', "
             f"'{self.updated_at}')"
         )
@@ -45,6 +45,7 @@ class UserModel(db.Model):
             provider=self.provider,
             provider_id=self.provider_id,
             group=self.group,
+            current_connection_time=self.current_connection_time,
             created_at=self.created_at,
             updated_at=self.updated_at,
         )
