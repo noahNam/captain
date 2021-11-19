@@ -25,7 +25,9 @@ class BlacklistModel(db.Model):
     user_id = Column(BigInteger, ForeignKey(UserModel.id), nullable=False)
     access_token = Column(String(280), nullable=False)
     expired_at = Column(
-        DateTime, nullable=False, default=get_jwt_access_expired_timestamp()
+        DateTime(timezone=True),
+        nullable=False,
+        default=get_jwt_access_expired_timestamp(),
     )
 
     def __repr__(self):
