@@ -63,10 +63,7 @@ class UserRepository:
         """
         try:
             user = UserModel(
-                provider=dto.provider,
-                provider_id=dto.provider_id,
-                uuid=dto.uuid,
-                created_at=get_server_timestamp(),
+                provider=dto.provider, provider_id=dto.provider_id, uuid=dto.uuid,
             )
             session.add(user)
             session.commit()
