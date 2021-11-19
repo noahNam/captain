@@ -19,9 +19,11 @@ class UserModel(db.Model):
     provider = Column(String(10), nullable=False)
     provider_id = Column(String(256), nullable=False)
     group = Column(String(10), nullable=True)
-    current_connection_time = Column(DateTime, default=get_server_timestamp())
-    created_at = Column(DateTime, default=get_server_timestamp())
-    updated_at = Column(DateTime, default=get_server_timestamp())
+    current_connection_time = Column(
+        DateTime(timezone=True), default=get_server_timestamp()
+    )
+    created_at = Column(DateTime(timezone=True), default=get_server_timestamp())
+    updated_at = Column(DateTime(timezone=True), default=get_server_timestamp())
 
     jwt_models = relationship("JwtModel", backref=backref("jwts"))
     blacklists_models = relationship("BlacklistModel", backref=backref("blacklists"))
