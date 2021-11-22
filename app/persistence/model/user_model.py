@@ -22,8 +22,8 @@ class UserModel(db.Model):
     current_connection_time = Column(
         DateTime(timezone=True), default=get_server_timestamp()
     )
-    created_at = Column(DateTime(timezone=True), default=get_server_timestamp())
-    updated_at = Column(DateTime(timezone=True), default=get_server_timestamp())
+    created_at = Column(DateTime(timezone=True), server_default=get_server_timestamp())
+    updated_at = Column(DateTime(timezone=True), server_default=get_server_timestamp())
 
     jwt_models = relationship("JwtModel", backref=backref("jwts"))
     blacklists_models = relationship("BlacklistModel", backref=backref("blacklists"))
