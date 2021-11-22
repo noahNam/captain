@@ -28,6 +28,7 @@ class BlacklistModel(db.Model):
         DateTime(timezone=True),
         nullable=False,
         default=get_jwt_access_expired_timestamp(),
+        onupdate=get_jwt_access_expired_timestamp(),
     )
 
     def __repr__(self):
