@@ -12,4 +12,4 @@ class UserEntity(BaseModel):
     group: Optional[str]
     current_connection_time: datetime
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime]
