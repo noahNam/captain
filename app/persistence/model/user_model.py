@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger, Integer, String, DateTime
+from sqlalchemy import Column, BigInteger, Integer, String, DateTime, func
 from sqlalchemy.orm import relationship, backref
 
 from app import db
@@ -22,8 +22,8 @@ class UserModel(db.Model):
     current_connection_time = Column(
         DateTime(timezone=True), default=get_server_timestamp()
     )
-    created_at = Column(DateTime(timezone=True), server_default=get_server_timestamp())
-    updated_at = Column(DateTime(timezone=True), server_default=get_server_timestamp())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     jwt_models = relationship("JwtModel", backref=backref("jwts"))
     blacklists_models = relationship("BlacklistModel", backref=backref("blacklists"))
