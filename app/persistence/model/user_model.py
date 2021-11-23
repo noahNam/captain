@@ -23,7 +23,7 @@ class UserModel(db.Model):
         DateTime(timezone=True), default=get_server_timestamp()
     )
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now())
 
     jwt_models = relationship("JwtModel", backref=backref("jwts"))
     blacklists_models = relationship("BlacklistModel", backref=backref("blacklists"))
