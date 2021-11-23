@@ -20,24 +20,23 @@ def upgrade():
     op.alter_column(
         "users",
         "created_at",
-        existing_type=sa.DateTime(),
+        server_default=sa.text('now()'),
         type_=postgresql.TIMESTAMP(timezone=True),
     )
     op.alter_column(
         "users",
         "updated_at",
-        existing_type=sa.DateTime(),
+        server_default=sa.text('now()'),
         type_=postgresql.TIMESTAMP(timezone=True),
         onupdate=sa.func.now(),
     )
     op.alter_column(
         "users",
         "current_connection_time",
-        existing_type=sa.DateTime(),
         type_=postgresql.TIMESTAMP(timezone=True),
         server_default=sa.text('now()'),
-        nullable=False,
         onupdate=sa.func.now(),
+        nullable=False,
     )
 
 
