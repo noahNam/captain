@@ -29,8 +29,6 @@ class UserRepository:
                     "provider": dto.provider,
                     "provider_id": dto.provider_id,
                     "uuid": dto.uuid,
-                    # "current_connection_time": get_server_timestamp(),
-                    # "updated_at": get_server_timestamp(),
                 }
             )
             session.commit()
