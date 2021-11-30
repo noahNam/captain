@@ -114,6 +114,7 @@ pipelines:
           caches:
             - pip
           script:
+            - pip install --upgrade pip
             - pip install poetry && poetry config virtualenvs.create false && poetry install
             - FLASK_CONFIG=testing python -m pytest tests/ --ignore=tests/app/http
           services:
