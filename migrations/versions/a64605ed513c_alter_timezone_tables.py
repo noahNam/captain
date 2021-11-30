@@ -22,18 +22,9 @@ depends_on = None
 def upgrade():
     op.alter_column(
         "users",
-        "created_at",
-        existing_type=sa.DateTime(timezone=True),
-        nullable=False,
-        server_default=sa.func.now(),
-        default=sa.func.now(),
-    )
-    op.alter_column(
-        "users",
         "updated_at",
         existing_type=sa.DateTime(timezone=True),
         nullable=False,
-        server_default=sa.func.now(),
         onupdate=sa.func.now(),
     )
     op.alter_column(
@@ -42,38 +33,10 @@ def upgrade():
         existing_type=sa.DateTime(timezone=True),
         nullable=True,
         onupdate=sa.func.now(),
-        default=sa.func.now(),
-    )
-    op.alter_column(
-        "blacklists",
-        "expired_at",
-        existing_type=sa.DateTime(timezone=True),
-        nullable=False,
-        server_default=sa.func.now(),
-        default=sa.func.now(),
-    )
-    op.alter_column(
-        "jwts",
-        "access_expired_at",
-        existing_type=sa.DateTime(timezone=True),
-        nullable=False,
-    )
-    op.alter_column(
-        "jwts",
-        "refresh_expired_at",
-        existing_type=sa.DateTime(timezone=True),
-        nullable=False,
     )
 
 
 def downgrade():
-    op.alter_column(
-        "users",
-        "created_at",
-        existing_type=sa.DateTime,
-        nullable=False,
-        server_default=sa.func.now(),
-    )
     op.alter_column(
         "users",
         "updated_at",
@@ -83,17 +46,4 @@ def downgrade():
     )
     op.alter_column(
         "users", "current_connection_time", existing_type=sa.DateTime, nullable=True
-    )
-    op.alter_column(
-        "blacklists",
-        "expired_at",
-        existing_type=sa.DateTime,
-        nullable=False,
-        server_default=sa.func.now(),
-    )
-    op.alter_column(
-        "jwts", "access_expired_at", existing_type=sa.DateTime, nullable=False,
-    )
-    op.alter_column(
-        "jwts", "refresh_expired_at", existing_type=sa.DateTime, nullable=False,
     )
