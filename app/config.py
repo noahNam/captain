@@ -30,7 +30,7 @@ class LocalConfig(Config):
 
     # Prod migrate
     # SQLALCHEMY_DATABASE_URI = (
-    #     f"postgresql+psycopg2://postgres:%s@localhost:5432/captain"
+    #     f"postgresql+psycopg2://toadhome_captain:%s@localhost:5432/captain"
     #     % urlquote("password")
     # )
 
