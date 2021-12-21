@@ -1,8 +1,7 @@
-from sqlalchemy import Column, BigInteger, Integer, String, DateTime, func
+from sqlalchemy import Column, BigInteger, Integer, String, DateTime, func, SmallInteger
 from sqlalchemy.orm import relationship, backref
 
 from app import db
-from app.extensions.utils.time_helper import get_server_timestamp
 from core.domains.user.entity.user_entity import UserEntity
 
 
@@ -18,12 +17,14 @@ class UserModel(db.Model):
     uuid = Column(String(36), nullable=False)
     provider = Column(String(10), nullable=False)
     provider_id = Column(String(256), nullable=False)
-    group = Column(String(10), nullable=True)
+    group = Column(SmallInteger(), nullable=True)
     current_connection_time = Column(
         DateTime(), server_default=func.now(), onupdate=func.now(), nullable=False
     )
     created_at = Column(DateTime(), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(), server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
     jwt_models = relationship("JwtModel", backref=backref("jwts"))
     blacklists_models = relationship("BlacklistModel", backref=backref("blacklists"))

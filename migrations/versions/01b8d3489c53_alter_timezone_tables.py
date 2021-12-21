@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '01b8d3489c53'
-down_revision = '85df9ead7edc'
+revision = "01b8d3489c53"
+down_revision = "85df9ead7edc"
 branch_labels = None
 depends_on = None
 
@@ -20,13 +20,13 @@ def upgrade():
     op.alter_column(
         "users",
         "created_at",
-        server_default=sa.text('now()'),
+        server_default=sa.text("now()"),
         type_=postgresql.TIMESTAMP(timezone=True),
     )
     op.alter_column(
         "users",
         "updated_at",
-        server_default=sa.text('now()'),
+        server_default=sa.text("now()"),
         type_=postgresql.TIMESTAMP(timezone=True),
         onupdate=sa.func.now(),
     )
@@ -34,7 +34,7 @@ def upgrade():
         "users",
         "current_connection_time",
         type_=postgresql.TIMESTAMP(timezone=True),
-        server_default=sa.text('now()'),
+        server_default=sa.text("now()"),
         onupdate=sa.func.now(),
         nullable=False,
     )
@@ -58,6 +58,5 @@ def downgrade():
         "current_connection_time",
         existing_type=postgresql.TIMESTAMP(timezone=True),
         type_=sa.DateTime(),
-        nullable=True
+        nullable=True,
     )
-
