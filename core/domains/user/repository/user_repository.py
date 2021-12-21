@@ -12,6 +12,7 @@ from app.extensions.utils.time_helper import (
 from app.persistence.model.user_model import UserModel
 from core.domains.user.dto.user_dto import CreateUserDto, GetUserProviderDto
 from core.domains.user.entity.user_entity import UserEntity
+from core.domains.user.enum.user_enum import UserGroupEnum
 
 logger = logger_.getLogger(__name__)
 
@@ -61,7 +62,10 @@ class UserRepository:
         """
         try:
             user = UserModel(
-                provider=dto.provider, provider_id=dto.provider_id, uuid=dto.uuid,
+                provider=dto.provider,
+                provider_id=dto.provider_id,
+                uuid=dto.uuid,
+                group=UserGroupEnum.USER.value,
             )
             session.add(user)
             session.commit()
