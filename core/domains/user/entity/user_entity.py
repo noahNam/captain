@@ -9,7 +9,7 @@ class UserEntity(BaseModel):
     uuid: Optional[str]
     provider: str
     provider_id: str
-    group: Optional[str]
+    group: Optional[int]
     current_connection_time: datetime
     created_at: datetime
     updated_at: datetime
