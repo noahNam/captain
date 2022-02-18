@@ -276,7 +276,7 @@ def test_verification_when_get_expired_access_token_with_expired_refresh_token_t
     """
         given : expired access_token, user_id, expired refresh_token(in redis)
         when : verification request
-        then : response 401
+        then : response 400
     """
     user_id = create_base_users[0].id
     expired_token = create_invalid_access_token(user_id=user_id)
@@ -289,6 +289,32 @@ def test_verification_when_get_expired_access_token_with_expired_refresh_token_t
     result = VerificationJwtUseCase().execute(dto=jwt_with_uuid_dto)
 
     assert result.detail == FailureType.INVALID_REQUEST_ERROR
+    assert "Not valid refresh_token" in result.value["message"]
+
+
+def test_verification_when_get_expired_access_token_with_invalid_uuid_then_failure(
+        session: scoped_session,
+        redis: RedisClient,
+        create_base_users: List[UserBaseFactory],
+):
+    """
+        given : expired access_token, user_id, invalid uuid
+        when : verification request
+        then : response 400
+    """
+    user_id = create_base_users[0].id
+    uuid = create_base_users[0].uuid
+
+    AuthenticationRepository().create_token(GetUserDto(user_id=user_id))
+    token_info = AuthenticationRepository().get_token_info_by_user_id(user_id=user_id)
+    AuthenticationRepository().set_token_to_cache(token_info=token_info)
+    UserRepository().set_user_uuid_to_cache(user_id=user_id, uuid=uuid)
+
+    jwt_with_uuid_dto = JwtWithUUIDDto(token=token_info.access_token.encode("UTF-8"), uuid=uuid_v4)
+    result = VerificationJwtUseCase().execute(dto=jwt_with_uuid_dto)
+
+    assert result.detail == FailureType.INVALID_REQUEST_ERROR
+    assert "Not valid uuid" in result.value["message"]
 
 
 def test_verification_when_get_valid_access_token_then_return_new_token(
