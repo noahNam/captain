@@ -160,31 +160,36 @@ class VerificationJwtUseCase(JwtBaseUseCase):
             )
         # Valid refresh_token check
         if self._auth_repo.is_redis_ready():
-            # if refresh_token valid from redis
-            if self._auth_repo.is_valid_refresh_token_from_redis(
+            if not self._auth_repo.is_valid_refresh_token_from_redis(
                 user_id=user_id
-            ) and self.__is_valid_user_uuid_from_redis(uuid=dto.uuid, user_id=user_id):
-                # update token
-                self._auth_repo.update_token(dto=GetUserDto(user_id=user_id))
-                new_token_info = self._auth_repo.get_token_info_by_user_id(
-                    user_id=user_id
+            ):
+                return UseCaseFailureOutput(
+                    message=f"Not valid refresh_token",
+                    detail=FailureType.INVALID_REQUEST_ERROR,
                 )
-                # update to redis
-                if self._auth_repo.set_token_to_cache(token_info=new_token_info):
-                    result = jsonify(access_token=new_token_info.access_token)
 
-                    # 최근접속 일자 갱신
-                    self.__update_current_connection_time(user_id=user_id)
-                    return UseCaseSuccessOutput(value=result)
-                else:
-                    return UseCaseFailureOutput(
-                        message=f"Failed set_token_cache, check redis enabled",
-                        detail=FailureType.INTERNAL_SERVER_ERROR,
-                    )
+            if not self.__is_valid_user_uuid_from_redis(uuid=dto.uuid, user_id=user_id):
+                return UseCaseFailureOutput(
+                    message=f"Not valid uuid",
+                    detail=FailureType.INVALID_REQUEST_ERROR,
+                )
+
+            # update token
+            self._auth_repo.update_token(dto=GetUserDto(user_id=user_id))
+            new_token_info = self._auth_repo.get_token_info_by_user_id(
+                user_id=user_id
+            )
+            # update to redis
+            if self._auth_repo.set_token_to_cache(token_info=new_token_info):
+                result = jsonify(access_token=new_token_info.access_token)
+
+                # 최근접속 일자 갱신
+                self.__update_current_connection_time(user_id=user_id)
+                return UseCaseSuccessOutput(value=result)
             else:
                 return UseCaseFailureOutput(
-                    message=f"Not valid refresh_token or not valid uuid",
-                    detail=FailureType.INVALID_REQUEST_ERROR,
+                    message=f"Failed set_token_cache, check redis enabled",
+                    detail=FailureType.INTERNAL_SERVER_ERROR,
                 )
         else:
             # redis 연결이 안될 경우 DB 에서 토큰 가져옴
