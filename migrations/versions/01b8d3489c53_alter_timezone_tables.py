@@ -43,7 +43,7 @@ def upgrade():
 def downgrade():
     op.alter_column(
         "users",
-        "updated_at",
+        "created_at",
         existing_type=postgresql.TIMESTAMP(timezone=True),
         type_=sa.DateTime(),
     )
