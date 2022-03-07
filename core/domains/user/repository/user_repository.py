@@ -7,7 +7,7 @@ from app.extensions.database import session
 from app.extensions.utils.log_helper import logger_
 from app.extensions.utils.time_helper import (
     get_server_timestamp,
-    get_jwt_refresh_expire_timedelta_to_seconds,
+    get_jwt_refresh_expire_timedelta_to_seconds, get_jwt_refresh_expire_timedelta_to_seconds_for_test,
 )
 from app.persistence.model.user_model import UserModel
 from core.domains.user.dto.user_dto import CreateUserDto, GetUserProviderDto
@@ -106,7 +106,7 @@ class UserRepository:
             redis.set(
                 key=uuid,
                 value=user_id,
-                ex=get_jwt_refresh_expire_timedelta_to_seconds(),
+                ex=get_jwt_refresh_expire_timedelta_to_seconds_for_test(),
             )
             return True
         except Exception as e:

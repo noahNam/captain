@@ -11,7 +11,7 @@ from app.extensions.utils.time_helper import (
     get_jwt_refresh_expire_timedelta_to_seconds,
     get_jwt_access_expire_timedelta_to_seconds,
     get_jwt_refresh_expired_timestamp,
-    get_jwt_access_expire_timedelta_to_seconds_for_test,
+    get_jwt_access_expire_timedelta_to_seconds_for_test, get_jwt_refresh_expire_timedelta_to_seconds_for_test,
 )
 from app.persistence.model import BlacklistModel
 from app.persistence.model.jwt_model import JwtModel
@@ -113,7 +113,7 @@ class AuthenticationRepository:
             redis.set(
                 key=token_info.user_id,
                 value=token_info.refresh_token,
-                ex=get_jwt_refresh_expire_timedelta_to_seconds(),
+                ex=get_jwt_refresh_expire_timedelta_to_seconds_for_test(),
             )
         except Exception as e:
             logger.error(
