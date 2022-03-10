@@ -6,6 +6,7 @@ from flask_jwt_extended import decode_token
 from flask_jwt_extended.exceptions import JWTDecodeError
 
 from app.extensions.utils.event_observer import send_message, get_event_object
+from app.extensions.utils.log_helper import logger_
 from core.domains.authentication.dto.authentication_dto import (
     JwtDto,
     GetBlacklistDto,
@@ -20,6 +21,8 @@ from core.domains.authentication.repository.authentication_repository import (
 from core.domains.user.entity.user_entity import UserEntity
 from core.domains.user.enum import UserTopicEnum
 from core.use_case_output import UseCaseSuccessOutput, UseCaseFailureOutput, FailureType
+
+logger = logger_.getLogger(__name__)
 
 
 class JwtBaseUseCase:
@@ -148,9 +151,11 @@ class VerificationJwtUseCase(JwtBaseUseCase):
         blacklist_dto = GetBlacklistDto(user_id=user_id, access_token=dto.token)
 
         if self._auth_repo.is_redis_ready():
+            logger.info("[VerificationJwtUseCase][Blacklist] - is_blacklist check from Redis")
             is_blacklist = self._auth_repo.is_blacklist_from_redis(dto=blacklist_dto)
         else:
             # from DB
+            logger.info("[VerificationJwtUseCase][Blacklist] - is_blacklist check from DB")
             is_blacklist = self._auth_repo.get_blacklist_by_dto(dto=blacklist_dto)
 
         if is_blacklist:
@@ -160,6 +165,7 @@ class VerificationJwtUseCase(JwtBaseUseCase):
             )
         # Valid refresh_token check
         if self._auth_repo.is_redis_ready():
+            logger.info("[VerificationJwtUseCase][RefreshToken] - is_valid_refresh_token check from Redis")
             if not self._auth_repo.is_valid_refresh_token_from_redis(
                 user_id=user_id
             ):
@@ -193,6 +199,7 @@ class VerificationJwtUseCase(JwtBaseUseCase):
                 )
         else:
             # redis 연결이 안될 경우 DB 에서 토큰 가져옴
+            logger.info("[VerificationJwtUseCase][RefreshToken] - is_valid_refresh_token check from DB")
             if not (
                 self._auth_repo.is_valid_refresh_token(user_id=user_id)
                 and self.__is_valid_user_uuid(uuid=dto.uuid, user_id=user_id)
