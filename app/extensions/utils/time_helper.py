@@ -26,6 +26,11 @@ def get_jwt_refresh_expire_timedelta_to_seconds() -> int:
     return int(timedelta(days=14).total_seconds())
 
 
+def get_jwt_refresh_expire_timedelta_to_seconds_for_test() -> int:
+    """ for test -> set cache expire time(refresh_token, uuid)"""
+    return int(timedelta(minutes=5).total_seconds())
+
+
 def get_jwt_access_expired_timestamp() -> datetime:
     return get_server_timestamp() + timedelta(minutes=30)
 
