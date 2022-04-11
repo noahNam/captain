@@ -293,9 +293,9 @@ def test_verification_when_get_expired_access_token_with_expired_refresh_token_t
 
 
 def test_verification_when_get_expired_access_token_with_invalid_uuid_then_failure(
-        session: scoped_session,
-        redis: RedisClient,
-        create_base_users: List[UserBaseFactory],
+    session: scoped_session,
+    redis: RedisClient,
+    create_base_users: List[UserBaseFactory],
 ):
     """
         given : expired access_token, user_id, invalid uuid
@@ -310,7 +310,9 @@ def test_verification_when_get_expired_access_token_with_invalid_uuid_then_failu
     AuthenticationRepository().set_token_to_cache(token_info=token_info)
     UserRepository().set_user_uuid_to_cache(user_id=user_id, uuid=uuid)
 
-    jwt_with_uuid_dto = JwtWithUUIDDto(token=token_info.access_token.encode("UTF-8"), uuid=uuid_v4)
+    jwt_with_uuid_dto = JwtWithUUIDDto(
+        token=token_info.access_token.encode("UTF-8"), uuid=uuid_v4
+    )
     result = VerificationJwtUseCase().execute(dto=jwt_with_uuid_dto)
 
     assert result.detail == FailureType.INVALID_REQUEST_ERROR
