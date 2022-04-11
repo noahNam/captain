@@ -151,11 +151,15 @@ class VerificationJwtUseCase(JwtBaseUseCase):
         blacklist_dto = GetBlacklistDto(user_id=user_id, access_token=dto.token)
 
         if self._auth_repo.is_redis_ready():
-            logger.info("[VerificationJwtUseCase][Blacklist] - is_blacklist check from Redis")
+            logger.info(
+                "[VerificationJwtUseCase][Blacklist] - is_blacklist check from Redis"
+            )
             is_blacklist = self._auth_repo.is_blacklist_from_redis(dto=blacklist_dto)
         else:
             # from DB
-            logger.info("[VerificationJwtUseCase][Blacklist] - is_blacklist check from DB")
+            logger.info(
+                "[VerificationJwtUseCase][Blacklist] - is_blacklist check from DB"
+            )
             is_blacklist = self._auth_repo.get_blacklist_by_dto(dto=blacklist_dto)
 
         if is_blacklist:
@@ -165,10 +169,10 @@ class VerificationJwtUseCase(JwtBaseUseCase):
             )
         # Valid refresh_token check
         if self._auth_repo.is_redis_ready():
-            logger.info("[VerificationJwtUseCase][RefreshToken] - is_valid_refresh_token check from Redis")
-            if not self._auth_repo.is_valid_refresh_token_from_redis(
-                user_id=user_id
-            ):
+            logger.info(
+                "[VerificationJwtUseCase][RefreshToken] - is_valid_refresh_token check from Redis"
+            )
+            if not self._auth_repo.is_valid_refresh_token_from_redis(user_id=user_id):
                 return UseCaseFailureOutput(
                     message=f"Not valid refresh_token",
                     detail=FailureType.INVALID_REQUEST_ERROR,
@@ -176,21 +180,21 @@ class VerificationJwtUseCase(JwtBaseUseCase):
 
             if not self.__is_valid_user_uuid_from_redis(uuid=dto.uuid, user_id=user_id):
                 return UseCaseFailureOutput(
-                    message=f"Not valid uuid",
-                    detail=FailureType.INVALID_REQUEST_ERROR,
+                    message=f"Not valid uuid", detail=FailureType.INVALID_REQUEST_ERROR,
                 )
 
             # update token
             self._auth_repo.update_token(dto=GetUserDto(user_id=user_id))
-            new_token_info = self._auth_repo.get_token_info_by_user_id(
-                user_id=user_id
-            )
+            new_token_info = self._auth_repo.get_token_info_by_user_id(user_id=user_id)
             # update to redis
             if self._auth_repo.set_token_to_cache(token_info=new_token_info):
                 result = jsonify(access_token=new_token_info.access_token)
 
                 # 최근접속 일자 갱신
                 self.__update_current_connection_time(user_id=user_id)
+
+                # 기존 UUID 유효시간을 갱신 토큰 시간과 동기화
+                self.__set_user_uuid_to_cache(user_id=user_id, uuid=dto.uuid)
                 return UseCaseSuccessOutput(value=result)
             else:
                 return UseCaseFailureOutput(
@@ -199,7 +203,9 @@ class VerificationJwtUseCase(JwtBaseUseCase):
                 )
         else:
             # redis 연결이 안될 경우 DB 에서 토큰 가져옴
-            logger.info("[VerificationJwtUseCase][RefreshToken] - is_valid_refresh_token check from DB")
+            logger.info(
+                "[VerificationJwtUseCase][RefreshToken] - is_valid_refresh_token check from DB"
+            )
             if not (
                 self._auth_repo.is_valid_refresh_token(user_id=user_id)
                 and self.__is_valid_user_uuid(uuid=dto.uuid, user_id=user_id)
@@ -237,3 +243,9 @@ class VerificationJwtUseCase(JwtBaseUseCase):
             user_id=user_id,
         )
         return get_event_object(topic_name=UserTopicEnum.IS_VALID_USER_UUID_FROM_REDIS)
+
+    def __set_user_uuid_to_cache(self, user_id: int, uuid: str) -> bool:
+        send_message(
+            topic_name=UserTopicEnum.SET_USER_UUID_TO_CACHE, user_id=user_id, uuid=uuid
+        )
+        return get_event_object(topic_name=UserTopicEnum.SET_USER_UUID_TO_CACHE)
