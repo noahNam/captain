@@ -8,8 +8,8 @@ class OAuthBaseHostEnum(Enum):
 
 class OAuthKakaoEnum(Enum):
     # Kakao Secret_key for access kakao api
-    KAKAO_CLIENT_ID = "685d9d3691ad88dac84b6f06066c9e91"
-    KAKAO_CLIENT_SECRET = "waB8DtEHj1VMgMso8H0d9HwTXmSoat3a"
+    KAKAO_CLIENT_ID = os.environ.get("KAKAO_CLIENT_ID") or ""
+    KAKAO_CLIENT_SECRET = os.environ.get("KAKAO_CLIENT_SECRET") or ""
 
     AUTH_BASE_URL = "https://kauth.kakao.com"
     API_BASE_URL = "https://kapi.kakao.com"
@@ -75,4 +75,4 @@ class OAuthGoogleEnum(Enum):
 
 class OAuthAppleEnum(Enum):
     FIREBASE_AUTH_URL = "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
-    FIREBASE_AUDIENCE = "apartalktoadhome"
+    FIREBASE_AUDIENCE = os.environ.get("APPLE_FIREBASE_AUDIENCE") or ""
