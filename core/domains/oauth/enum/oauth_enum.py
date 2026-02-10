@@ -34,8 +34,8 @@ class ProviderEnum(Enum):
 
 
 class OAuthNaverEnum(Enum):
-    NAVER_CLIENT_ID = "***REMOVED***"
-    NAVER_CLIENT_SECRET = "***REMOVED***"
+    NAVER_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID", "")
+    NAVER_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "")
 
     AUTH_BASE_URL = "https://nid.naver.com"
     API_BASE_URL = "https://openapi.naver.com"
@@ -53,10 +53,8 @@ class OAuthNaverEnum(Enum):
 
 
 class OAuthGoogleEnum(Enum):
-    GOOGLE_CLIENT_ID = (
-        "***REMOVED***"
-    )
-    GOOGLE_CLIENT_SECRET = "***REMOVED***"
+    GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+    GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
     PROJECT_ID = "toadhome-oauth"
 
     AUTH_URL = "https://accounts.google.com/o/oauth2/auth"

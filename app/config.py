@@ -4,7 +4,7 @@ from urllib.parse import quote as urlquote
 
 
 class Config:
-    SECRET_KEY = os.environ.get("SECRET_KEY") or "auckland"
+    SECRET_KEY = os.environ.get("SECRET_KEY") or ""
     REDIS_URL = os.environ.get("REDIS_URL") or "redis://localhost:6379"
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -15,7 +15,7 @@ class Config:
     # JWT Config
     JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=120)
     JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(days=14)
-    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or "hawaii"
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or ""
 
 
 class LocalConfig(Config):
@@ -24,8 +24,9 @@ class LocalConfig(Config):
     SQLALCHEMY_ECHO = True
     DEBUG = True
 
-    SQLALCHEMY_DATABASE_URI = (
-        "postgresql+psycopg2://captain:***REMOVED***@localhost:5433/captain"
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "LOCAL_DATABASE_URL",
+        "postgresql+psycopg2://captain@localhost:5433/captain",
     )
 
     # Prod migrate
